@@ -1,0 +1,22 @@
+{
+  "name": "exeteres",
+  "main": "src/index.ts",
+  "packageManager": "yarn@4.1.1",
+  "scripts": {
+    "proxy:dashboard": "kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443",
+    "proxy:longhorn": "kubectl -n longhorn-system port-forward svc/longhorn-frontend 8444:80",
+    "create-dashboard-token": "kubectl -n kubernetes-dashboard create token dashboard-user --duration=100000h"
+  },
+  "dependencies": {
+    "@pulumi/kubernetes": "^4.0.0",
+    "@pulumi/pulumi": "^3.0.0",
+    "dashboard": ""
+  },
+  "devDependencies": {
+    "@types/node": "^18",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
+  }
+}
