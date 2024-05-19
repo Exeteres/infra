@@ -7,17 +7,18 @@ interface HelmOptions {
 
   repo: string
   chart: string
+  version?: string
 
   values?: Input<Record<string, unknown>>
   dependsOn?: Input<Resource>[] | Input<Resource>
 }
 
-export const createHelmChart = ({ name, namespace, repo, chart, values, dependsOn }: HelmOptions) => {
+export const createHelmChart = ({ name, namespace, repo, chart, version, values, dependsOn }: HelmOptions) => {
   return new k8s.helm.v3.Chart(
     name,
     {
       namespace: namespace.metadata.name,
-      fetchOpts: { repo },
+      fetchOpts: { repo, version },
       chart: chart,
       values: values,
     },

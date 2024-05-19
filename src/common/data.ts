@@ -23,5 +23,7 @@ export const nodes = {
 }
 
 export const storageClasses = {
+  local: "local-path",
   encrypted: "encrypted",
+  encryptedLocal: "encrypted-local",
 }

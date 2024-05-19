@@ -46,7 +46,13 @@ createHelmChart({
     },
 
     redis: {
-      enabled: false,
+      master: {
+        nodeSelector: nodes.master.nodeSelector,
+        persistence: {
+          size: "100Mi",
+          storageClass: storageClasses.encrypted,
+        },
+      },
     },
 
     initialAccount: {
@@ -75,10 +81,10 @@ createHelmChart({
     },
 
     postfix: {
-      nodeSelector: nodes.publicAms.nodeSelector,
+      nodeSelector: nodes.publicSpb.nodeSelector,
 
       persistence: {
-        size: "100Mi",
+        size: "200Mi",
         storageClass: storageClasses.encrypted,
       },
     },

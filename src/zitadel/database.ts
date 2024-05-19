@@ -1,5 +1,5 @@
 import { localIssuer } from "../cert-manager"
-import { createCertificate, createHelmRelease, nodes } from "../common"
+import { createCertificate, createHelmRelease, nodes, storageClasses } from "../common"
 import { namespace } from "./shared"
 
 const { certificate: databaseCert, secretName: databaseCertSecretName } = createCertificate({
@@ -42,7 +42,8 @@ export const databaseRelease = createHelmRelease({
       ].join("\n"),
 
       persistence: {
-        size: "1Gi",
+        size: "200Mi",
+        storageClass: storageClasses.encrypted,
       },
 
       nodeSelector: nodes.master.nodeSelector,

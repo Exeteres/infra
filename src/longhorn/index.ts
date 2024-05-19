@@ -51,3 +51,29 @@ void new k8s.storage.v1.StorageClass(
   },
   { parent: namespace, dependsOn: [release, encryptionKeySecret] },
 )
+
+void new k8s.storage.v1.StorageClass(
+  storageClasses.encryptedLocal,
+  {
+    metadata: {
+      name: storageClasses.encryptedLocal,
+    },
+    provisioner: "driver.longhorn.io",
+    allowVolumeExpansion: true,
+    parameters: {
+      numberOfReplicas: "1",
+      staleReplicaTimeout: "2880",
+      fromBackup: "",
+      encrypted: "true",
+      dataLocality: "strict-local",
+
+      "csi.storage.k8s.io/provisioner-secret-name": encryptionKeySecret.metadata.name,
+      "csi.storage.k8s.io/provisioner-secret-namespace": encryptionKeySecret.metadata.namespace,
+      "csi.storage.k8s.io/node-publish-secret-name": encryptionKeySecret.metadata.name,
+      "csi.storage.k8s.io/node-publish-secret-namespace": encryptionKeySecret.metadata.namespace,
+      "csi.storage.k8s.io/node-stage-secret-name": encryptionKeySecret.metadata.name,
+      "csi.storage.k8s.io/node-stage-secret-namespace": encryptionKeySecret.metadata.namespace,
+    },
+  },
+  { parent: namespace, dependsOn: [release, encryptionKeySecret] },
+)
