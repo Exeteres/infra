@@ -1,7 +1,0 @@
-import "./kubernetes-dashboard"
-import "./cert-manager"
-import "./longhorn"
-import "./zitadel"
-import "./mailu"
-// import "./netbird"
-import "./factorio"

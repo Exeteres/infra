@@ -12,5 +12,5 @@
     "noImplicitReturns": true,
     "forceConsistentCasingInFileNames": true
   },
-  "files": ["src/**/*.ts"]
+  "files": ["stacks/**/*.ts", "packages/**/*.ts"]
 }

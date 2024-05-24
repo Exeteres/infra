@@ -1,2 +1,0 @@
-import "./database"
-import "./zitadel"

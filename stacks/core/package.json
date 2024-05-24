@@ -1,0 +1,7 @@
+{
+  "name": "@stacks/core",
+  "private": true,
+  "dependencies": {
+    "@infra/core": "workspace:*"
+  }
+}

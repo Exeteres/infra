@@ -1,0 +1,10 @@
+{
+  "name": "@infra/core",
+  "private": true,
+  "dependencies": {
+    "@pulumi/crds": "workspace:*",
+    "@pulumi/kubernetes": "^4.12.0",
+    "@pulumi/pulumi": "^3.116.1",
+    "@pulumi/random": "^4.16.2"
+  }
+}

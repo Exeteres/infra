@@ -29,6 +29,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@infra/apps@workspace:*, @infra/apps@workspace:packages/apps":
+  version: 0.0.0-use.local
+  resolution: "@infra/apps@workspace:packages/apps"
+  dependencies:
+    "@infra/core": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@infra/core@workspace:*, @infra/core@workspace:packages/core":
+  version: 0.0.0-use.local
+  resolution: "@infra/core@workspace:packages/core"
+  dependencies:
+    "@pulumi/crds": "workspace:*"
+    "@pulumi/kubernetes": "npm:^4.12.0"
+    "@pulumi/pulumi": "npm:^3.116.1"
+    "@pulumi/random": "npm:^4.16.2"
+  languageName: unknown
+  linkType: soft
+
 "@isaacs/cliui@npm:^8.0.2":
   version: 8.0.2
   resolution: "@isaacs/cliui@npm:8.0.2"
@@ -490,9 +509,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pulumi/kubernetes@npm:^4.0.0":
-  version: 4.10.0
-  resolution: "@pulumi/kubernetes@npm:4.10.0"
+"@pulumi/crds@workspace:*, @pulumi/crds@workspace:packages/crds":
+  version: 0.0.0-use.local
+  resolution: "@pulumi/crds@workspace:packages/crds"
+  dependencies:
+    "@pulumi/pulumi": "npm:^3.42.0"
+    "@types/node": "npm:^14"
+    typescript: "npm:^4.3.5"
+  languageName: unknown
+  linkType: soft
+
+"@pulumi/kubernetes@npm:^4.12.0":
+  version: 4.12.0
+  resolution: "@pulumi/kubernetes@npm:4.12.0"
   dependencies:
     "@pulumi/pulumi": "npm:^3.25.0"
     "@types/node-fetch": "npm:^2.1.4"
@@ -501,11 +530,57 @@ __metadata:
     node-fetch: "npm:^2.3.0"
     shell-quote: "npm:^1.6.1"
     tmp: "npm:^0.0.33"
-  checksum: 10c0/7e5375cf41cf65d9049d699626a7159c8e14608c25cd8d8d56ce8c6e58374c272713901015dcee352a3bc5a02cd164c203e00f12f860f3685f4710360d3b509f
+  checksum: 10c0/2d9d8a3f202067f7322b688afc57f72030f4f946cd87098f0e710b908fbd5d9a65c9c5354a2af87ae3987104dddc4ad2e379848a9c1141f4e212cb6a5e3538e8
   languageName: node
   linkType: hard
 
-"@pulumi/pulumi@npm:^3.0.0, @pulumi/pulumi@npm:^3.25.0":
+"@pulumi/pulumi@npm:^3.0.0, @pulumi/pulumi@npm:^3.116.1, @pulumi/pulumi@npm:^3.42.0":
+  version: 3.116.1
+  resolution: "@pulumi/pulumi@npm:3.116.1"
+  dependencies:
+    "@grpc/grpc-js": "npm:^1.10.1"
+    "@logdna/tail-file": "npm:^2.0.6"
+    "@npmcli/arborist": "npm:^7.3.1"
+    "@opentelemetry/api": "npm:^1.2.0"
+    "@opentelemetry/exporter-zipkin": "npm:^1.6.0"
+    "@opentelemetry/instrumentation": "npm:^0.32.0"
+    "@opentelemetry/instrumentation-grpc": "npm:^0.32.0"
+    "@opentelemetry/resources": "npm:^1.6.0"
+    "@opentelemetry/sdk-trace-base": "npm:^1.6.0"
+    "@opentelemetry/sdk-trace-node": "npm:^1.6.0"
+    "@opentelemetry/semantic-conventions": "npm:^1.6.0"
+    "@pulumi/query": "npm:^0.3.0"
+    "@types/google-protobuf": "npm:^3.15.5"
+    "@types/semver": "npm:^7.5.6"
+    "@types/tmp": "npm:^0.2.6"
+    execa: "npm:^5.1.0"
+    fdir: "npm:^6.1.1"
+    google-protobuf: "npm:^3.5.0"
+    got: "npm:^11.8.6"
+    ini: "npm:^2.0.0"
+    js-yaml: "npm:^3.14.0"
+    minimist: "npm:^1.2.6"
+    normalize-package-data: "npm:^6.0.0"
+    picomatch: "npm:^3.0.1"
+    pkg-dir: "npm:^7.0.0"
+    require-from-string: "npm:^2.0.1"
+    semver: "npm:^7.5.2"
+    source-map-support: "npm:^0.5.6"
+    tmp: "npm:^0.2.1"
+    upath: "npm:^1.1.0"
+  peerDependencies:
+    ts-node: ">= 7.0.1 < 12"
+    typescript: ">= 3.8.3 < 6"
+  peerDependenciesMeta:
+    ts-node:
+      optional: true
+    typescript:
+      optional: true
+  checksum: 10c0/e996ab0be09bb605efe332f31fc9c13492f88435d99ace1ef7eb1c9a7313743d7e86157cd69623cd5f9e7c92d89e04ea7050877e467065915beedb151d746772
+  languageName: node
+  linkType: hard
+
+"@pulumi/pulumi@npm:^3.25.0":
   version: 3.112.0
   resolution: "@pulumi/pulumi@npm:3.112.0"
   dependencies:
@@ -549,6 +624,15 @@ __metadata:
   version: 0.3.0
   resolution: "@pulumi/query@npm:0.3.0"
   checksum: 10c0/96931985653af4762e775c74c5e45607cd50b2005508c295a5bf2b69fae786e52e93ae844e59f1fe59572a08b09d135e7b928c9d6ae74570974aa94371f913a0
+  languageName: node
+  linkType: hard
+
+"@pulumi/random@npm:^4.16.2":
+  version: 4.16.2
+  resolution: "@pulumi/random@npm:4.16.2"
+  dependencies:
+    "@pulumi/pulumi": "npm:^3.0.0"
+  checksum: 10c0/e419f8ef8674180e0a35965a5b0f2acf87f417e304ba0a1e1bad8d450e757ffcc9ac4271d27d7176468d060aa3f8fba9d16154b5bf5e7e6bc4967785ebb29c2d
   languageName: node
   linkType: hard
 
@@ -614,6 +698,30 @@ __metadata:
   checksum: 10c0/33b6fb1d0834ec8dd7689ddc0e2781c2bfd8b9c4e4bacbcb14111e0ae00621f2c264b8a7d36541799d74888b5dccdf422a891a5cb5a709ace26325eedc81e22e
   languageName: node
   linkType: hard
+
+"@stacks/core@workspace:stacks/core":
+  version: 0.0.0-use.local
+  resolution: "@stacks/core@workspace:stacks/core"
+  dependencies:
+    "@infra/core": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@stacks/mailu@workspace:stacks/mailu":
+  version: 0.0.0-use.local
+  resolution: "@stacks/mailu@workspace:stacks/mailu"
+  dependencies:
+    "@infra/apps": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@stacks/zitadel@workspace:stacks/zitadel":
+  version: 0.0.0-use.local
+  resolution: "@stacks/zitadel@workspace:stacks/zitadel"
+  dependencies:
+    "@infra/apps": "workspace:*"
+  languageName: unknown
+  linkType: soft
 
 "@szmarczak/http-timer@npm:^4.0.5":
   version: 4.0.6
@@ -695,12 +803,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^18":
-  version: 18.19.31
-  resolution: "@types/node@npm:18.19.31"
+"@types/node@npm:^14":
+  version: 14.18.63
+  resolution: "@types/node@npm:14.18.63"
+  checksum: 10c0/626a371419a6a0e11ca460b22bb4894abe5d75c303739588bc96267e380aa8b90ba5a87bc552400584f0ac2a84b5c458dadcbcf0dfd2396ebeb765f7a7f95893
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:^20.12.12":
+  version: 20.12.12
+  resolution: "@types/node@npm:20.12.12"
   dependencies:
     undici-types: "npm:~5.26.4"
-  checksum: 10c0/bfebae8389220c0188492c82eaf328f4ba15e6e9b4abee33d6bf36d3b13f188c2f53eb695d427feb882fff09834f467405e2ed9be6aeb6ad4705509822d2ea08
+  checksum: 10c0/f374b763c744e8f16e4f38cf6e2c0eef31781ec9228c9e43a6f267880fea420fab0a238b59f10a7cb3444e49547c5e3785787e371fc242307310995b21988812
   languageName: node
   linkType: hard
 
@@ -824,15 +939,6 @@ __metadata:
   version: 0.4.0
   resolution: "asynckit@npm:0.4.0"
   checksum: 10c0/d73e2ddf20c4eb9337e1b3df1a0f6159481050a5de457c55b14ea2e5cb6d90bb69e004c9af54737a5ee0917fcf2c9e25de67777bbe58261847846066ba75bc9d
-  languageName: node
-  linkType: hard
-
-"backbone@npm:>=0.3.3":
-  version: 1.6.0
-  resolution: "backbone@npm:1.6.0"
-  dependencies:
-    underscore: "npm:>=1.8.3"
-  checksum: 10c0/1aa3823e431abdbd3b7d5576ff69deea65554596714869ba55eb26d53f9bc68bffc5b42f8f58020a85a4eeed87820a8491c63033bc2363a99aacfa3b5a019b3c
   languageName: node
   linkType: hard
 
@@ -1031,16 +1137,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dashboard@npm:":
-  version: 0.0.1
-  resolution: "dashboard@npm:0.0.1"
-  dependencies:
-    backbone: "npm:>=0.3.3"
-    underscore: "npm:>=1.1.2"
-  checksum: 10c0/7195f45ab1cfc820e734b27e8823aa50ab86baa840191322eea9388232f39c60a126ad9b4756079c2968dfd63a09fed2ce9d139910c596eff363bcd8cf961740
-  languageName: node
-  linkType: hard
-
 "debug@npm:4, debug@npm:^4.1.1, debug@npm:^4.3.4":
   version: 4.3.4
   resolution: "debug@npm:4.3.4"
@@ -1200,21 +1296,6 @@ __metadata:
   checksum: 10c0/c8e615235e8de4c5addf2fa4c3da3e3aa59ce975a3e83533b4f6a71750fb816a2e79610dc5f1799b6e28976c9ae86747a36a606655bf8cb414a74d8d507b304f
   languageName: node
   linkType: hard
-
-"exeteres@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "exeteres@workspace:."
-  dependencies:
-    "@pulumi/kubernetes": "npm:^4.0.0"
-    "@pulumi/pulumi": "npm:^3.0.0"
-    "@types/node": "npm:^18"
-    dashboard: "npm:"
-    eslint-config-prettier: "npm:^9.1.0"
-    eslint-plugin-prettier: "npm:^5.1.3"
-    prettier: "npm:^3.2.5"
-    typescript: "npm:^5.3.3"
-  languageName: unknown
-  linkType: soft
 
 "exponential-backoff@npm:^3.1.1":
   version: 3.1.1
@@ -1485,6 +1566,18 @@ __metadata:
   checksum: 10c0/1e1904ddb0cb3d6cce7cd09e27a90184908b7a5d5c21b92e232c93579d314f0b83c246ffb035493d0504b1e9147ba2c9b21df0030f48673fba0496ecd698161f
   languageName: node
   linkType: hard
+
+"infra@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "infra@workspace:."
+  dependencies:
+    "@types/node": "npm:^20.12.12"
+    eslint-config-prettier: "npm:^9.1.0"
+    eslint-plugin-prettier: "npm:^5.1.3"
+    prettier: "npm:^3.2.5"
+    typescript: "npm:^5.4.5"
+  languageName: unknown
+  linkType: soft
 
 "ini@npm:^2.0.0":
   version: 2.0.0
@@ -2736,7 +2829,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^5.3.3":
+"typescript@npm:^4.3.5":
+  version: 4.9.5
+  resolution: "typescript@npm:4.9.5"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: 10c0/5f6cad2e728a8a063521328e612d7876e12f0d8a8390d3b3aaa452a6a65e24e9ac8ea22beb72a924fd96ea0a49ea63bb4e251fb922b12eedfb7f7a26475e5c56
+  languageName: node
+  linkType: hard
+
+"typescript@npm:^5.4.5":
   version: 5.4.5
   resolution: "typescript@npm:5.4.5"
   bin:
@@ -2756,7 +2859,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A^5.3.3#optional!builtin<compat/typescript>":
+"typescript@patch:typescript@npm%3A^4.3.5#optional!builtin<compat/typescript>":
+  version: 4.9.5
+  resolution: "typescript@patch:typescript@npm%3A4.9.5#optional!builtin<compat/typescript>::version=4.9.5&hash=289587"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: 10c0/e3333f887c6829dfe0ab6c1dbe0dd1e3e2aeb56c66460cb85c5440c566f900c833d370ca34eb47558c0c69e78ced4bfe09b8f4f98b6de7afed9b84b8d1dd06a1
+  languageName: node
+  linkType: hard
+
+"typescript@patch:typescript@npm%3A^5.4.5#optional!builtin<compat/typescript>":
   version: 5.4.5
   resolution: "typescript@patch:typescript@npm%3A5.4.5#optional!builtin<compat/typescript>::version=5.4.5&hash=5adc0c"
   bin:
@@ -2773,13 +2886,6 @@ __metadata:
     tsc: bin/tsc
     tsserver: bin/tsserver
   checksum: 10c0/e13d78af3ace03b43827e6cf76aa5ec7525ebdc02a92d84ee3f966063d3c6e0e21104941bfb1c32f6c208add4993175a2ead6f93d84bc417658e9524409bf22c
-  languageName: node
-  linkType: hard
-
-"underscore@npm:>=1.1.2, underscore@npm:>=1.8.3":
-  version: 1.13.6
-  resolution: "underscore@npm:1.13.6"
-  checksum: 10c0/5f57047f47273044c045fddeb8b141dafa703aa487afd84b319c2495de2e685cecd0b74abec098292320d518b267c0c4598e45aa47d4c3628d0d4020966ba521
   languageName: node
   linkType: hard
 

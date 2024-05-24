@@ -1,0 +1,7 @@
+{
+  "name": "@stacks/factorio",
+  "private": true,
+  "dependencies": {
+    "@infra/apps": "workspace:*"
+  }
+}

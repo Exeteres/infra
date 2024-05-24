@@ -1,0 +1,7 @@
+{
+  "name": "@stacks/mailu",
+  "private": true,
+  "dependencies": {
+    "@infra/apps": "workspace:*"
+  }
+}
