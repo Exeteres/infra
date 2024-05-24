@@ -17,10 +17,10 @@ Feel free to use this repository as a reference or a starting point for your own
 You can also add it as a submodule and use some parts of it in your own repository:
 
 ```bash
-git submodule add lib git@github.com:Exeteres/infra.git
+git submodule add git@github.com:Exeteres/infra.git lib
 ```
 
-If you are using Yarn, you can also add it as a workspace:
+If you are using Yarn, you can add it as a workspace:
 
 ```json
 // package.json
@@ -29,7 +29,7 @@ If you are using Yarn, you can also add it as a workspace:
 }
 ```
 
-Then you can reference the packages in your stacks
+Then you can reference the packages in your stacks:
 
 ```json
 // stacks/<my-stack>/package.json
