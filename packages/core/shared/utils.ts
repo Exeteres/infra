@@ -1,24 +1,37 @@
-import { pulumi, pulumiRandom } from "./imports"
-import { CommonOptions } from "./options"
+import { pulumi } from "./imports"
 
 /**
  * Transforms a pair of input options (single and multiple) into a single array input.
  */
 export function normalizeInputArray<T>(
   single: pulumi.Input<T> | undefined,
-  multiple: pulumi.Input<T[]> | undefined,
-): pulumi.Input<T[]> | undefined {
-  if (!single) {
+  multiple: pulumi.Input<pulumi.Input<T>[]> | undefined,
+): pulumi.Input<pulumi.Input<T>[]> {
+  if (single) {
+    return [single]
+  }
+
+  if (multiple) {
     return multiple
   }
 
-  if (!multiple) {
-    return pulumi.all([single]).apply(([single]) => [single]) as pulumi.Input<T[]>
+  return []
+}
+
+export function normalizeInputArrayAndMap<T, U>(
+  single: pulumi.Input<T> | undefined,
+  multiple: pulumi.Input<pulumi.Input<T>[]> | undefined,
+  mapFn: (value: T) => U,
+): pulumi.Input<pulumi.Input<U>[]> {
+  if (single) {
+    return [pulumi.output(single).apply(mapFn as any)]
   }
 
-  return pulumi
-    .all([single, multiple]) //
-    .apply(([single, multiple]) => [single, ...multiple]) as pulumi.Input<T[]>
+  if (multiple) {
+    return pulumi.output(multiple).apply(values => values.map(mapFn as any)) as any
+  }
+
+  return []
 }
 
 export type PartialKeys<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>

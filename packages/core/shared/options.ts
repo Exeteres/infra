@@ -62,3 +62,5 @@ export function mapPulumiOptions<TOptions extends Partial<CommonOptions>>(
     ...extra,
   }
 }
+
+export type NodeSelectorInput = pulumi.Input<Record<string, pulumi.Input<string>>>
