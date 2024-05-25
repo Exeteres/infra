@@ -73,3 +73,15 @@ export interface CommonAppOptions extends PartialKeys<CommonOptions, "name"> {
    */
   nodeSelector?: NodeSelectorInput
 }
+
+/**
+ * Maps a hostname to a node selector.
+ *
+ * @param hostname The hostname to map.
+ * @returns The node selector.
+ */
+export function mapHostnameToNodeSelector(hostname: string): NodeSelectorInput {
+  return {
+    "kubernetes.io/hostname": hostname,
+  }
+}

@@ -9,8 +9,10 @@ interface ContainerOptions extends PartialKeys<k8s.types.input.core.v1.Container
    * The map of environment variables to set in the container.
    * It is like the `env` property, but more convenient to use.
    */
-  environment?: Record<string, pulumi.Input<string | k8s.types.input.core.v1.EnvVarSource>>
+  environment?: pulumi.Input<ContainerEnvironment>
 }
+
+export type ContainerEnvironment = Record<string, pulumi.Input<string | k8s.types.input.core.v1.EnvVarSource>>
 
 interface ServiceWorkloadOptions extends CommonOptions {
   /**
@@ -31,12 +33,12 @@ interface ServiceWorkloadOptions extends CommonOptions {
   /**
    * The configuration of the port that the service exposes.
    */
-  port?: pulumi.Input<k8s.types.input.core.v1.ServicePort>
+  port?: pulumi.Input<ServicePort>
 
   /**
    * The configuration of the ports that the service exposes.
    */
-  ports?: pulumi.Input<pulumi.Input<k8s.types.input.core.v1.ServicePort>[]>
+  ports?: pulumi.Input<pulumi.Input<ServicePort>[]>
 
   /**
    * The node selector to constrain the workload to run on specific nodes.
@@ -46,18 +48,27 @@ interface ServiceWorkloadOptions extends CommonOptions {
   /**
    * The volume to define in the workload.
    */
-  volume?: pulumi.Input<k8s.types.input.core.v1.Volume>
+  volume?: pulumi.Input<WorkloadVolume>
 
   /**
    * The volumes to define in the workload.
    */
-  volumes?: pulumi.Input<pulumi.Input<k8s.types.input.core.v1.Volume>[]>
+  volumes?: pulumi.Input<pulumi.Input<WorkloadVolume>[]>
 
   /**
    * The number of replicas to run in the workload.
    */
   replicas?: pulumi.Input<number>
+
+  /**
+   * The secret to use for pulling the container image.
+   */
+  imagePullSecret?: pulumi.Input<k8s.core.v1.Secret>
 }
+
+export type ServicePort = k8s.types.input.core.v1.ServicePort | number
+
+export type WorkloadVolume = k8s.types.input.core.v1.Volume | k8s.core.v1.PersistentVolumeClaim
 
 type TypedServiceOptions<TWorkloadKind> = Omit<ServiceWorkloadOptions, "kind"> & { kind: TWorkloadKind }
 
@@ -139,18 +150,26 @@ export function createWorkloadService(options: ServiceWorkloadOptions) {
           metadata: mapMetadata(options, { labels }),
           spec: {
             nodeSelector: options.nodeSelector,
+
+            imagePullSecrets: pulumi
+              .output(options.imagePullSecret)
+              .apply(value => (value ? [{ name: value.metadata.name }] : [])),
+
             containers: normalizeInputArrayAndMap(
               //
               options.container,
               options.containers,
               c => mapContainer(options.name, c),
             ),
-            volumes: normalizeInputArray(options.volume, options.volumes),
+
+            volumes: normalizeInputArrayAndMap(options.volume, options.volumes, mapVolume),
           },
         },
       },
     },
-    mapPulumiOptions(options),
+    mapPulumiOptions(options, {
+      ignoreChanges: ["spec.template.spec.containers[*].image"],
+    }),
   )
 
   const service = new k8s.core.v1.Service(
@@ -159,7 +178,7 @@ export function createWorkloadService(options: ServiceWorkloadOptions) {
       metadata: mapMetadata(options),
       spec: {
         selector: labels,
-        ports: normalizeInputArray(options.port, options.ports),
+        ports: normalizeInputArrayAndMap(options.port, options.ports, mapPort),
       },
     },
     mapPulumiOptions(options),
@@ -199,6 +218,56 @@ function mapEnvVar([name, value]: [
       return { name, value }
     } else {
       return { name, valueFrom: value }
+    }
+  })
+}
+
+function mapPort(port: ServicePort): k8s.types.input.core.v1.ServicePort {
+  if (typeof port === "number") {
+    return { port }
+  } else {
+    return port
+  }
+}
+
+function mapVolume(volume: WorkloadVolume) {
+  if (volume instanceof k8s.core.v1.PersistentVolumeClaim) {
+    return {
+      name: volume.metadata.name,
+      persistentVolumeClaim: {
+        claimName: volume.metadata.name,
+      },
+    }
+  }
+
+  return volume
+}
+
+interface MapVolumeToMountOptions extends Omit<k8s.types.input.core.v1.VolumeMount, "name"> {
+  /**
+   * The volume to mount.
+   */
+  volume: WorkloadVolume
+}
+
+/**
+ * Maps a volume to a volume mount with the specified options.
+ *
+ * @param options The options to map the volume to a volume mount.
+ * @returns The volume mount.
+ */
+export function mapVolumeToMount(options: MapVolumeToMountOptions): pulumi.Input<k8s.types.input.core.v1.VolumeMount> {
+  return pulumi.output(options.volume).apply(volume => {
+    if (volume instanceof k8s.core.v1.PersistentVolumeClaim) {
+      return {
+        ...options,
+        name: volume.metadata.name,
+      }
+    }
+
+    return {
+      ...options,
+      name: volume.name,
     }
   })
 }
