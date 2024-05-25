@@ -134,10 +134,14 @@ export function createZitadelApp(options: ZitadelAppOptions) {
     name: "zitadel",
     namespace: options.namespace,
 
-    domain: options.domain,
+    route: {
+      domain: options.domain,
 
-    serviceName: zitadelRelease.name,
-    servicePort: 8080,
+      service: {
+        name: zitadelRelease.name,
+        port: 8080,
+      },
+    },
 
     tlsPassthrough: true,
   })

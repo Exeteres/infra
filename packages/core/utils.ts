@@ -21,7 +21,7 @@ export function normalizeInputArray<T>(
 export function normalizeInputArrayAndMap<T, U>(
   single: pulumi.Input<T> | undefined,
   multiple: pulumi.Input<pulumi.Input<T>[]> | undefined,
-  mapFn: (value: T) => U,
+  mapFn: (value: T) => pulumi.Input<U>,
 ): pulumi.Input<pulumi.Input<U>[]> {
   if (single) {
     return [pulumi.output(single).apply(mapFn as any)]

@@ -1,1 +1,1 @@
-export * as traefikCrds from "@pulumi/traefik"
+export * as traefik from "@pulumi/traefik"
