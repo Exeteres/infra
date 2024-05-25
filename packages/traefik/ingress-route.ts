@@ -9,7 +9,7 @@ import {
 import { traefik } from "./imports"
 import { mapMetadata, mapPulumiOptions } from "@infra/k8s"
 
-interface IngressRouteOptions extends CommonIngressRouteOptions<TcpIngressRoute> {
+interface IngressRouteOptions extends CommonIngressRouteOptions<IngressRoute> {
   /**
    * The name of the secret containing the certificate to use for TLS.
    */
@@ -26,7 +26,31 @@ interface IngressRoute extends TcpIngressRoute {
    * The paths to match against the URL of the request.
    */
   paths?: pulumi.Input<pulumi.Input<string>[]>
+
+  /**
+   * The method to match against the request.
+   */
+  method?: pulumi.Input<string>
+
+  /**
+   * The methods to match against the request.
+   */
+  methods?: pulumi.Input<pulumi.Input<string>[]>
+
+  /**
+   * The middleware to apply to the route.
+   */
+  middleware?: pulumi.Input<IngressRouteMiddleware>
+
+  /**
+   * The middlewares to apply to the route.
+   */
+  middlewares?: pulumi.Input<pulumi.Input<IngressRouteMiddleware>[]>
 }
+
+export type IngressRouteMiddleware =
+  | traefik.types.input.traefik.v1alpha1.IngressRouteSpecRoutesMiddlewaresArgs
+  | traefik.traefik.v1alpha1.Middleware
 
 /**
  * Creates a IngressRoute for Traefik.
@@ -64,6 +88,7 @@ function mapRouteToCrd(
       kind: "Rule",
       match: createIngressRouteMatchFilter(route).apply(buildMatchExpression),
       services: normalizeInputArrayAndMap(route.service, route.services, mapServiceToCrd),
+      middlewares: normalizeInputArrayAndMap(route.middleware, route.middlewares, mapMiddlewareToCrd),
     } satisfies traefik.types.input.traefik.v1alpha1.IngressRouteSpecRoutesArgs
   })
 }
@@ -84,6 +109,14 @@ function createIngressRouteMatchFilter(route: IngressRoute): pulumi.Output<Ingre
       matchers.push({ method: "Host", args: [route.domain] })
     }
 
+    if (route.method) {
+      matchers.push({ method: "Method", args: [route.method] })
+    }
+
+    if (route.methods) {
+      matchers.push(...route.methods.map(method => ({ method: "Method", args: [method] })))
+    }
+
     if (matchers.length && route.match) {
       return {
         all: [...matchers, route.match],
@@ -100,6 +133,21 @@ function createIngressRouteMatchFilter(route: IngressRoute): pulumi.Output<Ingre
       return route.match
     }
 
-    throw new Error("At least one of 'path', 'paths', 'domain' or 'match' must be provided.")
+    throw new Error("At least one of 'path', 'paths', 'domain', 'method', 'methods', or 'match' must be set.")
+  })
+}
+
+function mapMiddlewareToCrd(
+  middleware: pulumi.Input<IngressRouteMiddleware>,
+): pulumi.Output<traefik.types.input.traefik.v1alpha1.IngressRouteSpecRoutesMiddlewaresArgs> {
+  return pulumi.output(middleware).apply(middleware => {
+    if (middleware instanceof traefik.traefik.v1alpha1.Middleware) {
+      return {
+        name: middleware.metadata.name as pulumi.Output<string>,
+        namespace: middleware.metadata.namespace as pulumi.Output<string>,
+      } satisfies traefik.types.input.traefik.v1alpha1.IngressRouteSpecRoutesMiddlewaresArgs
+    }
+
+    return middleware
   })
 }

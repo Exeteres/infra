@@ -1,6 +1,6 @@
-import { normalizeInputArrayAndMap, pulumi } from "@infra/core"
+import { pulumi } from "@infra/core"
 import { traefik } from "./imports"
-import { CommonOptions } from "@infra/k8s"
+import { CommonOptions, k8s } from "@infra/k8s"
 
 export interface CommonIngressRouteOptions<TIngressRoute extends TcpIngressRoute> extends CommonOptions {
   /**
@@ -46,7 +46,9 @@ export interface TcpIngressRoute {
   services?: pulumi.Input<pulumi.Input<IngressRouteService>[]>
 }
 
-export interface IngressRouteService {
+export type IngressRouteService = IngressRouteServiceRef | k8s.core.v1.Service
+
+export interface IngressRouteServiceRef {
   /**
    * The name of the service to route traffic to.
    */
@@ -62,6 +64,13 @@ export function mapServiceToCrd(
   service: pulumi.Input<IngressRouteService>,
 ): pulumi.Output<traefik.types.input.traefik.v1alpha1.IngressRouteTCPSpecRoutesServicesArgs> {
   return pulumi.output(service).apply(service => {
+    if (service instanceof k8s.core.v1.Service) {
+      return {
+        name: service.metadata.name,
+        port: service.spec.ports[0].port,
+      }
+    }
+
     return {
       name: service.name,
       port: service.port,
