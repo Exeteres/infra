@@ -1,6 +1,7 @@
-import { createMailuApp } from "@infra/apps"
-import { createConfig, createNamespace } from "@infra/core"
+import { createNamespace } from "@infra/k8s"
 import { publicIssuer } from "./shared"
+import { createConfig } from "@infra/core"
+import { createMailuApp } from "@infra/mailu"
 
 const namespace = createNamespace({ name: "mailu" })
 const config = createConfig({ name: "mailu" })

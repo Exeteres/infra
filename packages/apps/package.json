@@ -1,7 +1,0 @@
-{
-  "name": "@infra/apps",
-  "private": true,
-  "dependencies": {
-    "@infra/core": "workspace:*"
-  }
-}

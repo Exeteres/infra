@@ -1,5 +1,6 @@
-import { createFactorioApp } from "@infra/apps"
-import { createConfig, createNamespace, createSecret } from "@infra/core"
+import { createConfig } from "@infra/core"
+import { createNamespace, createSecret } from "@infra/k8s"
+import { createFactorioApp } from "@infra/factorio"
 
 const namespace = createNamespace({ name: "factorio" })
 const config = createConfig({ name: "factorio" })

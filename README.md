@@ -6,8 +6,8 @@ It uses [Pulumi](https://www.pulumi.com/) to manage the Kubernetes cluster and t
 ## Repository Structure
 
 - **packages/core**: The handy utility wrappers around the Pulumi SDK and some common infrastructure components;
-- **packages/apps**: The ready-to-use applications that can be deployed on the cluster;
-- **packages/crds**: The generated CRDs SDK wrappers;
+- **packages/\<package\>**: The ready-to-use application and their infrastructure components;
+- **packages/\<package\>-crds**: The generated SDK for SRDs of the application;
 - **stacks/**: The final Pulumi stacks, may contain some environment-specific configuration.
 
 ## Usage
@@ -36,7 +36,7 @@ Then you can reference the packages in your stacks:
 {
   "dependencies": {
     "@infra/core": "workspace:*",
-    "@infra/apps": "workspace:*"
+    "@infra/<package>": "workspace:*"
   }
 }
 ```

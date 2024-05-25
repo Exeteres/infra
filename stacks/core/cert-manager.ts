@@ -1,12 +1,6 @@
-import {
-  createAcmeIssuer,
-  createCertManagerRelease,
-  createConfig,
-  createNamespace,
-  createPlainIssuer,
-  createSecret,
-  mapSecretToRef,
-} from "@infra/core"
+import { createAcmeIssuer, createCertManagerRelease, createPlainIssuer } from "@infra/cert-manager"
+import { createConfig } from "@infra/core"
+import { createNamespace, createSecret, mapSecretToRef } from "@infra/k8s"
 
 const namespace = createNamespace({ name: "cert-manager" })
 const config = createConfig({ name: "cert-manager" })

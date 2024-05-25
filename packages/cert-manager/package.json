@@ -1,0 +1,8 @@
+{
+  "name": "@infra/cert-manager",
+  "private": true,
+  "dependencies": {
+    "@infra/k8s": "workspace:*",
+    "@pulumi/cert-manager": "workspace:*"
+  }
+}

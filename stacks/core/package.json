@@ -2,6 +2,8 @@
   "name": "@stacks/core",
   "private": true,
   "dependencies": {
-    "@infra/core": "workspace:*"
+    "@infra/cert-manager": "workspace:*",
+    "@infra/kruise": "workspace:*",
+    "@infra/kubernetes-dashboard": "workspace:*"
   }
 }

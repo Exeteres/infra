@@ -1,4 +1,5 @@
-import { createKubernetesDashboardRelease, createKubernetesDashboardServiceAccount, createNamespace } from "@infra/core"
+import { createKubernetesDashboardRelease, createKubernetesDashboardServiceAccount } from "@infra/kubernetes-dashboard"
+import { createNamespace } from "@infra/k8s"
 
 const namespace = createNamespace({ name: "kubernetes-dashboard" })
 

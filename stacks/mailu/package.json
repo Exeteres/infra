@@ -2,6 +2,6 @@
   "name": "@stacks/mailu",
   "private": true,
   "dependencies": {
-    "@infra/apps": "workspace:*"
+    "@infra/mailu": "workspace:*"
   }
 }

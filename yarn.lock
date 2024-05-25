@@ -29,11 +29,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@infra/apps@workspace:*, @infra/apps@workspace:packages/apps":
+"@infra/cert-manager@workspace:*, @infra/cert-manager@workspace:packages/cert-manager":
   version: 0.0.0-use.local
-  resolution: "@infra/apps@workspace:packages/apps"
+  resolution: "@infra/cert-manager@workspace:packages/cert-manager"
   dependencies:
-    "@infra/core": "workspace:*"
+    "@infra/k8s": "workspace:*"
+    "@pulumi/cert-manager": "workspace:*"
   languageName: unknown
   linkType: soft
 
@@ -41,10 +42,69 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@infra/core@workspace:packages/core"
   dependencies:
-    "@pulumi/crds": "workspace:*"
-    "@pulumi/kubernetes": "npm:^4.12.0"
     "@pulumi/pulumi": "npm:^3.116.1"
     "@pulumi/random": "npm:^4.16.2"
+  languageName: unknown
+  linkType: soft
+
+"@infra/factorio@workspace:*, @infra/factorio@workspace:packages/factorio":
+  version: 0.0.0-use.local
+  resolution: "@infra/factorio@workspace:packages/factorio"
+  dependencies:
+    "@infra/k8s": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@infra/k8s@workspace:*, @infra/k8s@workspace:packages/k8s":
+  version: 0.0.0-use.local
+  resolution: "@infra/k8s@workspace:packages/k8s"
+  dependencies:
+    "@infra/core": "workspace:*"
+    "@pulumi/kubernetes": "npm:^4.12.0"
+  languageName: unknown
+  linkType: soft
+
+"@infra/kruise@workspace:*, @infra/kruise@workspace:packages/kruise":
+  version: 0.0.0-use.local
+  resolution: "@infra/kruise@workspace:packages/kruise"
+  dependencies:
+    "@infra/k8s": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@infra/kubernetes-dashboard@workspace:*, @infra/kubernetes-dashboard@workspace:packages/kubernetes-dashboard":
+  version: 0.0.0-use.local
+  resolution: "@infra/kubernetes-dashboard@workspace:packages/kubernetes-dashboard"
+  dependencies:
+    "@infra/k8s": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@infra/mailu@workspace:*, @infra/mailu@workspace:packages/mailu":
+  version: 0.0.0-use.local
+  resolution: "@infra/mailu@workspace:packages/mailu"
+  dependencies:
+    "@infra/cert-manager": "workspace:*"
+    "@infra/k8s": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@infra/traefik@workspace:*, @infra/traefik@workspace:packages/traefik":
+  version: 0.0.0-use.local
+  resolution: "@infra/traefik@workspace:packages/traefik"
+  dependencies:
+    "@infra/k8s": "workspace:*"
+    "@pulumi/traefik": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@infra/zitadel@workspace:*, @infra/zitadel@workspace:packages/zitadel":
+  version: 0.0.0-use.local
+  resolution: "@infra/zitadel@workspace:packages/zitadel"
+  dependencies:
+    "@infra/cert-manager": "workspace:*"
+    "@infra/k8s": "workspace:*"
+    "@infra/traefik": "workspace:*"
   languageName: unknown
   linkType: soft
 
@@ -509,9 +569,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pulumi/crds@workspace:*, @pulumi/crds@workspace:packages/crds":
+"@pulumi/cert-manager@workspace:*, @pulumi/cert-manager@workspace:packages/cert-manager-crds":
   version: 0.0.0-use.local
-  resolution: "@pulumi/crds@workspace:packages/crds"
+  resolution: "@pulumi/cert-manager@workspace:packages/cert-manager-crds"
   dependencies:
     "@pulumi/pulumi": "npm:^3.42.0"
     "@types/node": "npm:^14"
@@ -636,6 +696,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@pulumi/traefik@workspace:*, @pulumi/traefik@workspace:packages/traefik-crds":
+  version: 0.0.0-use.local
+  resolution: "@pulumi/traefik@workspace:packages/traefik-crds"
+  dependencies:
+    "@pulumi/pulumi": "npm:^3.42.0"
+    "@types/node": "npm:^14"
+    typescript: "npm:^4.3.5"
+  languageName: unknown
+  linkType: soft
+
 "@sigstore/bundle@npm:^2.3.0, @sigstore/bundle@npm:^2.3.1":
   version: 2.3.1
   resolution: "@sigstore/bundle@npm:2.3.1"
@@ -703,7 +773,17 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@stacks/core@workspace:stacks/core"
   dependencies:
-    "@infra/core": "workspace:*"
+    "@infra/cert-manager": "workspace:*"
+    "@infra/kruise": "workspace:*"
+    "@infra/kubernetes-dashboard": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@stacks/factorio@workspace:stacks/factorio":
+  version: 0.0.0-use.local
+  resolution: "@stacks/factorio@workspace:stacks/factorio"
+  dependencies:
+    "@infra/factorio": "workspace:*"
   languageName: unknown
   linkType: soft
 
@@ -711,7 +791,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@stacks/mailu@workspace:stacks/mailu"
   dependencies:
-    "@infra/apps": "workspace:*"
+    "@infra/mailu": "workspace:*"
   languageName: unknown
   linkType: soft
 
@@ -719,7 +799,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@stacks/zitadel@workspace:stacks/zitadel"
   dependencies:
-    "@infra/apps": "workspace:*"
+    "@infra/zitadel": "workspace:*"
   languageName: unknown
   linkType: soft
 

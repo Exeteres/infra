@@ -2,6 +2,6 @@
   "name": "@stacks/zitadel",
   "private": true,
   "dependencies": {
-    "@infra/apps": "workspace:*"
+    "@infra/zitadel": "workspace:*"
   }
 }

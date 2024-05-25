@@ -1,4 +1,5 @@
-import { createKruiseRelease, createNamespace } from "@infra/core"
+import { createKruiseRelease } from "@infra/kruise"
+import { createNamespace } from "@infra/k8s"
 
 const namespace = createNamespace({ name: "kruise-system" })
 

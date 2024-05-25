@@ -1,6 +1,7 @@
-import { createZitadelApp } from "@infra/apps"
-import { createConfig, createNamespace } from "@infra/core"
+import { createConfig } from "@infra/core"
 import { plainIssuer, publicIssuer } from "./shared"
+import { createNamespace } from "@infra/k8s"
+import { createZitadelApp } from "@infra/zitadel"
 
 const namespace = createNamespace({ name: "zitadel" })
 const config = createConfig({ name: "zitadel" })

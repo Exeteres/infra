@@ -1,0 +1,8 @@
+{
+  "name": "@infra/k8s",
+  "private": true,
+  "dependencies": {
+    "@infra/core": "workspace:*",
+    "@pulumi/kubernetes": "^4.12.0"
+  }
+}
