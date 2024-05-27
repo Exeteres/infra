@@ -24,7 +24,11 @@ export function normalizeInputArrayAndMap<T, U>(
   mapFn: (value: T) => pulumi.Input<U>,
 ): pulumi.Input<pulumi.Input<U>[]> {
   if (single) {
-    return [pulumi.output(single).apply(mapFn as any)]
+    if (pulumi.Output.isInstance(single)) {
+      return pulumi.output(single).apply(v => [mapFn(v as T)])
+    }
+
+    return [mapFn(single as T) as any]
   }
 
   if (multiple) {
