@@ -45,6 +45,7 @@ export function mapMetadata<TOptions extends Partial<CommonOptions>>(
 ): pulumi.Input<k8s.types.input.meta.v1.ObjectMeta> {
   return pulumi.all([options.labels, options.annotations, extra]).apply(([labels, annotations, extra]) => {
     return {
+      name: options.name,
       namespace: options.namespace?.metadata.name,
       labels,
       annotations,

@@ -63,6 +63,7 @@ export function createHelmRelease(options: HelmOptions) {
   return new k8s.helm.v3.Release(
     options.name,
     {
+      name: options.name,
       namespace: options.namespace.metadata.name,
       repositoryOpts: { repo: options.repo },
       version: options.version,

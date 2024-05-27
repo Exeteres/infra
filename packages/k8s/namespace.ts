@@ -12,6 +12,7 @@ interface NamespaceOptions extends Omit<CommonOptions, "namespace"> {}
 export function createNamespace(options: NamespaceOptions) {
   return new k8s.core.v1.Namespace(options.name, {
     metadata: {
+      name: options.name,
       labels: options.labels,
       annotations: options.annotations,
     },
