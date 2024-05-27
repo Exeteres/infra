@@ -42,20 +42,22 @@ export function createServiceAccount(options: ServiceAccountOptions): ServiceAcc
     mapPulumiOptions(options),
   )
 
-  const bindings = pulumi.output(normalizeInputArray(options.role, options.roles)).apply(roles =>
-    roles.map(role => {
-      return createRoleBinding({
-        name: `${options.name}-${role.metadata.name}`,
-        namespace: options.namespace,
+  const bindings = pulumi.output(normalizeInputArray(options.role, options.roles)).apply(roles => {
+    return roles.map(role => {
+      return role.metadata.name.apply(name => {
+        return createRoleBinding({
+          name: `${options.name}-${name}`,
+          namespace: options.namespace,
 
-        subject: serviceAccount,
-        role,
+          subject: serviceAccount,
+          role,
+        })
       })
-    }),
-  )
+    })
+  })
 
   return {
     serviceAccount,
-    bindings,
+    bindings: bindings as unknown as pulumi.Output<k8s.rbac.v1.RoleBinding[]>,
   }
 }

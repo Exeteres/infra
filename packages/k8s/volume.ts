@@ -19,7 +19,7 @@ export function createPersistentVolumeClaim(options: PersistentVolumeOptions) {
   return new k8s.core.v1.PersistentVolumeClaim(
     options.name,
     {
-      metadata: mapMetadata({
+      metadata: mapMetadata(options, {
         annotations: {
           ...options?.annotations,
           "pulumi.com/skipAwait": "true",

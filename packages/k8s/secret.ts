@@ -10,6 +10,11 @@ interface SecretOptions extends CommonOptions {
   key?: string
 
   /**
+   * The type of the secret.
+   */
+  type?: string
+
+  /**
    * The value of the secret.
    */
   value?: pulumi.Input<string>
@@ -31,6 +36,7 @@ export function createSecret(options: SecretOptions) {
     options.name,
     {
       metadata: mapMetadata(options),
+      type: options.type,
       stringData: options.value ? { [options.key ?? "value"]: options.value! } : options.data,
     },
     mapPulumiOptions(options),

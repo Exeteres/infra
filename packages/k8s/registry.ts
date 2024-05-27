@@ -19,6 +19,7 @@ export function createGhcrRegistrySecret(options: GhcrRegistryOptions) {
   return createSecret({
     ...options,
 
+    type: "kubernetes.io/dockerconfigjson",
     key: ".dockerconfigjson",
 
     value: pulumi.output(options.accessToken).apply(token => {

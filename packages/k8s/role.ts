@@ -1,6 +1,6 @@
 import { normalizeInputArray, pulumi } from "@infra/core"
 import { k8s } from "./imports"
-import { CommonOptions, mapMetadata } from "./options"
+import { CommonOptions, mapMetadata, mapPulumiOptions } from "./options"
 import { RoleBindingSubjct, createRoleBinding } from "./role-binding"
 
 interface RoleOptions extends CommonOptions {
@@ -44,10 +44,14 @@ interface RoleResult {
  * @returns The Role and the RoleBinding if subjects were provided.
  */
 export function createRole(options: RoleOptions): RoleResult {
-  const role = new k8s.rbac.v1.Role(options.name, {
-    metadata: mapMetadata(options),
-    rules: normalizeInputArray(options.rule, options.rules),
-  })
+  const role = new k8s.rbac.v1.Role(
+    options.name,
+    {
+      metadata: mapMetadata(options),
+      rules: normalizeInputArray(options.rule, options.rules),
+    },
+    mapPulumiOptions(options),
+  )
 
   if (options.subject || options.subjects) {
     const binding = createRoleBinding({
