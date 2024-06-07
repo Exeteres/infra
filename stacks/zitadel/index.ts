@@ -1,14 +1,10 @@
-import { createConfig } from "@infra/core"
+import { pulumi } from "@infra/core"
 import { plainIssuer, publicIssuer } from "./shared"
-import { createNamespace } from "@infra/k8s"
-import { createZitadelApp } from "@infra/zitadel"
+import { zitadel } from "@infra/zitadel"
 
-const namespace = createNamespace({ name: "zitadel" })
-const config = createConfig({ name: "zitadel" })
+const config = new pulumi.Config("zitadel")
 
-createZitadelApp({
-  namespace,
-
+zitadel.createApplication({
   bootstrapIssuer: plainIssuer,
   publicIssuer: publicIssuer,
 

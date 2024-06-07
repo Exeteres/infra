@@ -1,1 +1,1 @@
-export * from "./release"
+export * as kruise from "./exports"

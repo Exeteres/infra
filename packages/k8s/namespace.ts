@@ -1,7 +1,7 @@
-import { k8s } from "./imports"
+import { raw } from "./imports"
 import { CommonOptions } from "./options"
 
-interface NamespaceOptions extends Omit<CommonOptions, "namespace"> {}
+export interface NamespaceOptions extends Omit<CommonOptions, "namespace"> {}
 
 /**
  * Create a new namespace in the cluster.
@@ -10,7 +10,7 @@ interface NamespaceOptions extends Omit<CommonOptions, "namespace"> {}
  * @returns The namespace resource.
  */
 export function createNamespace(options: NamespaceOptions) {
-  return new k8s.core.v1.Namespace(options.name, {
+  return new raw.core.v1.Namespace(options.name, {
     metadata: {
       name: options.name,
       labels: options.labels,

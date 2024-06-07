@@ -1,2 +1,1 @@
-export * from "./release"
-export * from "./service-account"
+export * as kubernetesDashboard from "./exports"

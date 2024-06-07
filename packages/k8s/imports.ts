@@ -1,1 +1,1 @@
-export * as k8s from "@pulumi/kubernetes"
+export * as raw from "@pulumi/kubernetes"

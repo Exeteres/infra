@@ -1,1 +1,1 @@
-export * as traefik from "@pulumi/traefik"
+export * as raw from "@pulumi/traefik"

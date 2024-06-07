@@ -1,12 +1,12 @@
-import { CommonOptions, mapMetadata, mapPulumiOptions } from "@infra/k8s"
-import { traefik } from "./imports"
+import { k8s } from "@infra/k8s"
+import { raw } from "./imports"
 import { pulumi } from "@infra/core"
 
-interface MiddlewareOptions extends CommonOptions {
+interface MiddlewareOptions extends k8s.CommonOptions {
   /**
    * The middleware spec.
    */
-  spec: pulumi.Input<traefik.types.input.traefik.v1alpha1.MiddlewareSpecArgs>
+  spec: pulumi.Input<raw.types.input.traefik.v1alpha1.MiddlewareSpecArgs>
 }
 
 /**
@@ -16,12 +16,12 @@ interface MiddlewareOptions extends CommonOptions {
  * @returns The middleware.
  */
 export function createMiddleware(options: MiddlewareOptions) {
-  return new traefik.traefik.v1alpha1.Middleware(
+  return new raw.traefik.v1alpha1.Middleware(
     options.name,
     {
-      metadata: mapMetadata(options),
+      metadata: k8s.mapMetadata(options),
       spec: options.spec,
     },
-    mapPulumiOptions(options),
+    k8s.mapPulumiOptions(options),
   )
 }

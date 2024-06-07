@@ -1,22 +1,22 @@
 import { pulumi } from "@infra/core"
 import { CommonOptions, mapPulumiOptions } from "./options"
-import { k8s } from "./imports"
+import { raw } from "./imports"
 
 export interface HelmOptions extends CommonOptions {
   /**
    * The URL of the Helm repository.
    */
-  repo: string
+  repo: pulumi.Input<string>
 
   /**
    * The name of the Helm chart in the repository.
    */
-  chart: string
+  chart: pulumi.Input<string>
 
   /**
    * The version of the Helm chart.
    */
-  version: string
+  version: pulumi.Input<string>
 
   /**
    * The values to pass to the Helm chart.
@@ -26,7 +26,7 @@ export interface HelmOptions extends CommonOptions {
   /**
    * Whether to skip waiting for the Helm chart to be ready.
    */
-  skipAwait?: boolean
+  skipAwait?: pulumi.Input<boolean>
 }
 
 /**
@@ -37,7 +37,7 @@ export interface HelmOptions extends CommonOptions {
  * @returns The created Helm chart.
  */
 export function createHelmChart(options: HelmOptions) {
-  return new k8s.helm.v3.Chart(
+  return new raw.helm.v3.Chart(
     options.name,
     {
       namespace: options.namespace.metadata.name,
@@ -60,7 +60,7 @@ export function createHelmChart(options: HelmOptions) {
  * @returns The created Helm release.
  */
 export function createHelmRelease(options: HelmOptions) {
-  return new k8s.helm.v3.Release(
+  return new raw.helm.v3.Release(
     options.name,
     {
       name: options.name,

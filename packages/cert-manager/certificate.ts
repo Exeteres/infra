@@ -1,8 +1,11 @@
-import { certManager } from "./imports"
+import { k8s } from "@infra/k8s"
+import { kq, raw } from "./imports"
 import { normalizeInputArray, pulumi } from "@infra/core"
-import { CommonOptions, mapMetadata, mapPulumiOptions } from "@infra/k8s"
+import { inspect } from "util"
 
-interface CertificateOptions extends CommonOptions {
+export type Issuer = raw.certmanager.v1.ClusterIssuer | raw.certmanager.v1.Issuer
+
+interface CertificateOptions extends k8s.CommonOptions {
   /**
    * The Common Name (CN) of the certificate.
    * Typically, it is used for mTLS authentication.
@@ -25,31 +28,36 @@ interface CertificateOptions extends CommonOptions {
    * The issuer which will be used to create the certificate.
    * May be a ClusterIssuer or an Issuer.
    */
-  issuer: certManager.certmanager.v1.ClusterIssuer | certManager.certmanager.v1.Issuer
+  issuer: pulumi.Input<Issuer>
 
   /**
-   * The custom name of the certificate secret.
-   * Useful when certificate secret name required before creating the certificate.
-   * It can be created using `createCertificateSecretName` function.
+   * The name of the certificate to create.
+   * If not provided, it will be generated from the `name` field.
    */
-  secretName?: pulumi.Input<string>
+  secretName?: string
 }
 
-interface CertificatePair {
+export interface CertificateBundle {
   /**
    * The certificate resource created.
    */
-  certificate: certManager.certmanager.v1.Certificate
+  certificate: raw.certmanager.v1.Certificate
 
   /**
-   * The name of the secret that contains the certificate.
+   * The secret name where the certificate is stored.
    * Can be specified in the `tls` field of an Ingress.
    */
-  secretName: pulumi.Output<string>
+  secretName: string
 }
 
-export function createCertificateSecretName(options: CommonOptions): pulumi.Output<string> {
-  return pulumi.output(`${options.name}-cert`)
+/**
+ * Create a secret name for the given certificate name.
+ *
+ * @param name The name of the certificate.
+ * @returns The secret name.
+ */
+export function createCertificateSecretName(name: string): string {
+  return `${name}-cert`
 }
 
 /**
@@ -58,25 +66,25 @@ export function createCertificateSecretName(options: CommonOptions): pulumi.Outp
  * @param options The options for creating a certificate.
  * @returns The certificate and the secret name.
  */
-export function createCertificate(options: CertificateOptions): CertificatePair {
-  const secretName = options.secretName ?? createCertificateSecretName(options)
+export function createCertificate(options: CertificateOptions): CertificateBundle {
+  const secretName = options.secretName ?? createCertificateSecretName(options.name)
 
-  const certificate = new certManager.certmanager.v1.Certificate(
+  const certificate = new raw.certmanager.v1.Certificate(
     options.name,
     {
-      metadata: mapMetadata(options),
+      metadata: k8s.mapMetadata(options),
       spec: {
         commonName: options.commonName,
         dnsNames: normalizeInputArray(options.domain, options.domains),
-        issuerRef: {
-          name: options.issuer.metadata.apply(m => m!.name) as pulumi.Input<string>,
-          kind: options.issuer.kind as pulumi.Input<string>,
-        },
+        issuerRef: pulumi.output(options.issuer).apply(issuer => ({
+          name: issuer.metadata.apply(m => m!.name) as pulumi.Input<string>,
+          kind: issuer.kind as pulumi.Input<string>,
+        })),
         secretName,
       },
     },
-    mapPulumiOptions(options),
+    k8s.mapPulumiOptions(options),
   )
 
-  return { certificate, secretName: pulumi.output(secretName) }
+  return { certificate, secretName }
 }

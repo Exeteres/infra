@@ -2,6 +2,10 @@ import { pulumi } from "./imports"
 
 /**
  * Transforms a pair of input options (single and multiple) into a single array input.
+ *
+ * @param single The single input value.
+ * @param multiple The multiple input value.
+ * @returns The normalized input array.
  */
 export function normalizeInputArray<T>(
   single: pulumi.Input<T> | undefined,
@@ -18,6 +22,14 @@ export function normalizeInputArray<T>(
   return []
 }
 
+/**
+ * Transforms a pair of input options (single and multiple) into a single array input and maps the values.
+ *
+ * @param single The single input value.
+ * @param multiple The multiple input value.
+ * @param mapFn The mapping function.
+ * @returns The normalized input array.
+ */
 export function normalizeInputArrayAndMap<T, U>(
   single: pulumi.Input<T> | undefined,
   multiple: pulumi.Input<pulumi.Input<T>[]> | undefined,
@@ -39,3 +51,19 @@ export function normalizeInputArrayAndMap<T, U>(
 }
 
 export type PartialKeys<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
+
+/**
+ * Removes the indentation from a multiline string.
+ *
+ * @param str The string to trim.
+ * @returns The trimmed string.
+ */
+export function trimIndentation(str: string): string {
+  const lines = str.split("\n")
+  const indent = lines
+    .filter(line => line.trim() !== "")
+    .map(line => line.match(/^\s*/)?.[0].length ?? 0)
+    .reduce((min, indent) => Math.min(min, indent), Infinity)
+
+  return lines.map(line => line.slice(indent)).join("\n")
+}

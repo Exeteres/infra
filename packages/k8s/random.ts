@@ -5,9 +5,8 @@ import { CommonOptions, mapPulumiOptions } from "./options"
 interface RandomSecretOptions extends CommonOptions {
   /**
    * The key of the secret.
-   * By default, the key is `value`.
    */
-  key?: string
+  key: string
 
   /**
    * The length of the secret.

@@ -4,6 +4,7 @@
   "dependencies": {
     "@infra/cert-manager": "workspace:*",
     "@infra/k8s": "workspace:*",
+    "@infra/postgresql": "workspace:*",
     "@infra/traefik": "workspace:*"
   }
 }

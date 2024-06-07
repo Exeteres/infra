@@ -1,5 +1,5 @@
-import { mapMetadata, mapPulumiOptions } from "@infra/k8s"
-import { traefik } from "./imports"
+import { k8s } from "@infra/k8s"
+import { raw } from "./imports"
 import {
   CommonIngressRouteOptions,
   IngressRouteMatchFilter,
@@ -24,10 +24,10 @@ interface TcpIngressRouteOptions extends CommonIngressRouteOptions<TcpIngressRou
  * @returns The TCP IngressRoute.
  */
 export function createTcpIngressRoute(options: TcpIngressRouteOptions) {
-  return new traefik.traefik.v1alpha1.IngressRouteTCP(
+  return new raw.traefik.v1alpha1.IngressRouteTCP(
     options.name,
     {
-      metadata: mapMetadata(options),
+      metadata: k8s.mapMetadata(options),
       spec: {
         entryPoints: normalizeInputArray(options.entryPoint, options.entryPoints),
         routes: normalizeInputArrayAndMap(options.route, options.routes, mapRouteToCrd),
@@ -36,18 +36,18 @@ export function createTcpIngressRoute(options: TcpIngressRouteOptions) {
         },
       },
     },
-    mapPulumiOptions(options),
+    k8s.mapPulumiOptions(options),
   )
 }
 
 function mapRouteToCrd(
   route: pulumi.Input<TcpIngressRoute>,
-): pulumi.Output<traefik.types.input.traefik.v1alpha1.IngressRouteTCPSpecRoutesArgs> {
+): pulumi.Output<raw.types.input.traefik.v1alpha1.IngressRouteTCPSpecRoutesArgs> {
   return pulumi.output(route).apply(route => {
     return {
       match: createTcpIngressRouteMatchFilter(route).apply(buildMatchExpression),
       services: normalizeInputArrayAndMap(route.service, route.services, mapServiceToCrd),
-    } satisfies traefik.types.input.traefik.v1alpha1.IngressRouteTCPSpecRoutesArgs
+    } satisfies raw.types.input.traefik.v1alpha1.IngressRouteTCPSpecRoutesArgs
   })
 }
 

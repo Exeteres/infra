@@ -1,29 +1,32 @@
 import { pulumi } from "@infra/core"
 import { CommonOptions, mapMetadata, mapPulumiOptions } from "./options"
-import { k8s } from "./imports"
+import { raw } from "./imports"
 
-interface SecretOptions extends CommonOptions {
-  /**
-   * The key of the secret.
-   * By default, the key is `value`.
-   */
-  key?: string
-
+type SecretOptions = CommonOptions & {
   /**
    * The type of the secret.
    */
   type?: string
+} & (
+    | {
+        /**
+         * The key of the secret.
+         * By default, the key is `value`.
+         */
+        key: string
 
-  /**
-   * The value of the secret.
-   */
-  value?: pulumi.Input<string>
-
-  /**
-   * The arbitrary data of the secret which can be used instead of `key` and `value`.
-   */
-  data?: Record<string, pulumi.Input<string>>
-}
+        /**
+         * The value of the secret.
+         */
+        value: pulumi.Input<string>
+      }
+    | {
+        /**
+         * The arbitrary data of the secret which can be used instead of `key` and `value`.
+         */
+        data: Record<string, pulumi.Input<string>>
+      }
+  )
 
 /**
  * Create a new secret with the given options.
@@ -32,12 +35,12 @@ interface SecretOptions extends CommonOptions {
  * @returns The created secret.
  */
 export function createSecret(options: SecretOptions) {
-  return new k8s.core.v1.Secret(
+  return new raw.core.v1.Secret(
     options.name,
     {
       metadata: mapMetadata(options),
       type: options.type,
-      stringData: options.value ? { [options.key ?? "value"]: options.value! } : options.data,
+      stringData: "value" in options ? { [options.key]: options.value } : options.data,
     },
     mapPulumiOptions(options),
   )
@@ -49,9 +52,9 @@ export function createSecret(options: SecretOptions) {
  * @param secret The secret resource.
  * @returns The ref object: { name, key }.
  */
-export function mapSecretToRef(secret: k8s.core.v1.Secret) {
+export function mapSecretToRef(secret: raw.core.v1.Secret, key?: string) {
   return {
     name: secret.metadata.name,
-    key: secret.stringData.apply(d => Object.keys(d ?? {})[0]),
+    key,
   }
 }

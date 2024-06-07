@@ -1,10 +1,10 @@
-import { PartialKeys, normalizeInputArray, normalizeInputArrayAndMap, pulumi } from "@infra/core"
-import { k8s } from "./imports"
-import { CommonOptions, NodeSelectorInput, mapMetadata, mapPulumiOptions } from "./options"
+import { PartialKeys, normalizeInputArrayAndMap, pulumi } from "@infra/core"
+import { raw } from "./imports"
+import { CommonOptions, NodeSelector, mapMetadata, mapPulumiOptions } from "./options"
 
 type WorkloadKind = "Deployment" | "StatefulSet" | "ReplicaSet" | "DaemonSet"
 
-interface ContainerOptions extends PartialKeys<k8s.types.input.core.v1.Container, "name"> {
+interface ContainerOptions extends PartialKeys<raw.types.input.core.v1.Container, "name"> {
   /**
    * The map of environment variables to set in the container.
    * It is like the `env` property, but more convenient to use.
@@ -12,7 +12,7 @@ interface ContainerOptions extends PartialKeys<k8s.types.input.core.v1.Container
   environment?: pulumi.Input<ContainerEnvironment>
 }
 
-export type ContainerEnvironment = Record<string, pulumi.Input<string | k8s.types.input.core.v1.EnvVarSource>>
+export type ContainerEnvironment = Record<string, pulumi.Input<string | raw.types.input.core.v1.EnvVarSource>>
 
 interface ServiceWorkloadOptions extends CommonOptions {
   /**
@@ -43,7 +43,7 @@ interface ServiceWorkloadOptions extends CommonOptions {
   /**
    * The node selector to constrain the workload to run on specific nodes.
    */
-  nodeSelector?: NodeSelectorInput
+  nodeSelector?: NodeSelector
 
   /**
    * The volume to define in the workload.
@@ -61,22 +61,37 @@ interface ServiceWorkloadOptions extends CommonOptions {
   replicas?: pulumi.Input<number>
 
   /**
+   * The affinity to define in the workload.
+   */
+  affinity?: pulumi.Input<raw.types.input.core.v1.Affinity>
+
+  /**
+   * The topology spread constraints to define in the workload.
+   */
+  topologySpreadConstraints?: pulumi.Input<raw.types.input.core.v1.TopologySpreadConstraint>[]
+
+  /**
+   * Whether to run only one replica per node.
+   */
+  oneReplicaPerNode?: boolean
+
+  /**
    * The secret to use for pulling the container image.
    */
-  imagePullSecret?: pulumi.Input<k8s.core.v1.Secret>
+  imagePullSecret?: pulumi.Input<raw.core.v1.Secret>
 }
 
-export type ServicePort = k8s.types.input.core.v1.ServicePort | number
+export type ServicePort = raw.types.input.core.v1.ServicePort | number
 
-export type WorkloadVolume = k8s.types.input.core.v1.Volume | k8s.core.v1.PersistentVolumeClaim
+export type WorkloadVolume = raw.types.input.core.v1.Volume | raw.core.v1.PersistentVolumeClaim
 
 type TypedServiceOptions<TWorkloadKind> = Omit<ServiceWorkloadOptions, "kind"> & { kind: TWorkloadKind }
 
 type WorkloadResources = {
-  Deployment: k8s.apps.v1.Deployment
-  StatefulSet: k8s.apps.v1.StatefulSet
-  ReplicaSet: k8s.apps.v1.ReplicaSet
-  DaemonSet: k8s.apps.v1.DaemonSet
+  Deployment: raw.apps.v1.Deployment
+  StatefulSet: raw.apps.v1.StatefulSet
+  ReplicaSet: raw.apps.v1.ReplicaSet
+  DaemonSet: raw.apps.v1.DaemonSet
 }
 
 interface ServiceResult<TWorkloadKind extends WorkloadKind> {
@@ -89,7 +104,7 @@ interface ServiceResult<TWorkloadKind extends WorkloadKind> {
   /**
    * The service resource.
    */
-  service: k8s.core.v1.Service
+  service: raw.core.v1.Service
 }
 
 /**
@@ -150,6 +165,9 @@ export function createWorkloadService(options: ServiceWorkloadOptions) {
           metadata: mapMetadata(options, { labels }),
           spec: {
             nodeSelector: options.nodeSelector,
+            affinity: options.affinity,
+
+            topologySpreadConstraints: mapTopologySpreadConstraints(options),
 
             imagePullSecrets: pulumi
               .output(options.imagePullSecret)
@@ -172,7 +190,7 @@ export function createWorkloadService(options: ServiceWorkloadOptions) {
     }),
   )
 
-  const service = new k8s.core.v1.Service(
+  const service = new raw.core.v1.Service(
     options.name,
     {
       metadata: mapMetadata(options),
@@ -190,13 +208,13 @@ export function createWorkloadService(options: ServiceWorkloadOptions) {
 function resolveConstructor(kind: WorkloadKind) {
   switch (kind) {
     case "Deployment":
-      return k8s.apps.v1.Deployment
+      return raw.apps.v1.Deployment
     case "StatefulSet":
-      return k8s.apps.v1.StatefulSet
+      return raw.apps.v1.StatefulSet
     case "ReplicaSet":
-      return k8s.apps.v1.ReplicaSet
+      return raw.apps.v1.ReplicaSet
     case "DaemonSet":
-      return k8s.apps.v1.DaemonSet
+      return raw.apps.v1.DaemonSet
   }
 }
 
@@ -206,13 +224,13 @@ function mapContainer(name: string, options: ContainerOptions) {
 
     name: options.name ?? name,
     env: options.environment ? Object.entries(options.environment).map(mapEnvVar) : options.env,
-  } satisfies k8s.types.input.core.v1.Container
+  } satisfies raw.types.input.core.v1.Container
 }
 
 function mapEnvVar([name, value]: [
   string,
-  pulumi.Input<string | k8s.types.input.core.v1.EnvVarSource>,
-]): pulumi.Input<k8s.types.input.core.v1.EnvVar> {
+  pulumi.Input<string | raw.types.input.core.v1.EnvVarSource>,
+]): pulumi.Input<raw.types.input.core.v1.EnvVar> {
   return pulumi.output(value).apply(value => {
     if (typeof value === "string") {
       return { name, value }
@@ -222,7 +240,7 @@ function mapEnvVar([name, value]: [
   })
 }
 
-function mapPort(port: ServicePort): k8s.types.input.core.v1.ServicePort {
+function mapPort(port: ServicePort): raw.types.input.core.v1.ServicePort {
   if (typeof port === "number") {
     return { port }
   } else {
@@ -231,7 +249,7 @@ function mapPort(port: ServicePort): k8s.types.input.core.v1.ServicePort {
 }
 
 function mapVolume(volume: WorkloadVolume) {
-  if (volume instanceof k8s.core.v1.PersistentVolumeClaim) {
+  if (volume instanceof raw.core.v1.PersistentVolumeClaim) {
     return {
       name: volume.metadata.name,
       persistentVolumeClaim: {
@@ -243,7 +261,7 @@ function mapVolume(volume: WorkloadVolume) {
   return volume
 }
 
-interface MapVolumeToMountOptions extends Omit<k8s.types.input.core.v1.VolumeMount, "name"> {
+interface MapVolumeToMountOptions extends Omit<raw.types.input.core.v1.VolumeMount, "name"> {
   /**
    * The volume to mount.
    */
@@ -256,9 +274,9 @@ interface MapVolumeToMountOptions extends Omit<k8s.types.input.core.v1.VolumeMou
  * @param options The options to map the volume to a volume mount.
  * @returns The volume mount.
  */
-export function mapVolumeToMount(options: MapVolumeToMountOptions): pulumi.Input<k8s.types.input.core.v1.VolumeMount> {
+export function mapVolumeToMount(options: MapVolumeToMountOptions): pulumi.Input<raw.types.input.core.v1.VolumeMount> {
   return pulumi.output(options.volume).apply(volume => {
-    if (volume instanceof k8s.core.v1.PersistentVolumeClaim) {
+    if (volume instanceof raw.core.v1.PersistentVolumeClaim) {
       return {
         ...options,
         name: volume.metadata.name,
@@ -270,4 +288,26 @@ export function mapVolumeToMount(options: MapVolumeToMountOptions): pulumi.Input
       name: volume.name,
     }
   })
+}
+
+function mapTopologySpreadConstraints(
+  options: ServiceWorkloadOptions,
+): pulumi.Input<raw.types.input.core.v1.TopologySpreadConstraint>[] {
+  if (!options.oneReplicaPerNode) {
+    return options.topologySpreadConstraints ?? []
+  }
+
+  return [
+    {
+      maxSkew: 1,
+      topologyKey: "kubernetes.io/hostname",
+      whenUnsatisfiable: "DoNotSchedule",
+      labelSelector: {
+        matchLabels: {
+          "app.kubernetes.io/name": options.name,
+        },
+      },
+    },
+    ...(options.topologySpreadConstraints ?? []),
+  ]
 }

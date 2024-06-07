@@ -1,26 +1,26 @@
-import { createAcmeIssuer, createCertManagerRelease, createPlainIssuer } from "@infra/cert-manager"
-import { createConfig } from "@infra/core"
-import { createNamespace, createSecret, mapSecretToRef } from "@infra/k8s"
+import { certManager } from "@infra/cert-manager"
+import { pulumi } from "@infra/core"
+import { k8s } from "@infra/k8s"
 
-const namespace = createNamespace({ name: "cert-manager" })
-const config = createConfig({ name: "cert-manager" })
+const config = new pulumi.Config("cert-manager")
 
-export const certManagerRelease = createCertManagerRelease({
-  name: "cert-manager",
-  namespace,
-})
+const { namespace, release } = certManager.createApplication()
 
-const apiTokenSecret = createSecret({
+const apiTokenSecret = k8s.createSecret({
   name: "cloudflare-api-token",
   namespace,
 
+  dependsOn: release,
+
+  key: "value",
   value: config.requireSecret("cloudflare-api-token"),
 })
 
-export const publicIssuer = createAcmeIssuer({
+export const publicIssuer = certManager.createAcmeIssuer({
   name: "public",
-  dependsOn: certManagerRelease,
   isClusterScoped: true,
+
+  dependsOn: release,
 
   email: config.require("acme-email"),
   server: config.require("acme-server"),
@@ -28,13 +28,15 @@ export const publicIssuer = createAcmeIssuer({
   solver: {
     dns01: {
       cloudflare: {
-        apiTokenSecretRef: mapSecretToRef(apiTokenSecret),
+        apiTokenSecretRef: k8s.mapSecretToRef(apiTokenSecret, "value"),
       },
     },
   },
 })
 
-export const plainIssuer = createPlainIssuer({
+export const plainIssuer = certManager.createPlainIssuer({
   name: "plain",
   isClusterScoped: true,
+
+  dependsOn: release,
 })

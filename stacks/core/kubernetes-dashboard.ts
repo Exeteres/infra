@@ -1,16 +1,9 @@
-import { createKubernetesDashboardRelease, createKubernetesDashboardServiceAccount } from "@infra/kubernetes-dashboard"
-import { createNamespace } from "@infra/k8s"
+import { kubernetesDashboard } from "@infra/kubernetes-dashboard"
 
-const namespace = createNamespace({ name: "kubernetes-dashboard" })
+const dashboard = kubernetesDashboard.createApplication()
 
-export const kubernetesDashboardRelease = createKubernetesDashboardRelease({
-  name: "kubernetes-dashboard",
-  namespace,
-})
-
-export const dashboardAccount = createKubernetesDashboardServiceAccount({
+kubernetesDashboard.createServiceAccount({
   name: "dashboard-account",
-  namespace,
-
-  dependsOn: kubernetesDashboardRelease,
+  namespace: dashboard.namespace,
+  dependsOn: dashboard.release,
 })

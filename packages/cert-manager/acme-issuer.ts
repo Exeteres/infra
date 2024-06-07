@@ -1,8 +1,8 @@
 import { normalizeInputArray, pulumi } from "@infra/core"
-import { ClusterScoped, ClusteredOptions, NamespaceScoped, mapMetadata, mapPulumiOptions } from "@infra/k8s"
-import { certManager } from "./imports"
+import { raw } from "./imports"
+import { k8s } from "@infra/k8s"
 
-interface AcmeIssuerOptions extends ClusteredOptions {
+type AcmeIssuerOptions = k8s.ScopedOptions & {
   /**
    * The email address to use for the ACME account.
    */
@@ -18,41 +18,23 @@ interface AcmeIssuerOptions extends ClusteredOptions {
   /**
    * The solver configuration for the ACME issuer.
    */
-  solver?: pulumi.Input<certManager.types.input.certmanager.v1.ClusterIssuerSpecAcmeSolversArgs>
+  solver?: pulumi.Input<raw.types.input.certmanager.v1.ClusterIssuerSpecAcmeSolversArgs>
 
   /**
    * The solver configurations for the ACME issuer.
    */
-  solvers?: pulumi.Input<certManager.types.input.certmanager.v1.ClusterIssuerSpecAcmeSolversArgs[]>
+  solvers?: pulumi.Input<raw.types.input.certmanager.v1.ClusterIssuerSpecAcmeSolversArgs[]>
 }
 
-/**
- * Create an issuer which issues certificates using the ACME protocol.
- *
- * @param options The options for the issuer.
- * @returns The Issuer resource.
- */
-export function createAcmeIssuer(options: NamespaceScoped<AcmeIssuerOptions>): certManager.certmanager.v1.Issuer
-
-/**
- * Create a cluster issuer which issues certificates using the ACME protocol.
- *
- * @param options The options for the issuer.
- * @returns The ClusterIssuer resource.
- */
-export function createAcmeIssuer(options: ClusterScoped<AcmeIssuerOptions>): certManager.certmanager.v1.ClusterIssuer
-
-export function createAcmeIssuer(options: NamespaceScoped<AcmeIssuerOptions> | ClusterScoped<AcmeIssuerOptions>) {
-  const Resource = options.isClusterScoped
-    ? certManager.certmanager.v1.ClusterIssuer
-    : certManager.certmanager.v1.Issuer
+export function createAcmeIssuer(options: AcmeIssuerOptions) {
+  const Resource = options.isClusterScoped ? raw.certmanager.v1.ClusterIssuer : raw.certmanager.v1.Issuer
 
   const secretName = `${options.name}-issuer`
 
   return new Resource(
     options.name,
     {
-      metadata: mapMetadata(options),
+      metadata: k8s.mapMetadata(options),
       spec: {
         acme: {
           server: options.server,
@@ -66,6 +48,6 @@ export function createAcmeIssuer(options: NamespaceScoped<AcmeIssuerOptions> | C
         },
       },
     },
-    mapPulumiOptions(options),
+    k8s.mapPulumiOptions(options),
   )
 }

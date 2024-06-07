@@ -1,6 +1,6 @@
 import { pulumi } from "@infra/core"
-import { k8s } from "./imports"
 import { CommonOptions, mapMetadata, mapPulumiOptions } from "./options"
+import { raw } from "./imports"
 
 interface PersistentVolumeOptions extends CommonOptions {
   /**
@@ -16,7 +16,7 @@ interface PersistentVolumeOptions extends CommonOptions {
  * @returns A new k8s.core.v1.PersistentVolumeClaim object.
  */
 export function createPersistentVolumeClaim(options: PersistentVolumeOptions) {
-  return new k8s.core.v1.PersistentVolumeClaim(
+  return new raw.core.v1.PersistentVolumeClaim(
     options.name,
     {
       metadata: mapMetadata(options, {

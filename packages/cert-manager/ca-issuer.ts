@@ -1,41 +1,24 @@
-import { ClusteredOptions, NamespaceScoped, mapMetadata, mapPulumiOptions } from "@infra/k8s"
-import { certManager } from "./imports"
+import { k8s } from "@infra/k8s"
+import { Issuer } from "./certificate"
+import { raw } from "./imports"
 import { pulumi } from "@infra/core"
 
-interface CaIssuerOptions extends ClusteredOptions {
+type CaIssuerOptions = k8s.ScopedOptions & {
   /**
    * The issuer which will be used to create the certificate for the CA itself.
    */
-  bootstrapIssuer: certManager.certmanager.v1.Issuer | certManager.certmanager.v1.ClusterIssuer
+  bootstrapIssuer: pulumi.Input<Issuer>
 }
 
-/**
- * Creates an issuer which signs certificates using a self-signed CA.
- *
- * @param options The options for the issuer.
- * @returns The Issuer resource.
- */
-export function createCaIssuer(options: NamespaceScoped<CaIssuerOptions>): certManager.certmanager.v1.Issuer
-
-/**
- * Creates a cluster issuer which signs certificates using a self-signed CA.
- *
- * @param options The options for the issuer.
- * @returns The ClusterIssuer resource.
- */
-export function createCaIssuer(options: NamespaceScoped<CaIssuerOptions>): certManager.certmanager.v1.ClusterIssuer
-
 export function createCaIssuer(options: CaIssuerOptions) {
-  const Resource = options.isClusterScoped
-    ? certManager.certmanager.v1.ClusterIssuer
-    : certManager.certmanager.v1.Issuer
+  const Resource = options.isClusterScoped ? raw.certmanager.v1.ClusterIssuer : raw.certmanager.v1.Issuer
 
   const secretName = `${options.name}-issuer`
 
-  const caCertificate = new certManager.certmanager.v1.Certificate(
+  const caCertificate = new raw.certmanager.v1.Certificate(
     `${options.name}-ca`,
     {
-      metadata: mapMetadata(options),
+      metadata: k8s.mapMetadata(options, { name: `${options.name}-ca` }),
       spec: {
         secretName,
         isCA: true,
@@ -44,26 +27,26 @@ export function createCaIssuer(options: CaIssuerOptions) {
           algorithm: "ECDSA",
           size: 256,
         },
-        issuerRef: {
-          name: options.bootstrapIssuer.metadata.apply(m => m!.name) as pulumi.Input<string>,
-          kind: options.bootstrapIssuer.kind as pulumi.Input<string>,
+        issuerRef: pulumi.output(options.bootstrapIssuer).apply(issuer => ({
+          name: issuer.metadata.apply(m => m!.name) as pulumi.Input<string>,
+          kind: issuer.kind as pulumi.Input<string>,
           group: "cert-manager.io",
-        },
+        })),
       },
     },
-    mapPulumiOptions(options),
+    k8s.mapPulumiOptions(options),
   )
 
   return new Resource(
     options.name,
     {
-      metadata: mapMetadata(options),
+      metadata: k8s.mapMetadata(options),
       spec: {
         ca: {
           secretName,
         },
       },
     },
-    mapPulumiOptions(options, { dependsOn: caCertificate }),
+    k8s.mapPulumiOptions(options, { dependsOn: caCertificate }),
   )
 }

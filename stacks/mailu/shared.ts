@@ -1,11 +1,8 @@
 import { certManager } from "@infra/cert-manager"
-import { importResource, pulumi } from "@infra/core"
+import { pulumi, resource } from "@infra/core"
+
+import "@infra/cert-manager"
 
 const core = new pulumi.StackReference("organization/core/main")
 
-export const publicIssuer = importResource({
-  from: core,
-  type: certManager.certmanager.v1.ClusterIssuer,
-  outputName: "publicIssuer",
-  name: "public",
-})
+export const publicIssuer = resource.import<certManager.Issuer>(core, "publicIssuer")

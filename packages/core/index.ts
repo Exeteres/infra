@@ -1,4 +1,4 @@
+export * as resource from "./resource"
 export * from "./imports"
 export * from "./utils"
-export * from "./config"
-export * from "./stack"
+export { merge } from "ts-deepmerge"

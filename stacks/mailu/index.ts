@@ -1,15 +1,11 @@
-import { createNamespace } from "@infra/k8s"
+import { pulumi } from "@infra/core"
 import { publicIssuer } from "./shared"
-import { createConfig } from "@infra/core"
-import { createMailuApp } from "@infra/mailu"
+import { mailu } from "@infra/mailu"
 
-const namespace = createNamespace({ name: "mailu" })
-const config = createConfig({ name: "mailu" })
+const config = new pulumi.Config("mailu")
 
-createMailuApp({
-  namespace,
-
-  publicIssuer: publicIssuer,
+mailu.createApplication({
+  publicIssuer,
   domain: config.require("domain"),
 
   nodeSelector: {

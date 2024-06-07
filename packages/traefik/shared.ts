@@ -1,8 +1,8 @@
 import { pulumi } from "@infra/core"
-import { traefik } from "./imports"
-import { CommonOptions, k8s } from "@infra/k8s"
+import { raw } from "./imports"
+import { k8s } from "@infra/k8s"
 
-export interface CommonIngressRouteOptions<TIngressRoute extends TcpIngressRoute> extends CommonOptions {
+export interface CommonIngressRouteOptions<TIngressRoute extends TcpIngressRoute> extends k8s.CommonOptions {
   /**
    * The type of entry point.
    */
@@ -46,7 +46,7 @@ export interface TcpIngressRoute {
   services?: pulumi.Input<pulumi.Input<IngressRouteService>[]>
 }
 
-export type IngressRouteService = IngressRouteServiceRef | k8s.core.v1.Service
+export type IngressRouteService = IngressRouteServiceRef | k8s.raw.core.v1.Service
 
 export interface IngressRouteServiceRef {
   /**
@@ -62,9 +62,9 @@ export interface IngressRouteServiceRef {
 
 export function mapServiceToCrd(
   service: pulumi.Input<IngressRouteService>,
-): pulumi.Output<traefik.types.input.traefik.v1alpha1.IngressRouteTCPSpecRoutesServicesArgs> {
+): pulumi.Output<raw.types.input.traefik.v1alpha1.IngressRouteTCPSpecRoutesServicesArgs> {
   return pulumi.output(service).apply(service => {
-    if (service instanceof k8s.core.v1.Service) {
+    if (service instanceof k8s.raw.core.v1.Service) {
       return {
         name: service.metadata.name,
         port: service.spec.ports[0].port,
@@ -74,7 +74,7 @@ export function mapServiceToCrd(
     return {
       name: service.name,
       port: service.port,
-    } satisfies traefik.types.input.traefik.v1alpha1.IngressRouteTCPSpecRoutesServicesArgs
+    } satisfies raw.types.input.traefik.v1alpha1.IngressRouteTCPSpecRoutesServicesArgs
   })
 }
 

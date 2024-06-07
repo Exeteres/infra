@@ -1,18 +1,18 @@
 import { normalizeInputArray, pulumi } from "@infra/core"
-import { k8s } from "./imports"
-import { CommonOptions, mapMetadata, mapPulumiOptions } from "./options"
-import { RoleBindingSubjct, createRoleBinding } from "./role-binding"
+import { raw } from "./imports"
+import { RoleBinding, RoleBindingSubjct, createRoleBinding } from "./role-binding"
+import { ScopedOptions, mapMetadata, mapPulumiOptions } from "./options"
 
-interface RoleOptions extends CommonOptions {
+type RoleOptions = ScopedOptions & {
   /**
    * The rule for the role.
    */
-  rule?: pulumi.Input<k8s.types.input.rbac.v1.PolicyRule>
+  rule?: pulumi.Input<raw.types.input.rbac.v1.PolicyRule>
 
   /**
    * The rules for the role.
    */
-  rules?: pulumi.Input<pulumi.Input<k8s.types.input.rbac.v1.PolicyRule>[]>
+  rules?: pulumi.Input<pulumi.Input<raw.types.input.rbac.v1.PolicyRule>[]>
 
   /**
    * The subject to bind to the role.
@@ -29,13 +29,15 @@ interface RoleResult {
   /**
    * The created Role.
    */
-  role: k8s.rbac.v1.Role
+  role: Role
 
   /**
    * The binding created for the Role and its subjects if any.
    */
-  binding?: k8s.rbac.v1.RoleBinding
+  binding?: RoleBinding
 }
+
+export type Role = raw.rbac.v1.Role | raw.rbac.v1.ClusterRole
 
 /**
  * Creates a Role with the given options and optionally binds the given subjects to it.
@@ -44,7 +46,7 @@ interface RoleResult {
  * @returns The Role and the RoleBinding if subjects were provided.
  */
 export function createRole(options: RoleOptions): RoleResult {
-  const role = new k8s.rbac.v1.Role(
+  const role = new raw.rbac.v1.Role(
     options.name,
     {
       metadata: mapMetadata(options),
@@ -56,7 +58,8 @@ export function createRole(options: RoleOptions): RoleResult {
   if (options.subject || options.subjects) {
     const binding = createRoleBinding({
       name: options.name,
-      namespace: options.namespace,
+      namespace: "namespace" in options ? options.namespace : undefined!,
+      isClusterScoped: options.isClusterScoped,
 
       role,
       subject: options.subject,

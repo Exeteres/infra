@@ -1,30 +1,32 @@
 import { normalizeInputArray, pulumi } from "@infra/core"
-import { k8s } from "./imports"
 import { CommonOptions, mapMetadata, mapPulumiOptions } from "./options"
+import { raw } from "./imports"
 import { createRoleBinding } from "./role-binding"
+import type { Role } from "./role"
+import { k8s } from "."
 
 interface ServiceAccountOptions extends CommonOptions {
   /**
    * The role to bind to the service account.
    */
-  role?: pulumi.Input<k8s.rbac.v1.Role>
+  role?: pulumi.Input<Role>
 
   /**
    * The roles to bind to the service account.
    */
-  roles?: pulumi.Input<pulumi.Input<k8s.rbac.v1.Role>[]>
+  roles?: pulumi.Input<pulumi.Input<Role>[]>
 }
 
 interface ServiceAccountResult {
   /**
    * The created service account.
    */
-  serviceAccount: k8s.core.v1.ServiceAccount
+  serviceAccount: raw.core.v1.ServiceAccount
 
   /**
    * The bindings created for the service account roles.
    */
-  bindings: pulumi.Output<k8s.rbac.v1.RoleBinding[]>
+  bindings: pulumi.Output<raw.rbac.v1.RoleBinding[]>
 }
 
 /**
@@ -34,7 +36,7 @@ interface ServiceAccountResult {
  * @returns The created service account and bindings.
  */
 export function createServiceAccount(options: ServiceAccountOptions): ServiceAccountResult {
-  const serviceAccount = new k8s.core.v1.ServiceAccount(
+  const serviceAccount = new raw.core.v1.ServiceAccount(
     options.name,
     {
       metadata: mapMetadata(options),
@@ -48,6 +50,7 @@ export function createServiceAccount(options: ServiceAccountOptions): ServiceAcc
         return createRoleBinding({
           name: `${options.name}-${name}`,
           namespace: options.namespace,
+          isClusterScoped: k8s.raw.rbac.v1.ClusterRole.isInstance(role),
 
           subject: serviceAccount,
           role,
@@ -58,6 +61,6 @@ export function createServiceAccount(options: ServiceAccountOptions): ServiceAcc
 
   return {
     serviceAccount,
-    bindings: bindings as unknown as pulumi.Output<k8s.rbac.v1.RoleBinding[]>,
+    bindings: bindings as unknown as pulumi.Output<raw.rbac.v1.RoleBinding[]>,
   }
 }

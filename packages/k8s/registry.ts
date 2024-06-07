@@ -1,6 +1,6 @@
 import { pulumi } from "@infra/core"
-import { CommonOptions } from "./options"
 import { createSecret } from "./secret"
+import { CommonOptions } from "./options"
 
 interface GhcrRegistryOptions extends CommonOptions {
   /**
