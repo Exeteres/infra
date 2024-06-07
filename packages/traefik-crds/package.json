@@ -5,10 +5,10 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@pulumi/pulumi": "^3.117.0"
+        "@pulumi/pulumi": "^3.119.0"
     },
     "devDependencies": {
-        "@types/node": "^20.12.12",
+        "@types/node": "^20.14.2",
         "typescript": "^5.4.5"
     },
     "pulumi": {

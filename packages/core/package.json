@@ -2,7 +2,7 @@
   "name": "@infra/core",
   "private": true,
   "dependencies": {
-    "@pulumi/pulumi": "^3.117.0",
+    "@pulumi/pulumi": "^3.119.0",
     "@pulumi/random": "^4.16.2",
     "ts-deepmerge": "^7.0.0"
   }
