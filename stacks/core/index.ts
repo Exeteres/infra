@@ -3,6 +3,7 @@ import { plainIssuer as _plainIssuer, publicIssuer as _publicIssuer } from "./ce
 
 import "./kubernetes-dashboard"
 import "./kruise"
+import "./tailscale"
 
 export const publicIssuer = resource.export(_publicIssuer)
 export const plainIssuer = resource.export(_plainIssuer)

@@ -10,4 +10,10 @@ crd2pulumi -n --nodejsPath packages/cert-manager-crds --nodejsName cert-manager 
 echo "+ Generating SDK for traefik"
 crd2pulumi -n --nodejsPath packages/traefik-crds --nodejsName traefik --force https://raw.githubusercontent.com/traefik/traefik/v3.0/docs/content/reference/dynamic-configuration/kubernetes-crd-definition-v1.yml
 
+echo "+ Generating SDK for kruise"
+temp_file=$(mktemp)
+helm template --repo https://openkruise.github.io/charts/ kruise > $temp_file
+crd2pulumi -n --nodejsPath packages/kruise-crds --nodejsName kruise --force $temp_file
+rm $temp_file
+
 echo "Done!"

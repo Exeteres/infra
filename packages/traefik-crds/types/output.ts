@@ -837,6 +837,10 @@ export namespace traefik {
          */
         export interface MiddlewareSpecCompress {
             /**
+             * DefaultEncoding specifies the default encoding if the `Accept-Encoding` header is not in the request or contains a wildcard (`*`).
+             */
+            defaultEncoding?: string;
+            /**
              * ExcludedContentTypes defines the list of content types to compare the Content-Type header of the incoming requests and responses before compressing.
              * `application/grpc` is always excluded.
              */

@@ -17,6 +17,8 @@ export interface ApplicationOptions extends PartialKeys<CommonOptions, "name" | 
   prefix?: string
 }
 
+export type ChildComponentOptions<TOptions> = Omit<TOptions, "name" | "namespace">
+
 export interface ReleaseApplicationOptions extends ApplicationOptions {
   /**
    * The extra options to pass to the Helm release.

@@ -38,6 +38,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@infra/cloudflare@workspace:*, @infra/cloudflare@workspace:packages/cloudflare":
+  version: 0.0.0-use.local
+  resolution: "@infra/cloudflare@workspace:packages/cloudflare"
+  dependencies:
+    "@infra/core": "workspace:*"
+    "@pulumi/cloudflare": "npm:^5.30.0"
+  languageName: unknown
+  linkType: soft
+
 "@infra/core@workspace:*, @infra/core@workspace:packages/core":
   version: 0.0.0-use.local
   resolution: "@infra/core@workspace:packages/core"
@@ -72,6 +81,7 @@ __metadata:
   resolution: "@infra/kruise@workspace:packages/kruise"
   dependencies:
     "@infra/k8s": "workspace:*"
+    "@pulumi/kruise": "workspace:*"
   languageName: unknown
   linkType: soft
 
@@ -113,12 +123,30 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@infra/tailscale@workspace:*, @infra/tailscale@workspace:packages/tailscale":
+  version: 0.0.0-use.local
+  resolution: "@infra/tailscale@workspace:packages/tailscale"
+  dependencies:
+    "@infra/k8s": "workspace:*"
+    "@infra/kruise": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
 "@infra/traefik@workspace:*, @infra/traefik@workspace:packages/traefik":
   version: 0.0.0-use.local
   resolution: "@infra/traefik@workspace:packages/traefik"
   dependencies:
     "@infra/k8s": "workspace:*"
     "@pulumi/traefik": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@infra/vaultwarden@workspace:*, @infra/vaultwarden@workspace:packages/vaultwarden":
+  version: 0.0.0-use.local
+  resolution: "@infra/vaultwarden@workspace:packages/vaultwarden"
+  dependencies:
+    "@infra/cert-manager": "workspace:*"
+    "@infra/k8s": "workspace:*"
   languageName: unknown
   linkType: soft
 
@@ -598,9 +626,28 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@pulumi/cert-manager@workspace:packages/cert-manager-crds"
   dependencies:
-    "@pulumi/pulumi": "npm:^3.119.0"
-    "@types/node": "npm:^20.14.2"
-    typescript: "npm:^5.4.5"
+    "@pulumi/pulumi": "npm:^3.42.0"
+    "@types/node": "npm:^14"
+    typescript: "npm:^4.3.5"
+  languageName: unknown
+  linkType: soft
+
+"@pulumi/cloudflare@npm:^5.30.0":
+  version: 5.30.0
+  resolution: "@pulumi/cloudflare@npm:5.30.0"
+  dependencies:
+    "@pulumi/pulumi": "npm:^3.0.0"
+  checksum: 10c0/200aae2e9a4dfadf9d8e3a7d05d4dd9314699c1b6b5e40cb6d90d0c91fa9ef212df8c5591071527e76e26e97b0c8a807ee721044ae6f0a6ad449e6f504531bf9
+  languageName: node
+  linkType: hard
+
+"@pulumi/kruise@workspace:*, @pulumi/kruise@workspace:packages/kruise-crds":
+  version: 0.0.0-use.local
+  resolution: "@pulumi/kruise@workspace:packages/kruise-crds"
+  dependencies:
+    "@pulumi/pulumi": "npm:^3.42.0"
+    "@types/node": "npm:^14"
+    typescript: "npm:^4.3.5"
   languageName: unknown
   linkType: soft
 
@@ -674,7 +721,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pulumi/pulumi@npm:^3.119.0":
+"@pulumi/pulumi@npm:^3.119.0, @pulumi/pulumi@npm:^3.42.0":
   version: 3.119.0
   resolution: "@pulumi/pulumi@npm:3.119.0"
   dependencies:
@@ -780,9 +827,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@pulumi/traefik@workspace:packages/traefik-crds"
   dependencies:
-    "@pulumi/pulumi": "npm:^3.119.0"
-    "@types/node": "npm:^20.14.2"
-    typescript: "npm:^5.4.5"
+    "@pulumi/pulumi": "npm:^3.42.0"
+    "@types/node": "npm:^14"
+    typescript: "npm:^4.3.5"
   languageName: unknown
   linkType: soft
 
@@ -868,8 +915,10 @@ __metadata:
   resolution: "@stacks/core@workspace:stacks/core"
   dependencies:
     "@infra/cert-manager": "workspace:*"
+    "@infra/cloudflare": "workspace:*"
     "@infra/kruise": "workspace:*"
     "@infra/kubernetes-dashboard": "workspace:*"
+    "@infra/tailscale": "workspace:*"
   languageName: unknown
   linkType: soft
 
@@ -886,6 +935,24 @@ __metadata:
   resolution: "@stacks/mailu@workspace:stacks/mailu"
   dependencies:
     "@infra/mailu": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@stacks/vaultwarden@workspace:stacks/vaultwarden":
+  version: 0.0.0-use.local
+  resolution: "@stacks/vaultwarden@workspace:stacks/vaultwarden"
+  dependencies:
+    "@infra/tailscale": "workspace:*"
+    "@infra/vaultwarden": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@stacks/vpn@workspace:stacks/vpn":
+  version: 0.0.0-use.local
+  resolution: "@stacks/vpn@workspace:stacks/vpn"
+  dependencies:
+    "@infra/k8s": "workspace:*"
+    "@infra/tailscale": "workspace:*"
   languageName: unknown
   linkType: soft
 
@@ -974,6 +1041,13 @@ __metadata:
   dependencies:
     undici-types: "npm:~5.26.4"
   checksum: 10c0/dce80d63a3b91892b321af823d624995c61e39c6a223cc0ac481a44d337640cc46931d33efb3beeed75f5c85c3bda1d97cef4c5cd4ec333caf5dee59cff6eca0
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:^14":
+  version: 14.18.63
+  resolution: "@types/node@npm:14.18.63"
+  checksum: 10c0/626a371419a6a0e11ca460b22bb4894abe5d75c303739588bc96267e380aa8b90ba5a87bc552400584f0ac2a84b5c458dadcbcf0dfd2396ebeb765f7a7f95893
   languageName: node
   linkType: hard
 
@@ -3116,6 +3190,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"typescript@npm:^4.3.5":
+  version: 4.9.5
+  resolution: "typescript@npm:4.9.5"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: 10c0/5f6cad2e728a8a063521328e612d7876e12f0d8a8390d3b3aaa452a6a65e24e9ac8ea22beb72a924fd96ea0a49ea63bb4e251fb922b12eedfb7f7a26475e5c56
+  languageName: node
+  linkType: hard
+
 "typescript@npm:^5.4.5":
   version: 5.4.5
   resolution: "typescript@npm:5.4.5"
@@ -3133,6 +3217,16 @@ __metadata:
     tsc: bin/tsc
     tsserver: bin/tsserver
   checksum: 10c0/070c3c4195005c3afb15f44a00eec66d159da52b1539eecd25cff09996cbceb916a19a1f87909819c3b637b5b58ac62e39f1af0ce93ab60d830fda599d7f69d4
+  languageName: node
+  linkType: hard
+
+"typescript@patch:typescript@npm%3A^4.3.5#optional!builtin<compat/typescript>":
+  version: 4.9.5
+  resolution: "typescript@patch:typescript@npm%3A4.9.5#optional!builtin<compat/typescript>::version=4.9.5&hash=289587"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: 10c0/e3333f887c6829dfe0ab6c1dbe0dd1e3e2aeb56c66460cb85c5440c566f900c833d370ca34eb47558c0c69e78ced4bfe09b8f4f98b6de7afed9b84b8d1dd06a1
   languageName: node
   linkType: hard
 

@@ -1,0 +1,8 @@
+{
+  "name": "@infra/cloudflare",
+  "private": true,
+  "dependencies": {
+    "@infra/core": "workspace:*",
+    "@pulumi/cloudflare": "^5.30.0"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "@infra/tailscale",
+  "private": true,
+  "dependencies": {
+    "@infra/k8s": "workspace:*",
+    "@infra/kruise": "workspace:*"
+  }
+}

@@ -2,6 +2,7 @@
   "name": "@infra/kruise",
   "private": true,
   "dependencies": {
-    "@infra/k8s": "workspace:*"
+    "@infra/k8s": "workspace:*",
+    "@pulumi/kruise": "workspace:*"
   }
 }

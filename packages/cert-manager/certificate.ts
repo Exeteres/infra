@@ -1,7 +1,6 @@
 import { k8s } from "@infra/k8s"
-import { kq, raw } from "./imports"
+import { raw } from "./imports"
 import { normalizeInputArray, pulumi } from "@infra/core"
-import { inspect } from "util"
 
 export type Issuer = raw.certmanager.v1.ClusterIssuer | raw.certmanager.v1.Issuer
 

@@ -7,8 +7,7 @@
   ],
   "scripts": {
     "proxy:dashboard": "kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443",
-    "create-dashboard-token": "kubectl -n kubernetes-dashboard create token dashboard-account --duration=100000h",
-    "generate-crds": "crd2pulumi -n --nodejsPath packages/crds --force https://github.com/cert-manager/cert-manager/releases/download/v1.14.5/cert-manager.yaml https://raw.githubusercontent.com/traefik/traefik/v3.0/docs/content/reference/dynamic-configuration/kubernetes-crd-definition-v1.yml"
+    "create-dashboard-token": "kubectl -n kubernetes-dashboard create token dashboard-account --duration=100000h"
   },
   "devDependencies": {
     "@types/node": "^20.14.2",

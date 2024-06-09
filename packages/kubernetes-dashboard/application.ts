@@ -1,3 +1,4 @@
+import { merge } from "@infra/core"
 import { k8s } from "@infra/k8s"
 
 /**
@@ -20,6 +21,20 @@ export function createApplication(options: k8s.ReleaseApplicationOptions = {}): 
     version: "7.4.0",
 
     ...options.releaseOptions,
+
+    values: merge(
+      {
+        app: {
+          scheduling: {
+            nodeSelector: options.nodeSelector,
+          },
+        },
+        kong: {
+          nodeSelector: options.nodeSelector,
+        },
+      },
+      options.releaseOptions?.values ?? {},
+    ),
   })
 
   return {

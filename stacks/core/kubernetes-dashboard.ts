@@ -1,9 +1,29 @@
+import { pulumi } from "@infra/core"
+import { k8s } from "@infra/k8s"
 import { kubernetesDashboard } from "@infra/kubernetes-dashboard"
 
-const dashboard = kubernetesDashboard.createApplication()
+const config = new pulumi.Config("kubernetes-dashboard")
+
+const hostname = config.require("hostname")
+
+const application = kubernetesDashboard.createApplication({
+  nodeSelector: k8s.mapHostnameToNodeSelector(config.require("node")),
+
+  releaseOptions: {
+    values: {
+      app: {
+        ingress: {
+          enabled: true,
+          hosts: [hostname],
+          ingressClassName: "tailscale",
+        },
+      },
+    },
+  },
+})
 
 kubernetesDashboard.createServiceAccount({
   name: "dashboard-account",
-  namespace: dashboard.namespace,
-  dependsOn: dashboard.release,
+  namespace: application.namespace,
+  dependsOn: application.release,
 })

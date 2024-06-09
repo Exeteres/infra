@@ -2,7 +2,7 @@ import { pulumi } from "@infra/core"
 import { CommonOptions, mapMetadata, mapPulumiOptions } from "./options"
 import { raw } from "./imports"
 
-type SecretOptions = CommonOptions & {
+export type SecretOptions = CommonOptions & {
   /**
    * The type of the secret.
    */
@@ -55,6 +55,6 @@ export function createSecret(options: SecretOptions) {
 export function mapSecretToRef(secret: raw.core.v1.Secret, key?: string) {
   return {
     name: secret.metadata.name,
-    key,
+    key: key as string,
   }
 }

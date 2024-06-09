@@ -1,0 +1,8 @@
+{
+  "name": "@stacks/vaultwarden",
+  "private": true,
+  "dependencies": {
+    "@infra/tailscale": "workspace:*",
+    "@infra/vaultwarden": "workspace:*"
+  }
+}

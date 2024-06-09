@@ -65,5 +65,8 @@ export function trimIndentation(str: string): string {
     .map(line => line.match(/^\s*/)?.[0].length ?? 0)
     .reduce((min, indent) => Math.min(min, indent), Infinity)
 
-  return lines.map(line => line.slice(indent)).join("\n")
+  return lines
+    .map(line => line.slice(indent))
+    .join("\n")
+    .trim()
 }
