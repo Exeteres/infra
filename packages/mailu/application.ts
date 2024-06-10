@@ -3,7 +3,7 @@ import { pulumi } from "@infra/core"
 import { k8s } from "@infra/k8s"
 import { getPrefixedName } from "@infra/k8s/application"
 
-export interface MailuOptions extends k8s.ReleaseApplicationOptions {
+export interface ApplicationOptions extends k8s.ReleaseApplicationOptions {
   /**
    * The fully qualified domain name of the Mailu application.
    */
@@ -15,7 +15,7 @@ export interface MailuOptions extends k8s.ReleaseApplicationOptions {
   publicIssuer: pulumi.Input<certManager.Issuer>
 }
 
-export interface MailuApplication extends k8s.ReleaseApplication {}
+export interface Application extends k8s.ReleaseApplication {}
 
 /**
  * Creates a ready-to-use Mailu application.
@@ -23,7 +23,7 @@ export interface MailuApplication extends k8s.ReleaseApplication {}
  * @param options The application options.
  * @returns The release.
  */
-export function createApplication(options: MailuOptions): MailuApplication {
+export function createApplication(options: ApplicationOptions): Application {
   const name = options.name ?? "mailu"
   const fullName = getPrefixedName(name, options.prefix)
   const namespace = options.namespace ?? k8s.createNamespace({ name: fullName })

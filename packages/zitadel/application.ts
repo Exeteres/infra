@@ -4,7 +4,7 @@ import { postgresql } from "@infra/postgresql"
 import { k8s } from "@infra/k8s"
 import { traefik } from "@infra/traefik"
 
-export interface ZitadelOptions extends k8s.ApplicationOptions {
+export interface ApplicationOptions extends k8s.ApplicationOptions {
   /**
    * The fully qualified domain name of the Zitadel application.
    */
@@ -26,7 +26,7 @@ export interface ZitadelOptions extends k8s.ApplicationOptions {
   databaseOptions?: postgresql.PostgreSQLOptions
 }
 
-export interface ZitadelApplication extends k8s.ReleaseApplication {
+export interface Application extends k8s.ReleaseApplication {
   /**
    * The database application which was deployed for Zitadel.
    */
@@ -44,7 +44,7 @@ export interface ZitadelApplication extends k8s.ReleaseApplication {
  * @param options The application options.
  * @returns The release.
  */
-export function createApplication(options: ZitadelOptions): ZitadelApplication {
+export function createApplication(options: ApplicationOptions): Application {
   const name = options.name ?? "zitadel"
   const namespace = options.namespace ?? k8s.createNamespace({ name })
   const fullName = k8s.getPrefixedName(name, options.prefix)

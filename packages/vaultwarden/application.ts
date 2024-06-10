@@ -1,7 +1,7 @@
 import { pulumi } from "@infra/core"
 import { k8s } from "@infra/k8s"
 
-export interface VaultwardenOptions extends k8s.ApplicationOptions {
+export interface ApplicationOptions extends k8s.ApplicationOptions {
   /**
    * The fully qualified domain name.
    */
@@ -23,7 +23,7 @@ export interface VaultwardenOptions extends k8s.ApplicationOptions {
   ingress?: k8s.ChildComponentOptions<k8s.IngressOptions>
 }
 
-export interface VaultwardenApplication extends k8s.Application {
+export interface Application extends k8s.Application {
   /**
    * The workload service which defines the application.
    */
@@ -46,7 +46,7 @@ export interface VaultwardenApplication extends k8s.Application {
  * @param options The application options.
  * @returns The release.
  */
-export function createApplication(options: VaultwardenOptions): VaultwardenApplication {
+export function createApplication(options: ApplicationOptions): Application {
   const name = options.name ?? "vaultwarden"
   const namespace = options.namespace ?? k8s.createNamespace({ name })
   const fullName = k8s.getPrefixedName(name, options.prefix)

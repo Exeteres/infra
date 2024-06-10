@@ -1,12 +1,15 @@
 import { k8s } from "@infra/k8s"
 
+export interface ApplicationOptions extends k8s.ReleaseApplicationOptions {}
+export interface Application extends k8s.ReleaseApplication {}
+
 /**
  * Creates a Helm release for the Kruise operator.
  *
  * @param options The release options.
  * @returns The release.
  */
-export function createApplication(options: k8s.ReleaseApplicationOptions): k8s.ReleaseApplication {
+export function createApplication(options: ApplicationOptions): Application {
   const name = options.name ?? "kruise"
   const fullName = k8s.getPrefixedName(name, options.prefix)
   const namespaceName = `${fullName}-system`

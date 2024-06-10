@@ -1,7 +1,7 @@
 import { pulumi } from "@infra/core"
 import { k8s } from "@infra/k8s"
 
-export interface TailscaleOptions extends k8s.ReleaseApplicationOptions {
+export interface ApplicationOptions extends k8s.ReleaseApplicationOptions {
   /**
    * The client ID provided by Tailscale.
    */
@@ -13,7 +13,7 @@ export interface TailscaleOptions extends k8s.ReleaseApplicationOptions {
   clientSecret: pulumi.Input<string>
 }
 
-export interface TailscaleApplication extends k8s.ReleaseApplication {}
+export interface Application extends k8s.ReleaseApplication {}
 
 /**
  * Creates a ready-to-use application.
@@ -21,7 +21,7 @@ export interface TailscaleApplication extends k8s.ReleaseApplication {}
  * @param options The application options.
  * @returns The release.
  */
-export function createApplication(options: TailscaleOptions): TailscaleApplication {
+export function createApplication(options: ApplicationOptions): Application {
   const name = options.name ?? "tailscale"
   const namespace = options.namespace ?? k8s.createNamespace({ name })
   const fullName = k8s.getPrefixedName(name, options.prefix)

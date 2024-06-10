@@ -1,7 +1,7 @@
 import { merge } from "@infra/core"
 import { k8s } from "@infra/k8s"
 
-export interface FactorioOptions extends k8s.ReleaseApplicationOptions {
+export interface ApplicationOptions extends k8s.ReleaseApplicationOptions {
   /**
    * The password secret to use for the Factorio Game Server.
    * If not provided, a new secret will be created.
@@ -15,7 +15,7 @@ export interface FactorioOptions extends k8s.ReleaseApplicationOptions {
   admins: string[]
 }
 
-export interface FactorioApplication extends k8s.ReleaseApplication {}
+export interface Application extends k8s.ReleaseApplication {}
 
 /**
  * Creates a ready-to-use Factorio Game Server application.
@@ -23,7 +23,7 @@ export interface FactorioApplication extends k8s.ReleaseApplication {}
  * @param options The application options.
  * @returns The release.
  */
-export function createApplication(options: FactorioOptions): FactorioApplication {
+export function createApplication(options: ApplicationOptions): Application {
   const name = options.name ?? "factorio"
   const fullName = k8s.getPrefixedName(name, options.prefix)
   const namespace = options.namespace ?? k8s.createNamespace({ name: fullName })
