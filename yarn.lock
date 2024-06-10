@@ -123,6 +123,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@infra/standardnotes@workspace:*, @infra/standardnotes@workspace:packages/standardnotes":
+  version: 0.0.0-use.local
+  resolution: "@infra/standardnotes@workspace:packages/standardnotes"
+  dependencies:
+    "@infra/k8s": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
 "@infra/tailscale@workspace:*, @infra/tailscale@workspace:packages/tailscale":
   version: 0.0.0-use.local
   resolution: "@infra/tailscale@workspace:packages/tailscale"
@@ -935,6 +943,15 @@ __metadata:
   resolution: "@stacks/mailu@workspace:stacks/mailu"
   dependencies:
     "@infra/mailu": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@stacks/standardnotes@workspace:stacks/standardnotes":
+  version: 0.0.0-use.local
+  resolution: "@stacks/standardnotes@workspace:stacks/standardnotes"
+  dependencies:
+    "@infra/standardnotes": "workspace:*"
+    "@infra/tailscale": "workspace:*"
   languageName: unknown
   linkType: soft
 
