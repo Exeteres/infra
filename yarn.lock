@@ -131,6 +131,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@infra/syncthing@workspace:*, @infra/syncthing@workspace:packages/syncthing":
+  version: 0.0.0-use.local
+  resolution: "@infra/syncthing@workspace:packages/syncthing"
+  dependencies:
+    "@infra/k8s": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
 "@infra/tailscale@workspace:*, @infra/tailscale@workspace:packages/tailscale":
   version: 0.0.0-use.local
   resolution: "@infra/tailscale@workspace:packages/tailscale"
@@ -951,6 +959,15 @@ __metadata:
   resolution: "@stacks/standardnotes@workspace:stacks/standardnotes"
   dependencies:
     "@infra/standardnotes": "workspace:*"
+    "@infra/tailscale": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@stacks/syncthing@workspace:stacks/syncthing":
+  version: 0.0.0-use.local
+  resolution: "@stacks/syncthing@workspace:stacks/syncthing"
+  dependencies:
+    "@infra/syncthing": "workspace:*"
     "@infra/tailscale": "workspace:*"
   languageName: unknown
   linkType: soft

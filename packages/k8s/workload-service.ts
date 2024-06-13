@@ -60,7 +60,7 @@ export function createWorkloadService<T extends WorkloadKind>(
   const service = new raw.core.v1.Service(
     options.name,
     {
-      metadata: mapMetadata(options),
+      metadata: mapMetadata({ ...options, ...options.service }),
       spec: {
         selector: labels,
         ports: normalizeInputArrayAndMap(options.port, options.ports, mapPort),

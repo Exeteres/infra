@@ -1,0 +1,8 @@
+{
+  "name": "@stacks/syncthing",
+  "private": true,
+  "dependencies": {
+    "@infra/syncthing": "workspace:*",
+    "@infra/tailscale": "workspace:*"
+  }
+}

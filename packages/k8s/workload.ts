@@ -248,3 +248,14 @@ function resolveConstructor(kind: WorkloadKind) {
       return raw.apps.v1.DaemonSet
   }
 }
+
+export function getRequiredServicePortByName(service: raw.core.v1.Service, name: string): pulumi.Output<number> {
+  return pulumi.output(service.spec.ports).apply(ports => {
+    const port = ports.find(p => p.name === name)
+    if (!port) {
+      throw new Error(`Service port with name '${name}' not found`)
+    }
+
+    return port.port
+  })
+}
