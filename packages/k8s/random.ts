@@ -1,6 +1,6 @@
-import { pulumiRandom } from "@infra/core"
 import { createSecret } from "./secret"
 import { CommonOptions, mapPulumiOptions } from "./options"
+import { random } from "@infra/core"
 
 interface RandomSecretOptions extends CommonOptions {
   /**
@@ -21,7 +21,7 @@ interface RandomSecretOptions extends CommonOptions {
  * @returns The secret.
  */
 export function createRandomSecret(options: RandomSecretOptions) {
-  const randomValue = new pulumiRandom.RandomBytes(
+  const randomValue = new random.raw.RandomBytes(
     options.name,
     {
       length: options.length,
@@ -39,7 +39,7 @@ export function createRandomSecret(options: RandomSecretOptions) {
  * @returns The secret.
  */
 export function createPasswordSecret(options: RandomSecretOptions) {
-  const randomPassword = new pulumiRandom.RandomPassword(
+  const randomPassword = new random.raw.RandomPassword(
     options.name,
     {
       length: options.length,

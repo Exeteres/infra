@@ -1,0 +1,7 @@
+{
+  "name": "@stacks/radicale",
+  "private": true,
+  "dependencies": {
+    "@infra/radicale": "workspace:*"
+  }
+}

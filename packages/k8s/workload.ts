@@ -21,7 +21,11 @@ export type WorkloadResources = {
   DaemonSet: raw.apps.v1.DaemonSet
 }
 
-export type WorkloadVolume = raw.types.input.core.v1.Volume | raw.core.v1.PersistentVolumeClaim
+export type WorkloadVolume =
+  | raw.types.input.core.v1.Volume
+  | raw.core.v1.PersistentVolumeClaim
+  | raw.core.v1.ConfigMap
+  | raw.core.v1.Secret
 
 export interface WorkloadOptions extends CommonOptions {
   /**
@@ -160,6 +164,24 @@ export function mapWorkladVolume(volume: WorkloadVolume) {
     }
   }
 
+  if (volume instanceof raw.core.v1.ConfigMap) {
+    return {
+      name: volume.metadata.name,
+      configMap: {
+        name: volume.metadata.name,
+      },
+    }
+  }
+
+  if (volume instanceof raw.core.v1.Secret) {
+    return {
+      name: volume.metadata.name,
+      secret: {
+        secretName: volume.metadata.name,
+      },
+    }
+  }
+
   return volume
 }
 
@@ -226,6 +248,14 @@ export function mapVolumeToMount(options: MapVolumeToMountOptions): pulumi.Input
       return {
         ...options,
         name: volume.metadata.name,
+      }
+    }
+
+    if (volume instanceof raw.core.v1.ConfigMap || volume instanceof raw.core.v1.Secret) {
+      return {
+        ...options,
+        name: volume.metadata.name,
+        readOnly: true,
       }
     }
 

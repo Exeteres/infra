@@ -113,6 +113,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@infra/nextcloud@workspace:packages/nextcloud":
+  version: 0.0.0-use.local
+  resolution: "@infra/nextcloud@workspace:packages/nextcloud"
+  dependencies:
+    "@infra/k8s": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
 "@infra/postgresql@workspace:*, @infra/postgresql@workspace:packages/postgresql":
   version: 0.0.0-use.local
   resolution: "@infra/postgresql@workspace:packages/postgresql"
@@ -120,6 +128,14 @@ __metadata:
     "@infra/k8s": "workspace:*"
     "@pulumi/cert-manager": "workspace:*"
     "@pulumi/postgresql": "npm:^3.11.1"
+  languageName: unknown
+  linkType: soft
+
+"@infra/radicale@workspace:*, @infra/radicale@workspace:packages/radicale":
+  version: 0.0.0-use.local
+  resolution: "@infra/radicale@workspace:packages/radicale"
+  dependencies:
+    "@infra/k8s": "workspace:*"
   languageName: unknown
   linkType: soft
 
@@ -951,6 +967,14 @@ __metadata:
   resolution: "@stacks/mailu@workspace:stacks/mailu"
   dependencies:
     "@infra/mailu": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@stacks/radicale@workspace:stacks/radicale":
+  version: 0.0.0-use.local
+  resolution: "@stacks/radicale@workspace:stacks/radicale"
+  dependencies:
+    "@infra/radicale": "workspace:*"
   languageName: unknown
   linkType: soft
 
