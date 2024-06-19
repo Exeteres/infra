@@ -100,6 +100,11 @@ export interface WorkloadOptions extends CommonOptions {
    * Relevant only for the CronJob workload.
    */
   schedule?: pulumi.Input<string>
+
+  /**
+   * The options for init containers.
+   */
+  initContainers?: pulumi.Input<raw.types.input.core.v1.Container[]>
 }
 
 export type TypedWorkloadOptions<TWorkloadKind> = Omit<WorkloadOptions, "kind"> & { kind: TWorkloadKind }
@@ -121,7 +126,6 @@ export function createWorkload<T extends WorkloadKind>(options: TypedWorkloadOpt
     spec: {
       nodeSelector: options.nodeSelector,
       affinity: options.affinity,
-      restartPolicy: "Never",
 
       serviceAccountName: options.serviceAccountName,
 
@@ -137,6 +141,8 @@ export function createWorkload<T extends WorkloadKind>(options: TypedWorkloadOpt
         options.containers,
         c => mapWorkloadContainer(options.name, c),
       ),
+
+      initContainers: options.initContainers,
 
       volumes: normalizeInputArrayAndMap(options.volume, options.volumes, mapWorkloadVolume),
 

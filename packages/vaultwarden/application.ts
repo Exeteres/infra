@@ -13,26 +13,31 @@ export interface ApplicationOptions extends k8s.ApplicationOptions {
   service?: k8s.ChildComponentOptions<k8s.ServiceOptions>
 
   /**
-   * The options to configure the volume claim.
-   */
-  volumeClaim?: k8s.ChildComponentOptions<k8s.PersistentVolumeClaimOptions>
-
-  /**
    * The options to configure the ingress.
    */
   ingress?: k8s.ChildComponentOptions<k8s.IngressOptions>
+
+  /**
+   * The options for init containers.
+   */
+  initContainers?: pulumi.Input<k8s.raw.types.input.core.v1.Container[]>
+
+  /**
+   * The options for extra volumes.
+   */
+  volumes?: pulumi.Input<k8s.raw.types.input.core.v1.Volume[]>
+
+  /**
+   * The secret containing the database configuration.
+   */
+  databaseSecret: pulumi.Input<k8s.raw.core.v1.Secret>
 }
 
 export interface Application extends k8s.Application {
   /**
    * The workload service which defines the application.
    */
-  workloadService: k8s.WorkloadService<"StatefulSet">
-
-  /**
-   * The volume claim which stores the application data.
-   */
-  volumeClaim: k8s.raw.core.v1.PersistentVolumeClaim
+  workloadService: k8s.WorkloadService<"Deployment">
 
   /**
    * The ingress which exposes the application.
@@ -51,42 +56,35 @@ export function createApplication(options: ApplicationOptions): Application {
   const namespace = options.namespace ?? k8s.createNamespace({ name })
   const fullName = k8s.getPrefixedName(name, options.prefix)
 
-  const volumeClaim = k8s.createPersistentVolumeClaim({
-    name: k8s.getPrefixedName("data", fullName),
-    namespace,
-
-    ...options.volumeClaim,
-
-    realName: "data",
-    capacity: "200Mi",
-  })
-
   const workloadService = k8s.createWorkloadService({
     name: fullName,
     namespace,
 
-    kind: "StatefulSet",
+    kind: "Deployment",
 
     annotations: options.annotations,
     labels: options.labels,
 
     nodeSelector: options.nodeSelector,
     service: options.service,
+    initContainers: options.initContainers,
 
     port: 80,
 
     container: {
       image: "vaultwarden/server:1.30.5-alpine",
 
-      volumeMounts: [
-        {
-          name: volumeClaim.metadata.name,
-          mountPath: "/data",
+      environment: {
+        DATABASE_URL: {
+          secretKeyRef: {
+            name: pulumi.output(options.databaseSecret).metadata.name,
+            key: "url",
+          },
         },
-      ],
+      },
     },
 
-    volume: volumeClaim,
+    volumes: options.volumes,
   })
 
   const ingress =
@@ -124,7 +122,6 @@ export function createApplication(options: ApplicationOptions): Application {
     fullName,
 
     workloadService,
-    volumeClaim,
     ingress,
   }
 }

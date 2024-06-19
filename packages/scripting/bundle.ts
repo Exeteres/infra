@@ -1,5 +1,5 @@
 import { k8s } from "@infra/k8s"
-import { ScriptEnvironment } from "./environment"
+import { ScriptEnvironment, mergeEnvironments } from "./environment"
 import { trimIndentation } from "@infra/core"
 
 export interface BundleOptions extends k8s.CommonOptions {
@@ -7,6 +7,11 @@ export interface BundleOptions extends k8s.CommonOptions {
    * The script environment to use.
    */
   environment: ScriptEnvironment
+
+  /**
+   * Extra scripts to include in the bundle.
+   */
+  scripts?: Record<string, string>
 }
 
 export interface Bundle {
@@ -28,9 +33,13 @@ export function createBundle(options: BundleOptions): Bundle {
   const scriptData: Record<string, string> = {}
   const actions: string[] = []
 
-  if (options.environment.preInstallScripts && Object.keys(options.environment.preInstallScripts).length > 0) {
-    for (const key in options.environment.preInstallScripts) {
-      scriptData[`pre-install-${key}`] = options.environment.preInstallScripts[key]
+  const environment = options.scripts
+    ? mergeEnvironments(options.environment, { distro: options.environment.distro, scripts: options.scripts })
+    : options.environment
+
+  if (environment.preInstallScripts && Object.keys(environment.preInstallScripts).length > 0) {
+    for (const key in environment.preInstallScripts) {
+      scriptData[`pre-install-${key}`] = environment.preInstallScripts[key]
 
       actions.push(`
         echo "+ Running pre-install script '${key}'..."
@@ -40,8 +49,8 @@ export function createBundle(options: BundleOptions): Bundle {
     }
   }
 
-  if (options.environment.packages && options.environment.packages.length > 0) {
-    scriptData["install-packages.sh"] = getInstallPackagesScript(options.environment)
+  if (environment.packages && environment.packages.length > 0) {
+    scriptData["install-packages.sh"] = getInstallPackagesScript(environment)
 
     actions.push(`
       echo "+ Installing packages..."
@@ -50,9 +59,9 @@ export function createBundle(options: BundleOptions): Bundle {
     `)
   }
 
-  if (options.environment.setupScripts && Object.keys(options.environment.setupScripts).length > 0) {
-    for (const key in options.environment.setupScripts) {
-      scriptData[`setup-${key}`] = options.environment.setupScripts[key]
+  if (environment.setupScripts && Object.keys(environment.setupScripts).length > 0) {
+    for (const key in environment.setupScripts) {
+      scriptData[`setup-${key}`] = environment.setupScripts[key]
 
       actions.push(`
         echo "+ Running setup script '${key}'..."
@@ -62,11 +71,11 @@ export function createBundle(options: BundleOptions): Bundle {
     }
   }
 
-  if (options.environment.cleanupScripts && Object.keys(options.environment.cleanupScripts).length > 0) {
+  if (environment.cleanupScripts && Object.keys(environment.cleanupScripts).length > 0) {
     const cleanupActions: string[] = []
 
-    for (const key in options.environment.cleanupScripts) {
-      scriptData[`cleanup-${key}`] = options.environment.cleanupScripts[key]
+    for (const key in environment.cleanupScripts) {
+      scriptData[`cleanup-${key}`] = environment.cleanupScripts[key]
 
       cleanupActions.push(`
         echo "+ Running cleanup script '${key}'..."
@@ -85,8 +94,8 @@ export function createBundle(options: BundleOptions): Bundle {
     `)
   }
 
-  for (const key in options.environment.scripts) {
-    scriptData[key] = options.environment.scripts[key]
+  for (const key in environment.scripts) {
+    scriptData[key] = environment.scripts[key]
   }
 
   scriptData["entrypoint.sh"] = trimIndentation(`
@@ -114,7 +123,7 @@ export function createBundle(options: BundleOptions): Bundle {
 
   return {
     configMap,
-    environment: options.environment,
+    environment,
   }
 }
 

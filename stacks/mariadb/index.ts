@@ -23,7 +23,7 @@ const backupRepository = restic.createRepository({
   }),
 })
 
-mariadb.createApplication({
+const { rootPasswordSecret } = mariadb.createApplication({
   namespace,
 
   backup: {
@@ -37,3 +37,5 @@ mariadb.createApplication({
 
   nodeSelector: k8s.mapHostnameToNodeSelector("public-spb"),
 })
+
+export const rootPassword = rootPasswordSecret.stringData["mariadb-root-password"]

@@ -2,7 +2,7 @@ import { normalizeInputArrayAndMap, pulumi } from "@infra/core"
 import { raw } from "./imports"
 import { mapMetadata, mapPulumiOptions } from "./options"
 import { ServiceOptions } from "./service"
-import { ContainerOptions, WorkloadKind, WorkloadOptions, WorkloadResources, createWorkload } from "./workload"
+import { WorkloadKind, WorkloadOptions, WorkloadResources, createWorkload } from "./workload"
 
 export interface WorkloadServiceOptions extends WorkloadOptions {
   /**

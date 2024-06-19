@@ -1,6 +1,8 @@
 import { merge, pulumi, trimIndentation } from "@infra/core"
 import { k8s } from "@infra/k8s"
 import { restic } from "@infra/restic"
+import { scripting } from "@infra/scripting"
+import { createScriptEnvironment } from "./scripting"
 
 export interface ApplicationOptions extends k8s.ReleaseApplicationOptions {
   /**
@@ -55,22 +57,8 @@ export function createApplication(options: ApplicationOptions = {}): Application
 
       repository: options.backup.repository,
 
-      environment: {
+      environment: scripting.mergeEnvironments(createScriptEnvironment({ rootPasswordSecret }), {
         distro: "alpine",
-        packages: ["mariadb-client"],
-
-        setupScripts: {
-          "configure-mysql-client.sh": trimIndentation(`
-            #!/bin/sh
-            set -e
-
-            cat > /root/.my.cnf <<EOF
-            [client]
-            user=root
-            password="$MARIADB_ROOT_PASSWORD"
-            EOF
-          `),
-        },
 
         scripts: {
           "lock.sh": trimIndentation(`
@@ -91,16 +79,7 @@ export function createApplication(options: ApplicationOptions = {}): Application
             echo "| Tables unlocked"
           `),
         },
-
-        environment: {
-          MARIADB_ROOT_PASSWORD: {
-            secretKeyRef: {
-              name: rootPasswordSecret.metadata.name,
-              key: "mariadb-root-password",
-            },
-          },
-        },
-      },
+      }),
     })
 
     restic.createBackupCronJob({
