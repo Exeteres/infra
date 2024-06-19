@@ -2,7 +2,7 @@ import { PartialKeys, normalizeInputArrayAndMap, pulumi } from "@infra/core"
 import { CommonOptions, NodeSelector, mapMetadata, mapPulumiOptions } from "./options"
 import { raw } from "./imports"
 
-export type WorkloadKind = "Deployment" | "StatefulSet" | "ReplicaSet" | "DaemonSet"
+export type WorkloadKind = keyof WorkloadResources
 
 export interface ContainerOptions extends PartialKeys<raw.types.input.core.v1.Container, "name"> {
   /**
@@ -19,6 +19,8 @@ export type WorkloadResources = {
   StatefulSet: raw.apps.v1.StatefulSet
   ReplicaSet: raw.apps.v1.ReplicaSet
   DaemonSet: raw.apps.v1.DaemonSet
+  Job: raw.batch.v1.Job
+  CronJob: raw.batch.v1.CronJob
 }
 
 export type WorkloadVolume =
@@ -92,6 +94,12 @@ export interface WorkloadOptions extends CommonOptions {
    * The service account name to use in the workload.
    */
   serviceAccountName?: pulumi.Input<string>
+
+  /**
+   * The schedule to run the cron job.
+   * Relevant only for the CronJob workload.
+   */
+  schedule?: pulumi.Input<string>
 }
 
 export type TypedWorkloadOptions<TWorkloadKind> = Omit<WorkloadOptions, "kind"> & { kind: TWorkloadKind }
@@ -108,6 +116,52 @@ export function createWorkload<T extends WorkloadKind>(options: TypedWorkloadOpt
     ...options.labels,
   }
 
+  const podTemplate = {
+    metadata: mapMetadata(options, { labels }),
+    spec: {
+      nodeSelector: options.nodeSelector,
+      affinity: options.affinity,
+      restartPolicy: "Never",
+
+      serviceAccountName: options.serviceAccountName,
+
+      topologySpreadConstraints: mapTopologySpreadConstraints(options),
+
+      imagePullSecrets: pulumi
+        .output(options.imagePullSecret)
+        .apply(value => (value ? [{ name: value.metadata.name }] : [])),
+
+      containers: normalizeInputArrayAndMap(
+        //
+        options.container,
+        options.containers,
+        c => mapWorkloadContainer(options.name, c),
+      ),
+
+      volumes: normalizeInputArrayAndMap(options.volume, options.volumes, mapWorkloadVolume),
+
+      securityContext: options.securityContext,
+    },
+  }
+
+  if (options.kind === "CronJob") {
+    return new raw.batch.v1.CronJob(
+      options.name,
+      {
+        metadata: mapMetadata(options, { labels }),
+        spec: {
+          schedule: options.schedule!,
+          jobTemplate: {
+            spec: {
+              template: podTemplate,
+            },
+          },
+        },
+      },
+      mapPulumiOptions(options),
+    ) as WorkloadResources[T]
+  }
+
   const constructor = resolveConstructor(options.kind)
 
   return new constructor(
@@ -120,32 +174,7 @@ export function createWorkload<T extends WorkloadKind>(options: TypedWorkloadOpt
         selector: {
           matchLabels: labels,
         },
-        template: {
-          metadata: mapMetadata(options, { labels }),
-          spec: {
-            nodeSelector: options.nodeSelector,
-            affinity: options.affinity,
-
-            serviceAccountName: options.serviceAccountName,
-
-            topologySpreadConstraints: mapTopologySpreadConstraints(options),
-
-            imagePullSecrets: pulumi
-              .output(options.imagePullSecret)
-              .apply(value => (value ? [{ name: value.metadata.name }] : [])),
-
-            containers: normalizeInputArrayAndMap(
-              //
-              options.container,
-              options.containers,
-              c => mapWorkloadContainer(options.name, c),
-            ),
-
-            volumes: normalizeInputArrayAndMap(options.volume, options.volumes, mapWorkladVolume),
-
-            securityContext: options.securityContext,
-          },
-        },
+        template: podTemplate,
       },
     },
     mapPulumiOptions(options, {
@@ -154,7 +183,7 @@ export function createWorkload<T extends WorkloadKind>(options: TypedWorkloadOpt
   ) as WorkloadResources[T]
 }
 
-export function mapWorkladVolume(volume: WorkloadVolume) {
+export function mapWorkloadVolume(volume: WorkloadVolume) {
   if (volume instanceof raw.core.v1.PersistentVolumeClaim) {
     return {
       name: volume.metadata.name,
@@ -190,7 +219,7 @@ export function mapWorkloadContainer(name: string, options: ContainerOptions) {
     ...options,
 
     name: options.name ?? name,
-    env: options.environment ? Object.entries(options.environment).map(mapContainerEnvVar) : options.env,
+    env: mapEnvironment(options.environment, options.env),
   } satisfies raw.types.input.core.v1.Container
 }
 
@@ -205,6 +234,15 @@ function mapContainerEnvVar([name, value]: [
       return { name, valueFrom: value }
     }
   })
+}
+
+export function mapEnvironment(
+  env?: pulumi.Input<ContainerEnvironment>,
+  env2?: pulumi.Input<pulumi.Input<raw.types.input.core.v1.EnvVar>[]>,
+) {
+  return pulumi
+    .all([env, env2])
+    .apply(([env, env2]) => [...(env ? Object.entries(env).map(mapContainerEnvVar) : []), ...(env2 ?? [])])
 }
 
 export function mapTopologySpreadConstraints(
@@ -266,7 +304,7 @@ export function mapVolumeToMount(options: MapVolumeToMountOptions): pulumi.Input
   })
 }
 
-function resolveConstructor(kind: WorkloadKind) {
+function resolveConstructor(kind: Exclude<WorkloadKind, "CronJob">) {
   switch (kind) {
     case "Deployment":
       return raw.apps.v1.Deployment
@@ -276,6 +314,8 @@ function resolveConstructor(kind: WorkloadKind) {
       return raw.apps.v1.ReplicaSet
     case "DaemonSet":
       return raw.apps.v1.DaemonSet
+    case "Job":
+      return raw.batch.v1.Job
   }
 }
 

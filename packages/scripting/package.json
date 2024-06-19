@@ -1,0 +1,7 @@
+{
+  "name": "@infra/scripting",
+  "private": true,
+  "dependencies": {
+    "@infra/k8s": "workspace:*"
+  }
+}

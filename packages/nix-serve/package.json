@@ -1,0 +1,7 @@
+{
+  "name": "@infra/nix-serve",
+  "private": true,
+  "dependencies": {
+    "@infra/k8s": "workspace:*"
+  }
+}

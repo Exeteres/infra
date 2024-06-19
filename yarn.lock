@@ -102,6 +102,23 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@infra/mariadb@workspace:*, @infra/mariadb@workspace:packages/mariadb":
+  version: 0.0.0-use.local
+  resolution: "@infra/mariadb@workspace:packages/mariadb"
+  dependencies:
+    "@infra/k8s": "workspace:*"
+    "@infra/restic": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@infra/mega@workspace:packages/mega":
+  version: 0.0.0-use.local
+  resolution: "@infra/mega@workspace:packages/mega"
+  dependencies:
+    "@infra/scripting": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
 "@infra/netbird@workspace:packages/netbird":
   version: 0.0.0-use.local
   resolution: "@infra/netbird@workspace:packages/netbird"
@@ -121,6 +138,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@infra/nix-serve@workspace:*, @infra/nix-serve@workspace:packages/nix-serve":
+  version: 0.0.0-use.local
+  resolution: "@infra/nix-serve@workspace:packages/nix-serve"
+  dependencies:
+    "@infra/k8s": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
 "@infra/postgresql@workspace:*, @infra/postgresql@workspace:packages/postgresql":
   version: 0.0.0-use.local
   resolution: "@infra/postgresql@workspace:packages/postgresql"
@@ -134,6 +159,22 @@ __metadata:
 "@infra/radicale@workspace:*, @infra/radicale@workspace:packages/radicale":
   version: 0.0.0-use.local
   resolution: "@infra/radicale@workspace:packages/radicale"
+  dependencies:
+    "@infra/k8s": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@infra/restic@workspace:*, @infra/restic@workspace:packages/restic":
+  version: 0.0.0-use.local
+  resolution: "@infra/restic@workspace:packages/restic"
+  dependencies:
+    "@infra/k8s": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@infra/scripting@workspace:*, @infra/scripting@workspace:packages/scripting":
+  version: 0.0.0-use.local
+  resolution: "@infra/scripting@workspace:packages/scripting"
   dependencies:
     "@infra/k8s": "workspace:*"
   languageName: unknown
@@ -967,6 +1008,22 @@ __metadata:
   resolution: "@stacks/mailu@workspace:stacks/mailu"
   dependencies:
     "@infra/mailu": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@stacks/mariadb@workspace:stacks/mariadb":
+  version: 0.0.0-use.local
+  resolution: "@stacks/mariadb@workspace:stacks/mariadb"
+  dependencies:
+    "@infra/mariadb": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@stacks/nix-serve@workspace:stacks/nix-serve":
+  version: 0.0.0-use.local
+  resolution: "@stacks/nix-serve@workspace:stacks/nix-serve"
+  dependencies:
+    "@infra/nix-serve": "workspace:*"
   languageName: unknown
   linkType: soft
 
