@@ -12,6 +12,7 @@ interface LocationConfig {
 const config = new pulumi.Config("vpn")
 
 const address = config.require("address")
+const dnsServerAddress = config.require("dnsServerAddress")
 const locations = config.getObject<LocationConfig[]>("locations") ?? []
 const privateKey = config.requireSecret("privateKey")
 const tailscaleAuthKey = config.requireSecret("tailscaleAuthKey")
@@ -36,11 +37,13 @@ for (const location of locations) {
         [Interface]
         Address = ${address}
         PrivateKey = ${privateKey}
+        DNS = ${dnsServerAddress}
 
         PostUp = iptables -t mangle -A PREROUTING -i tailscale0 -j MARK --set-mark 0x1
         PostUp = ip rule del not from all fwmark 0xca6c lookup 51820
         PostUp = ip rule add from all fwmark 0x1 lookup 51820
         PostUp = iptables -t nat -A POSTROUTING -o wg0 -j MASQUERADE
+        PostUp = ip route add ${dnsServerAddress} dev wg0
 
         [Peer]
         PublicKey = ${location.publicKey}
@@ -65,6 +68,10 @@ for (const location of locations) {
     kind: "Deployment",
 
     nodeSelector: mapHostnameToNodeSelector(node),
+
+    deploymentStrategy: {
+      type: "Recreate", // to prevent conflicts with old tailscale connections
+    },
 
     containers: [
       // Tailscale Frontend
@@ -163,6 +170,10 @@ for (const location of locations) {
         },
         {
           name: "net.ipv4.ip_forward",
+          value: "1",
+        },
+        {
+          name: "net.ipv6.conf.all.forwarding",
           value: "1",
         },
       ],
