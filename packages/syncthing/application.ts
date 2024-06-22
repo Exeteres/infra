@@ -1,5 +1,6 @@
 import { pulumi } from "@infra/core"
 import { k8s } from "@infra/k8s"
+import { restic } from "@infra/restic"
 
 export interface ApplicationOptions extends k8s.ApplicationOptions {
   volumeClaims?: {
@@ -28,6 +29,12 @@ export interface ApplicationOptions extends k8s.ApplicationOptions {
    * The options to configure the ingress.
    */
   ingress?: k8s.ChildComponentOptions<k8s.IngressOptions>
+
+  /**
+   * The options for the state backup.
+   * If not specified, backups will be disabled.
+   */
+  stateBackup?: restic.BackupOptions
 }
 
 export interface Application extends k8s.Application {
@@ -89,6 +96,41 @@ export function createApplication(options: ApplicationOptions = {}): Application
     })
   })
 
+  const initContainers: pulumi.Input<k8s.raw.types.input.core.v1.Container[]> = []
+  const sidecarContainers: pulumi.Input<k8s.raw.types.input.core.v1.Container[]> = []
+  const extraVolumes: pulumi.Input<k8s.raw.types.input.core.v1.Volume[]> = []
+
+  if (options.stateBackup) {
+    const bundle = restic.createScriptBundle({
+      name: k8s.getPrefixedName("backup", fullName),
+      namespace,
+
+      repository: options.stateBackup.repository,
+    })
+
+    restic.createBackupCronJob({
+      name: k8s.getPrefixedName("state", fullName),
+      namespace,
+
+      options: options.stateBackup,
+      bundle,
+      volumeClaim: stateVolumeClaim,
+    })
+
+    const { volumes, initContainer, sidecarContainer } = restic.createExtraContainers({
+      name: k8s.getPrefixedName("state", fullName),
+      namespace,
+
+      options: options.stateBackup,
+      bundle,
+      volume: stateVolumeClaim.metadata.name,
+    })
+
+    initContainers.push(initContainer)
+    sidecarContainers.push(sidecarContainer)
+    extraVolumes.push(...volumes)
+  }
+
   const workloadService = k8s.createWorkloadService({
     name: fullName,
     namespace,
@@ -119,6 +161,9 @@ export function createApplication(options: ApplicationOptions = {}): Application
     },
 
     service: options.service,
+    initContainers,
+    containers: sidecarContainers,
+    nodeSelector: options.nodeSelector,
 
     ports: [
       { name: "http", port: 8384, protocol: "TCP" },
@@ -127,7 +172,7 @@ export function createApplication(options: ApplicationOptions = {}): Application
       { name: "discovery", port: 21027, protocol: "UDP" },
     ],
 
-    volumes: [stateVolumeClaim, ...dataVolumeClaims],
+    volumes: [stateVolumeClaim, ...dataVolumeClaims, ...extraVolumes],
   })
 
   const ingress =

@@ -3,10 +3,14 @@ import { k8s } from "@infra/k8s"
 import { mariadb } from "@infra/mariadb"
 import { restic } from "@infra/restic"
 
+const sharedStack = new pulumi.StackReference("organization/shared/main")
+
 const config = new pulumi.Config("mariadb")
 
+const rootPassword = config.requireSecret("rootPassword")
 const backupPassword = config.requireSecret("backupPassword")
-const rcloneConfig = config.requireSecret("rcloneConfig")
+const nodeSelector = config.requireObject<k8s.NodeSelector>("nodeSelector")
+const rcloneConfig = sharedStack.requireOutput("rcloneConfig")
 
 const namespace = k8s.createNamespace({ name: "mariadb" })
 
@@ -23,7 +27,7 @@ const backupRepository = restic.createRepository({
   }),
 })
 
-const { rootPasswordSecret } = mariadb.createApplication({
+mariadb.createApplication({
   namespace,
 
   backup: {
@@ -31,11 +35,8 @@ const { rootPasswordSecret } = mariadb.createApplication({
     hostname: "mariadb",
   },
 
-  releaseOptions: {
-    values: {},
-  },
-
-  nodeSelector: k8s.mapHostnameToNodeSelector("public-spb"),
+  rootPassword,
+  nodeSelector,
 })
 
-export const rootPassword = rootPasswordSecret.stringData["mariadb-root-password"]
+export { rootPassword }

@@ -1,8 +1,8 @@
-import { merge, pulumi, trimIndentation } from "@infra/core"
+import { merge, pulumi, random, trimIndentation } from "@infra/core"
 import { k8s } from "@infra/k8s"
 import { restic } from "@infra/restic"
 import { scripting } from "@infra/scripting"
-import { createScriptEnvironment } from "./scripting"
+import { scriptEnvironment } from "./scripting"
 
 export interface ApplicationOptions extends k8s.ReleaseApplicationOptions {
   /**
@@ -10,6 +10,12 @@ export interface ApplicationOptions extends k8s.ReleaseApplicationOptions {
    * If not specified, backups will be disabled.
    */
   backup?: restic.BackupOptions
+
+  /**
+   * The root password for the MariaDB database.
+   * If not specified, a random password will be generated.
+   */
+  rootPassword?: pulumi.Input<string>
 }
 
 export interface Application extends k8s.ReleaseApplication {
@@ -29,14 +35,20 @@ export function createApplication(options: ApplicationOptions = {}): Application
   const fullName = k8s.getPrefixedName(name, options.prefix)
   const namespace = options.namespace ?? k8s.createNamespace({ name: fullName })
 
-  const rootPasswordSecret = k8s.createPasswordSecret({
+  const rootPasswordSecret = k8s.createSecret({
     name: k8s.getPrefixedName("root-password", fullName),
     namespace,
 
     realName: "root-password",
 
     key: "mariadb-root-password",
-    length: 16,
+    value:
+      options.rootPassword ??
+      random.createPassword({
+        name: k8s.getPrefixedName("root-password", fullName),
+        parent: namespace,
+        length: 16,
+      }).result,
   })
 
   const dataVolumeClaim = k8s.createPersistentVolumeClaim({
@@ -57,7 +69,7 @@ export function createApplication(options: ApplicationOptions = {}): Application
 
       repository: options.backup.repository,
 
-      environment: scripting.mergeEnvironments(createScriptEnvironment({ rootPasswordSecret }), {
+      environment: scripting.mergeEnvironments(scriptEnvironment, {
         distro: "alpine",
 
         scripts: {
@@ -78,6 +90,15 @@ export function createApplication(options: ApplicationOptions = {}): Application
             mysql -h mariadb -u root -e "UNLOCK TABLES;"
             echo "| Tables unlocked"
           `),
+        },
+
+        environment: {
+          MARIADB_ROOT_PASSWORD: {
+            secretKeyRef: {
+              name: rootPasswordSecret.metadata.name,
+              key: "mariadb-root-password",
+            },
+          },
         },
       }),
     })

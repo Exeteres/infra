@@ -1,5 +1,6 @@
-import { pulumi } from "@infra/core"
+import { mergeInputArrays, pulumi } from "@infra/core"
 import { k8s } from "@infra/k8s"
+import { restic } from "@infra/restic"
 import { readFile } from "fs/promises"
 import { join } from "path"
 
@@ -23,11 +24,13 @@ export interface StandardNotesOptions extends k8s.ApplicationOptions {
    * The options to configure the volume claims.
    */
   volumeClaims?: {
-    mysql?: k8s.ChildComponentOptions<k8s.PersistentVolumeClaimOptions>
-    redis?: k8s.ChildComponentOptions<k8s.PersistentVolumeClaimOptions>
-    serverLogs?: k8s.ChildComponentOptions<k8s.PersistentVolumeClaimOptions>
     serverUploads?: k8s.ChildComponentOptions<k8s.PersistentVolumeClaimOptions>
   }
+
+  /**
+   * The secret containing the database configuration.
+   */
+  databaseSecret: pulumi.Input<k8s.raw.core.v1.Secret>
 
   /**
    * The options to configure the ingresses
@@ -36,6 +39,40 @@ export interface StandardNotesOptions extends k8s.ApplicationOptions {
     server?: k8s.ChildComponentOptions<k8s.IngressOptions>
     files?: k8s.ChildComponentOptions<k8s.IngressOptions>
   }
+
+  /**
+   * The options for init containers.
+   */
+  initContainers?: pulumi.Input<k8s.raw.types.input.core.v1.Container[]>
+
+  /**
+   * The options for extra volumes.
+   */
+  volumes?: pulumi.Input<k8s.raw.types.input.core.v1.Volume[]>
+
+  /**
+   * The options for the uploads backup.
+   * If not specified, backups will be disabled.
+   */
+  uploadsBackup?: restic.BackupOptions
+
+  /**
+   * The encryption server key.
+   * If not specified, a random key will be generated.
+   */
+  encryptionServerKey?: pulumi.Input<string>
+
+  /**
+   * The auth secret key.
+   * If not specified, a random secret will be generated.
+   */
+  authSecretKey?: pulumi.Input<string>
+
+  /**
+   * The valet token secret.
+   * If not specified, a random secret will be generated.
+   */
+  valetTokenSecret?: pulumi.Input<string>
 }
 
 export interface StandardNotesApplication extends k8s.Application {
@@ -45,7 +82,6 @@ export interface StandardNotesApplication extends k8s.Application {
   workloadServices: {
     server: k8s.WorkloadService<"Deployment">
     localstack: k8s.WorkloadService<"Deployment">
-    mysql: k8s.WorkloadService<"StatefulSet">
     redis: k8s.WorkloadService<"StatefulSet">
   }
 
@@ -53,9 +89,6 @@ export interface StandardNotesApplication extends k8s.Application {
    * The volume claims which store the application data.
    */
   volumeClaims: {
-    mysql: k8s.raw.core.v1.PersistentVolumeClaim
-    redis: k8s.raw.core.v1.PersistentVolumeClaim
-    serverLogs: k8s.raw.core.v1.PersistentVolumeClaim
     serverUploads: k8s.raw.core.v1.PersistentVolumeClaim
   }
 
@@ -80,36 +113,6 @@ export function createApplication(options: StandardNotesOptions): StandardNotesA
   const fullName = k8s.getPrefixedName(name, options.prefix)
 
   const volumeClaims = {
-    mysql: k8s.createPersistentVolumeClaim({
-      name: k8s.getPrefixedName("mysql-data", fullName),
-      namespace,
-
-      realName: "mysql-data",
-
-      ...options.volumeClaims?.mysql,
-      capacity: "200Mi",
-    }),
-
-    redis: k8s.createPersistentVolumeClaim({
-      name: k8s.getPrefixedName("redis-data", fullName),
-      namespace,
-
-      realName: "redis-data",
-
-      ...options.volumeClaims?.redis,
-      capacity: "100Mi",
-    }),
-
-    serverLogs: k8s.createPersistentVolumeClaim({
-      name: k8s.getPrefixedName("server-logs", fullName),
-      namespace,
-
-      realName: "server-logs",
-
-      ...options.volumeClaims?.serverLogs,
-      capacity: "50Mi",
-    }),
-
     serverUploads: k8s.createPersistentVolumeClaim({
       name: k8s.getPrefixedName("server-uploads", fullName),
       namespace,
@@ -121,26 +124,6 @@ export function createApplication(options: StandardNotesOptions): StandardNotesA
     }),
   }
 
-  const mysqlPassword = k8s.createPasswordSecret({
-    name: k8s.getPrefixedName("mysql-password", fullName),
-    namespace,
-
-    realName: "mysql-password",
-
-    key: "password",
-    length: 16,
-  })
-
-  const mysqlRootPassword = k8s.createPasswordSecret({
-    name: k8s.getPrefixedName("mysql-root-password", fullName),
-    namespace,
-
-    realName: "mysql-root-password",
-
-    key: "password",
-    length: 16,
-  })
-
   const authJwtSecret = k8s.createRandomSecret({
     name: k8s.getPrefixedName("auth-secret", fullName),
     namespace,
@@ -149,6 +132,8 @@ export function createApplication(options: StandardNotesOptions): StandardNotesA
 
     key: "secret",
     length: 32,
+
+    existingValue: options.authSecretKey,
   })
 
   const authEncryptionServerKey = k8s.createRandomSecret({
@@ -159,6 +144,8 @@ export function createApplication(options: StandardNotesOptions): StandardNotesA
 
     key: "key",
     length: 32,
+
+    existingValue: options.encryptionServerKey,
   })
 
   const valetTokenSecret = k8s.createRandomSecret({
@@ -169,6 +156,8 @@ export function createApplication(options: StandardNotesOptions): StandardNotesA
 
     key: "token",
     length: 32,
+
+    existingValue: options.valetTokenSecret,
   })
 
   const localStackBootstrapScript = k8s.createConfigMap({
@@ -189,12 +178,14 @@ export function createApplication(options: StandardNotesOptions): StandardNotesA
 
     kind: "Deployment",
     port: 4566,
+    nodeSelector: options.nodeSelector,
 
     container: {
       image: "localstack/localstack:3.0",
 
       environment: {
         SERVICES: "sns,sqs",
+        HOSTNAME_EXTERNAL: "localstack",
         LS_LOG: "warn",
       },
 
@@ -221,37 +212,6 @@ export function createApplication(options: StandardNotesOptions): StandardNotesA
     },
   })
 
-  const mysql = k8s.createWorkloadService({
-    name: k8s.getPrefixedName("mysql", fullName),
-    namespace,
-
-    realName: "mysql",
-
-    kind: "StatefulSet",
-    port: 3306,
-
-    container: {
-      image: "mysql:8",
-
-      args: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_general_ci"],
-
-      environment: {
-        MYSQL_DATABASE: "standardnotes",
-        MYSQL_USER: "standardnotes",
-        MYSQL_ROOT_PASSWORD: {
-          secretKeyRef: k8s.mapSecretToRef(mysqlRootPassword, "password"),
-        },
-        MYSQL_PASSWORD: {
-          secretKeyRef: k8s.mapSecretToRef(mysqlPassword, "password"),
-        },
-      },
-
-      volumeMounts: [{ name: volumeClaims.mysql.metadata.name, mountPath: "/var/lib/mysql" }],
-    },
-
-    volume: volumeClaims.mysql,
-  })
-
   const redis = k8s.createWorkloadService({
     name: k8s.getPrefixedName("redis", fullName),
     namespace,
@@ -260,14 +220,49 @@ export function createApplication(options: StandardNotesOptions): StandardNotesA
 
     kind: "StatefulSet",
     port: 6379,
+    nodeSelector: options.nodeSelector,
 
     container: {
       image: "redis:6.0-alpine",
-      volumeMounts: [{ name: volumeClaims.redis.metadata.name, mountPath: "/data" }],
     },
-
-    volume: volumeClaims.redis,
   })
+
+  const databaseSecret = pulumi.output(options.databaseSecret)
+
+  const initContainers: pulumi.Input<k8s.raw.types.input.core.v1.Container[]> = []
+  const sidecarContainers: pulumi.Input<k8s.raw.types.input.core.v1.Container[]> = []
+  const extraVolumes: pulumi.Input<k8s.raw.types.input.core.v1.Volume[]> = []
+
+  if (options.uploadsBackup) {
+    const bundle = restic.createScriptBundle({
+      name: k8s.getPrefixedName("backup", fullName),
+      namespace,
+
+      repository: options.uploadsBackup.repository,
+    })
+
+    restic.createBackupCronJob({
+      name: k8s.getPrefixedName("uploads", fullName),
+      namespace,
+
+      options: options.uploadsBackup,
+      bundle,
+      volumeClaim: volumeClaims.serverUploads,
+    })
+
+    const { volumes, initContainer, sidecarContainer } = restic.createExtraContainers({
+      name: k8s.getPrefixedName("uploads", fullName),
+      namespace,
+
+      options: options.uploadsBackup,
+      bundle,
+      volume: volumeClaims.serverUploads.metadata.name,
+    })
+
+    initContainers.push(initContainer)
+    sidecarContainers.push(sidecarContainer)
+    extraVolumes.push(...volumes)
+  }
 
   const server = k8s.createWorkloadService({
     name: k8s.getPrefixedName("server", fullName),
@@ -281,27 +276,40 @@ export function createApplication(options: StandardNotesOptions): StandardNotesA
       { name: "files", port: 3104 },
     ],
 
+    initContainers: mergeInputArrays(initContainers, options.initContainers),
+
+    volume: volumeClaims.serverUploads,
+    volumes: mergeInputArrays(options.volumes, extraVolumes),
+    nodeSelector: options.nodeSelector,
+
     container: {
-      image: "standardnotes/server",
+      image: "standardnotes/server:9de33528853f22187f10a49fe301756cc8c65fa8",
+
       environment: {
         // Database
-        DB_HOST: mysql.service.metadata.name,
-        DB_PORT: pulumi.interpolate`${mysql.service.spec.ports[0].port}`,
-        DB_USERNAME: "standardnotes",
-        DB_PASSWORD: {
-          secretKeyRef: k8s.mapSecretToRef(mysqlPassword, "password"),
-        },
-        DB_DATABASE: "standardnotes",
         DB_TYPE: "mysql",
+        DB_HOST: {
+          secretKeyRef: k8s.mapSecretToRef(databaseSecret, "host"),
+        },
+        DB_PORT: {
+          secretKeyRef: k8s.mapSecretToRef(databaseSecret, "port"),
+        },
+        DB_USERNAME: {
+          secretKeyRef: k8s.mapSecretToRef(databaseSecret, "username"),
+        },
+        DB_PASSWORD: {
+          secretKeyRef: k8s.mapSecretToRef(databaseSecret, "password"),
+        },
+        DB_DATABASE: {
+          secretKeyRef: k8s.mapSecretToRef(databaseSecret, "database"),
+        },
 
-        // Redis
+        // Cache
+        CACHE_TYPE: "redis",
         REDIS_HOST: redis.service.metadata.name,
         REDIS_PORT: pulumi.interpolate`${redis.service.spec.ports[0].port}`,
-        CACHE_TYPE: "redis",
 
         // Auth
-        AUTH_SERVER_SNS_ENDPOINT: pulumi.interpolate`http://${name}:${localstack.service.spec.ports[0].port}`,
-        AUTH_SERVER_SQS_ENDPOINT: pulumi.interpolate`http://${name}:${localstack.service.spec.ports[0].port}`,
         AUTH_JWT_SECRET: {
           secretKeyRef: k8s.mapSecretToRef(authJwtSecret, "secret"),
         },
@@ -317,18 +325,16 @@ export function createApplication(options: StandardNotesOptions): StandardNotesA
       },
 
       volumeMounts: [
-        { name: volumeClaims.serverLogs.metadata.name, mountPath: "/var/lib/server/logs" },
         { name: volumeClaims.serverUploads.metadata.name, mountPath: "/opt/server/packages/files/dist/uploads" },
       ],
     },
 
-    volumes: [volumeClaims.serverLogs, volumeClaims.serverUploads],
+    containers: sidecarContainers,
   })
 
   const workloadServices = {
     server,
     localstack,
-    mysql,
     redis,
   }
 

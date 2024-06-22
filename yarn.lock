@@ -111,14 +111,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@infra/mega@workspace:packages/mega":
-  version: 0.0.0-use.local
-  resolution: "@infra/mega@workspace:packages/mega"
-  dependencies:
-    "@infra/scripting": "workspace:*"
-  languageName: unknown
-  linkType: soft
-
 "@infra/netbird@workspace:packages/netbird":
   version: 0.0.0-use.local
   resolution: "@infra/netbird@workspace:packages/netbird"
@@ -172,7 +164,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@infra/scripting@workspace:*, @infra/scripting@workspace:packages/scripting":
+"@infra/scripting@workspace:packages/scripting":
   version: 0.0.0-use.local
   resolution: "@infra/scripting@workspace:packages/scripting"
   dependencies:
@@ -185,6 +177,7 @@ __metadata:
   resolution: "@infra/standardnotes@workspace:packages/standardnotes"
   dependencies:
     "@infra/k8s": "workspace:*"
+    "@infra/restic": "workspace:*"
   languageName: unknown
   linkType: soft
 
@@ -218,7 +211,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@infra/vaultwarden@workspace:packages/vaultwarden"
   dependencies:
-    "@infra/cert-manager": "workspace:*"
     "@infra/k8s": "workspace:*"
   languageName: unknown
   linkType: soft
@@ -983,23 +975,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@stacks/core@workspace:stacks/core":
-  version: 0.0.0-use.local
-  resolution: "@stacks/core@workspace:stacks/core"
-  dependencies:
-    "@infra/cert-manager": "workspace:*"
-    "@infra/cloudflare": "workspace:*"
-    "@infra/kruise": "workspace:*"
-    "@infra/kubernetes-dashboard": "workspace:*"
-    "@infra/tailscale": "workspace:*"
-  languageName: unknown
-  linkType: soft
-
 "@stacks/factorio@workspace:stacks/factorio":
   version: 0.0.0-use.local
   resolution: "@stacks/factorio@workspace:stacks/factorio"
   dependencies:
     "@infra/factorio": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@stacks/kubernetes-dashboard@workspace:stacks/kubernetes-dashboard":
+  version: 0.0.0-use.local
+  resolution: "@stacks/kubernetes-dashboard@workspace:stacks/kubernetes-dashboard"
+  dependencies:
+    "@infra/kubernetes-dashboard": "workspace:*"
   languageName: unknown
   linkType: soft
 
@@ -1035,6 +1023,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@stacks/shared@workspace:stacks/shared":
+  version: 0.0.0-use.local
+  resolution: "@stacks/shared@workspace:stacks/shared"
+  dependencies:
+    "@infra/core": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
 "@stacks/standardnotes@workspace:stacks/standardnotes":
   version: 0.0.0-use.local
   resolution: "@stacks/standardnotes@workspace:stacks/standardnotes"
@@ -1049,6 +1045,18 @@ __metadata:
   resolution: "@stacks/syncthing@workspace:stacks/syncthing"
   dependencies:
     "@infra/syncthing": "workspace:*"
+    "@infra/tailscale": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@stacks/tailscale@workspace:stacks/tailscale":
+  version: 0.0.0-use.local
+  resolution: "@stacks/tailscale@workspace:stacks/tailscale"
+  dependencies:
+    "@infra/cert-manager": "workspace:*"
+    "@infra/cloudflare": "workspace:*"
+    "@infra/kruise": "workspace:*"
+    "@infra/kubernetes-dashboard": "workspace:*"
     "@infra/tailscale": "workspace:*"
   languageName: unknown
   linkType: soft

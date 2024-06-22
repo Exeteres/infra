@@ -5,10 +5,9 @@ import { kubernetesDashboard } from "@infra/kubernetes-dashboard"
 const config = new pulumi.Config("kubernetes-dashboard")
 
 const hostname = config.require("hostname")
+const nodeSelector = config.requireObject<k8s.NodeSelector>("nodeSelector")
 
 const application = kubernetesDashboard.createApplication({
-  nodeSelector: k8s.mapHostnameToNodeSelector(config.require("node")),
-
   releaseOptions: {
     values: {
       app: {
@@ -20,6 +19,8 @@ const application = kubernetesDashboard.createApplication({
       },
     },
   },
+
+  nodeSelector,
 })
 
 kubernetesDashboard.createServiceAccount({

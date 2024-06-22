@@ -36,11 +36,11 @@ export function createScriptBundle(options: ScriptBundleOptions): ScriptBundle {
 
           # Init the repo if it doesn't exist
           echo "| Checking the repository"
-          if restic snapshots -H $RESTIC_HOSTNAME > /dev/null 2>&1; then
+          if restic snapshots > /dev/null 2>&1; then
             echo "| Repository is ready"
           else
             echo "| Initializing new repository"
-            restic init -H $RESTIC_HOSTNAME
+            restic init
           fi
 
           # Execute lock script if it exists
@@ -53,15 +53,14 @@ export function createScriptBundle(options: ScriptBundleOptions): ScriptBundle {
 
           # Unlock the data source on exit
           if [ -f /scripts/unlock.sh ]; then
-            echo "| Unlocking the data source"
-            trap "/scripts/unlock.sh || echo '| warning: unlock script failed'" EXIT
+            trap "echo '| Unlocking the data source'; /scripts/unlock.sh || echo '| warning: unlock script failed'" EXIT
           else
             echo "| warning: unlock script not found, possible consistency issues"
           fi
 
           # Backup the volume
           echo "| Backing up volume"
-          restic backup -H $RESTIC_HOSTNAME /data $@
+          restic backup -H "$RESTIC_HOSTNAME" /data $@
           echo "| Backup complete"
         `),
 
@@ -95,14 +94,14 @@ export function createScriptBundle(options: ScriptBundleOptions): ScriptBundle {
           fi
 
           # Check if at least one snapshot exists
-          if ! restic snapshots -H $RESTIC_HOSTNAME > /dev/null 2>&1; then
+          if ! restic snapshots -H "$RESTIC_HOSTNAME" > /dev/null 2>&1; then
             echo "| No snapshots found. Skipping restore."
             exit 0
           fi
 
           # Restore the volume
           echo "| Restoring volume..."
-          restic restore -H $RESTIC_HOSTNAME latest --target /
+          restic restore -H "$RESTIC_HOSTNAME" latest --target /
           echo "| Volume restored."
         `),
       },

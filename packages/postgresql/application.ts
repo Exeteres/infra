@@ -1,35 +1,9 @@
-import { certManager } from "@infra/cert-manager"
-import { merge, pulumi } from "@infra/core"
+import { merge } from "@infra/core"
 import { k8s } from "@infra/k8s"
 
-export type PostgreSQLOptions = k8s.ReleaseApplicationOptions &
-  (
-    | {
-        /**
-         * The issuer to use for the database certificate.
-         */
-        issuer: pulumi.Input<certManager.Issuer>
-      }
-    | {
-        /**
-         * The issuer to create a ca issuer for the database certificate.
-         * Should be provided if issuer is not provided.
-         */
-        bootstrapIssuer: pulumi.Input<certManager.Issuer>
-      }
-  )
+export interface ApplicationOptions extends k8s.ReleaseApplicationOptions {}
 
-export interface PostgreSQLApplication extends k8s.ReleaseApplication {
-  /**
-   * The issuer for the PostgreSQL database.
-   */
-  issuer: pulumi.Output<certManager.Issuer>
-
-  /**
-   * The certificate for the PostgreSQL database.
-   */
-  certificate: certManager.CertificateBundle
-}
+export interface Application extends k8s.ReleaseApplication {}
 
 /**
  * Creates a PostgreSQL database using the Bitnami Helm chart.
@@ -37,25 +11,10 @@ export interface PostgreSQLApplication extends k8s.ReleaseApplication {
  * @param options The options for the PostgreSQL database.
  * @returns The PostgreSQL database release and certificate.
  */
-export function createApplication(options: PostgreSQLOptions): PostgreSQLApplication {
+export function createApplication(options: ApplicationOptions): Application {
   const name = options.name ?? "postgresql"
   const fullName = k8s.getPrefixedName(name, options.prefix)
   const namespace = options.namespace ?? k8s.createNamespace({ name: fullName })
-
-  const issuer =
-    "issuer" in options
-      ? options.issuer
-      : certManager.createCaIssuer({ name: fullName, namespace, bootstrapIssuer: options.bootstrapIssuer })
-
-  const certificate = certManager.createCertificate({
-    name: fullName,
-    namespace,
-
-    secretName: certManager.createCertificateSecretName(name),
-
-    domain: "postgresql",
-    issuer,
-  })
 
   const release = k8s.createHelmRelease({
     name: fullName,
@@ -71,28 +30,12 @@ export function createApplication(options: PostgreSQLOptions): PostgreSQLApplica
       {
         fullnameOverride: name,
 
-        tls: {
-          enabled: true,
-
-          certificatesSecret: certificate.secretName,
-          certCAFilename: "ca.crt",
-          certFilename: "tls.crt",
-          certKeyFilename: "tls.key",
-        },
-
         volumePermissions: {
           enabled: true,
         },
 
         primary: {
           nodeSelector: options.nodeSelector,
-
-          pgHbaConfiguration: [
-            //
-            "hostnossl all all 0.0.0.0/0    reject",
-            "host      all all 127.0.0.1/32 md5",
-            "hostssl   all all 0.0.0.0/0    cert clientcert=verify-full",
-          ].join("\n"),
 
           persistence: {
             size: "400Mi",
@@ -108,9 +51,6 @@ export function createApplication(options: PostgreSQLOptions): PostgreSQLApplica
     fullName,
     prefix: options.prefix,
     namespace,
-
-    issuer: pulumi.output(issuer),
     release,
-    certificate,
   }
 }

@@ -6,10 +6,12 @@ const config = new pulumi.Config("syncthing")
 
 const hostname = config.require("hostname")
 const webHostname = config.require("webHostname")
-const node = config.require("node")
+const nodeSelector = config.requireObject<k8s.NodeSelector>("nodeSelector")
+
+const namespace = k8s.createNamespace({ name: "syncthing" })
 
 syncthing.createApplication({
-  instanceName: node,
+  namespace,
 
   ingress: {
     className: "tailscale",
@@ -37,5 +39,5 @@ syncthing.createApplication({
     ],
   },
 
-  nodeSelector: k8s.mapHostnameToNodeSelector(node),
+  nodeSelector,
 })

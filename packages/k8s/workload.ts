@@ -105,6 +105,12 @@ export interface WorkloadOptions extends CommonOptions {
    * The options for init containers.
    */
   initContainers?: pulumi.Input<raw.types.input.core.v1.Container[]>
+
+  /**
+   * The deployment strategy to use in the workload.
+   * Relevant only for the Deployment workload.
+   */
+  deploymentStrategy?: pulumi.Input<raw.types.input.apps.v1.DeploymentStrategy>
 }
 
 export type TypedWorkloadOptions<TWorkloadKind> = Omit<WorkloadOptions, "kind"> & { kind: TWorkloadKind }
@@ -159,7 +165,13 @@ export function createWorkload<T extends WorkloadKind>(options: TypedWorkloadOpt
           schedule: options.schedule!,
           jobTemplate: {
             spec: {
-              template: podTemplate,
+              template: {
+                ...podTemplate,
+                spec: {
+                  ...podTemplate.spec,
+                  restartPolicy: "OnFailure",
+                },
+              },
             },
           },
         },
@@ -181,6 +193,7 @@ export function createWorkload<T extends WorkloadKind>(options: TypedWorkloadOpt
           matchLabels: labels,
         },
         template: podTemplate,
+        strategy: options.deploymentStrategy,
       },
     },
     mapPulumiOptions(options, {

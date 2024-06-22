@@ -76,3 +76,7 @@ export function trimIndentation(str: string): string {
     .join("\n")
     .trim()
 }
+
+export function mergeInputArrays<T>(...arrays: (pulumi.Input<T[]> | undefined | null)[]): pulumi.Output<T[]> {
+  return pulumi.all(arrays).apply(arrays => arrays.filter(Boolean).flat()) as any
+}

@@ -3,7 +3,6 @@
   "private": true,
   "dependencies": {
     "@infra/k8s": "workspace:*",
-    "@pulumi/cert-manager": "workspace:*",
     "@pulumi/postgresql": "^3.11.1"
   }
 }

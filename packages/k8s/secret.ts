@@ -52,9 +52,9 @@ export function createSecret(options: SecretOptions) {
  * @param secret The secret resource.
  * @returns The ref object: { name, key }.
  */
-export function mapSecretToRef(secret: raw.core.v1.Secret, key?: string) {
+export function mapSecretToRef(secret: pulumi.Input<raw.core.v1.Secret>, key?: string) {
   return {
-    name: secret.metadata.name,
+    name: pulumi.output(secret).metadata.name,
     key: key as string,
   }
 }

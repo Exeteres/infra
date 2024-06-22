@@ -1,5 +1,5 @@
 {
-  "name": "@stacks/core",
+  "name": "@stacks/tailscale",
   "private": true,
   "dependencies": {
     "@infra/cert-manager": "workspace:*",
