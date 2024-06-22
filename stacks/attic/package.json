@@ -1,0 +1,9 @@
+{
+  "name": "@stacks/attic",
+  "private": true,
+  "dependencies": {
+    "@infra/attic": "workspace:*",
+    "@infra/cert-manager": "workspace:*",
+    "@infra/cloudflare": "workspace:*"
+  }
+}

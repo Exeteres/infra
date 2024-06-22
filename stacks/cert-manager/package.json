@@ -1,0 +1,7 @@
+{
+  "name": "@stacks/cert-manager",
+  "private": true,
+  "dependencies": {
+    "@infra/cert-manager": "workspace:*"
+  }
+}

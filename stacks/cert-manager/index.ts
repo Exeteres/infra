@@ -1,7 +1,8 @@
 import { certManager } from "@infra/cert-manager"
-import { pulumi } from "@infra/core"
+import { pulumi, resource } from "@infra/core"
 import { k8s } from "@infra/k8s"
 
+const sharedStack = new pulumi.StackReference("organization/shared/main")
 const config = new pulumi.Config("cert-manager")
 
 const { namespace, release } = certManager.createApplication()
@@ -13,17 +14,17 @@ const apiTokenSecret = k8s.createSecret({
   dependsOn: release,
 
   key: "value",
-  value: config.requireSecret("cloudflare-api-token"),
+  value: sharedStack.requireOutput("cloudflareApiToken"),
 })
 
-export const publicIssuer = certManager.createAcmeIssuer({
+const _publicIssuer = certManager.createAcmeIssuer({
   name: "public",
   isClusterScoped: true,
 
   dependsOn: release,
 
-  email: config.require("acme-email"),
-  server: config.require("acme-server"),
+  email: config.require("acmeEmail"),
+  server: config.require("acmeServer"),
 
   solver: {
     dns01: {
@@ -34,9 +35,12 @@ export const publicIssuer = certManager.createAcmeIssuer({
   },
 })
 
-export const plainIssuer = certManager.createPlainIssuer({
+const _plainIssuer = certManager.createPlainIssuer({
   name: "plain",
   isClusterScoped: true,
 
   dependsOn: release,
 })
+
+export const publicIssuer = resource.export(_publicIssuer)
+export const plainIssuer = resource.export(_plainIssuer)

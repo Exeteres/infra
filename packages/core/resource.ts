@@ -14,6 +14,11 @@ export interface CommonOptions {
   parent?: pulumi.Resource
 
   /**
+   * The provider to use for the resource.
+   */
+  provider?: pulumi.ProviderResource
+
+  /**
    * The dependencies of the resource.
    */
   dependsOn?: pulumi.Input<pulumi.Input<pulumi.Resource>[]> | pulumi.Input<pulumi.Resource>
@@ -38,6 +43,7 @@ export function mapPulumiOptions<TOptions extends Partial<CommonOptions>>(
   return {
     parent: options.parent,
     dependsOn: options.dependsOn,
+    provider: options.provider,
     ...options.resourceOptions,
     ...extra,
   }

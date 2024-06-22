@@ -2,7 +2,7 @@ import { createSecret } from "./secret"
 import { CommonOptions, mapPulumiOptions } from "./options"
 import { pulumi, random } from "@infra/core"
 
-interface RandomSecretOptions extends CommonOptions {
+interface PasswordSecretOptions extends CommonOptions {
   /**
    * The key of the secret.
    */
@@ -20,6 +20,14 @@ interface RandomSecretOptions extends CommonOptions {
   existingValue?: pulumi.Input<string>
 }
 
+interface RandomSecretOptions extends PasswordSecretOptions {
+  /**
+   * The format to use for the secret value.
+   * By default, the value will be formatted as a hex string.
+   */
+  format?: "hex" | "base64"
+}
+
 /**
  * Creates a secret with a random value.
  *
@@ -35,7 +43,7 @@ export function createRandomSecret(options: RandomSecretOptions) {
         length: options.length,
       },
       mapPulumiOptions(options),
-    ).hex
+    )[options.format ?? "hex"]
 
   return createSecret({ ...options, value: randomValue })
 }
@@ -46,7 +54,7 @@ export function createRandomSecret(options: RandomSecretOptions) {
  * @param options The options to create the secret.
  * @returns The secret.
  */
-export function createPasswordSecret(options: RandomSecretOptions) {
+export function createPasswordSecret(options: PasswordSecretOptions) {
   const randomValue =
     options.existingValue ??
     new random.raw.RandomPassword(

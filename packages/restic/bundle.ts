@@ -88,7 +88,7 @@ export function createScriptBundle(options: ScriptBundleOptions): ScriptBundle {
 
           # Check if volume is not empty
           echo "| Checking if volume is empty..."
-          if [ "$(ls -A /data 2>/dev/null)" ]; then
+          if [ "$(find /data -type f -print -quit 2>/dev/null)" ]; then
             echo "| Volume is not empty. Skipping restore."
             exit 0
           fi

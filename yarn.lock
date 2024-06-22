@@ -29,6 +29,14 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@infra/attic@workspace:*, @infra/attic@workspace:packages/attic":
+  version: 0.0.0-use.local
+  resolution: "@infra/attic@workspace:packages/attic"
+  dependencies:
+    "@infra/k8s": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
 "@infra/cert-manager@workspace:*, @infra/cert-manager@workspace:packages/cert-manager":
   version: 0.0.0-use.local
   resolution: "@infra/cert-manager@workspace:packages/cert-manager"
@@ -143,7 +151,6 @@ __metadata:
   resolution: "@infra/postgresql@workspace:packages/postgresql"
   dependencies:
     "@infra/k8s": "workspace:*"
-    "@pulumi/cert-manager": "workspace:*"
     "@pulumi/postgresql": "npm:^3.11.1"
   languageName: unknown
   linkType: soft
@@ -975,6 +982,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@stacks/attic@workspace:stacks/attic":
+  version: 0.0.0-use.local
+  resolution: "@stacks/attic@workspace:stacks/attic"
+  dependencies:
+    "@infra/attic": "workspace:*"
+    "@infra/cert-manager": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@stacks/cert-manager@workspace:stacks/cert-manager":
+  version: 0.0.0-use.local
+  resolution: "@stacks/cert-manager@workspace:stacks/cert-manager"
+  dependencies:
+    "@infra/cert-manager": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
 "@stacks/factorio@workspace:stacks/factorio":
   version: 0.0.0-use.local
   resolution: "@stacks/factorio@workspace:stacks/factorio"
@@ -1012,6 +1036,14 @@ __metadata:
   resolution: "@stacks/nix-serve@workspace:stacks/nix-serve"
   dependencies:
     "@infra/nix-serve": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@stacks/postgresql@workspace:stacks/postgresql":
+  version: 0.0.0-use.local
+  resolution: "@stacks/postgresql@workspace:stacks/postgresql"
+  dependencies:
+    "@infra/postgresql": "workspace:*"
   languageName: unknown
   linkType: soft
 

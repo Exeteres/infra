@@ -1,0 +1,7 @@
+{
+  "name": "@stacks/postgresql",
+  "private": true,
+  "dependencies": {
+    "@infra/postgresql": "workspace:*"
+  }
+}

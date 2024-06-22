@@ -5,7 +5,7 @@ import { scripting } from "@infra/scripting"
 export interface DatabaseOptions extends k8s.CommonOptions {
   /**
    * The host of the database.
-   * For example, `mariadb`, `mariadb.default`, `mariadb.default.svc`, etc.
+   * For example, `postgresql`, `postgresql.postgresql`, or `postgresql.postgresql.svc.cluster.local`.
    */
   host: pulumi.Input<string>
 
@@ -28,8 +28,8 @@ export interface DatabaseOptions extends k8s.CommonOptions {
   password?: pulumi.Input<string>
 
   /**
-   * The secret containing the root password.
-   * Must have a key named `mariadb-root-password`.
+   * The secret containing the password for the postgres user.
+   * Must have a key named `postgres-password`.
    */
   rootPasswordSecret: k8s.raw.core.v1.Secret
 
@@ -80,16 +80,16 @@ export function createDatabase(options: DatabaseOptions): Database {
   const username = options.username ?? database
 
   const databaseSecret = k8s.createSecret({
-    name: `${options.name}-mariadb-credentials`,
+    name: `${options.name}-postgres-credentials`,
     namespace: options.namespace,
 
     data: {
       host: options.host,
       database,
       username,
-      port: "3306",
+      port: "5432",
       password: databasePassword,
-      url: pulumi.interpolate`mysql://${username}:${databasePassword}@${options.host}/${database}`,
+      url: pulumi.interpolate`postgresql://${username}:${databasePassword}@${options.host}/${database}`,
     },
   })
 
@@ -143,11 +143,11 @@ export function createDatabase(options: DatabaseOptions): Database {
           },
         },
         {
-          name: "MARIADB_ROOT_PASSWORD",
+          name: "PGPASSWORD",
           valueFrom: {
             secretKeyRef: {
               name: options.rootPasswordSecret.metadata.name,
-              key: "mariadb-root-password",
+              key: "postgres-password",
             },
           },
         },
