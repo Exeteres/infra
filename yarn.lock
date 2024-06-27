@@ -34,6 +34,7 @@ __metadata:
   resolution: "@infra/attic@workspace:packages/attic"
   dependencies:
     "@infra/k8s": "workspace:*"
+    "@infra/postgresql": "workspace:*"
   languageName: unknown
   linkType: soft
 
@@ -217,6 +218,14 @@ __metadata:
 "@infra/vaultwarden@workspace:*, @infra/vaultwarden@workspace:packages/vaultwarden":
   version: 0.0.0-use.local
   resolution: "@infra/vaultwarden@workspace:packages/vaultwarden"
+  dependencies:
+    "@infra/k8s": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@infra/vpn@workspace:*, @infra/vpn@workspace:packages/vpn":
+  version: 0.0.0-use.local
+  resolution: "@infra/vpn@workspace:packages/vpn"
   dependencies:
     "@infra/k8s": "workspace:*"
   languageName: unknown
@@ -988,6 +997,7 @@ __metadata:
   dependencies:
     "@infra/attic": "workspace:*"
     "@infra/cert-manager": "workspace:*"
+    "@infra/cloudflare": "workspace:*"
   languageName: unknown
   linkType: soft
 
@@ -1108,6 +1118,7 @@ __metadata:
   dependencies:
     "@infra/k8s": "workspace:*"
     "@infra/tailscale": "workspace:*"
+    "@infra/vpn": "workspace:*"
   languageName: unknown
   linkType: soft
 
