@@ -1,7 +1,8 @@
-import { PartialKeys } from "@infra/core"
+import { PartialKeys, pulumi } from "@infra/core"
 import { CommonOptions, NodeSelector } from "./options"
 import { HelmOptions } from "./helm"
 import { raw } from "./imports"
+import { k8s } from "."
 
 export interface ApplicationOptions extends PartialKeys<CommonOptions, "name" | "namespace"> {
   /**
@@ -74,4 +75,8 @@ export interface ChartApplication extends Application {
 
 export function getPrefixedName(name: string, prefix?: string): string {
   return prefix ? `${prefix}-${name}` : name
+}
+
+export function getResourceId(name: string, namespace: k8s.raw.core.v1.Namespace): pulumi.Output<string> {
+  return pulumi.interpolate`${namespace.metadata.name}/${name}`
 }

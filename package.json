@@ -7,7 +7,8 @@
   ],
   "scripts": {
     "proxy:dashboard": "kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443",
-    "create-dashboard-token": "kubectl -n kubernetes-dashboard create token dashboard-account --duration=100000h"
+    "create-dashboard-token": "kubectl -n kubernetes-dashboard create token dashboard-account --duration=100000h",
+    "headscale": "kubectl exec -n headscale deploy/headscale -- /ko-app/headscale"
   },
   "devDependencies": {
     "@types/node": "^20.14.2",

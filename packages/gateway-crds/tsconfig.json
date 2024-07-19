@@ -1,0 +1,43 @@
+{
+    "compilerOptions": {
+        "outDir": "bin",
+        "target": "es2016",
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "declaration": true,
+        "sourceMap": true,
+        "stripInternal": true,
+        "experimentalDecorators": true,
+        "noFallthroughCasesInSwitch": true,
+        "forceConsistentCasingInFileNames": true,
+        "strict": true
+    },
+    "files": [
+        "gateway/index.ts",
+        "gateway/v1/gateway.ts",
+        "gateway/v1/gatewayClass.ts",
+        "gateway/v1/grpcroute.ts",
+        "gateway/v1/httproute.ts",
+        "gateway/v1/index.ts",
+        "gateway/v1alpha2/backendLBPolicy.ts",
+        "gateway/v1alpha2/grpcroute.ts",
+        "gateway/v1alpha2/index.ts",
+        "gateway/v1alpha2/referenceGrant.ts",
+        "gateway/v1alpha2/tcproute.ts",
+        "gateway/v1alpha2/tlsroute.ts",
+        "gateway/v1alpha2/udproute.ts",
+        "gateway/v1alpha3/backendTLSPolicy.ts",
+        "gateway/v1alpha3/index.ts",
+        "gateway/v1beta1/gateway.ts",
+        "gateway/v1beta1/gatewayClass.ts",
+        "gateway/v1beta1/httproute.ts",
+        "gateway/v1beta1/index.ts",
+        "gateway/v1beta1/referenceGrant.ts",
+        "index.ts",
+        "provider.ts",
+        "types/index.ts",
+        "types/input.ts",
+        "types/output.ts",
+        "utilities.ts"
+    ]
+}

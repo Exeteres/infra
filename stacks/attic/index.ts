@@ -17,21 +17,12 @@ const databasePassword = config.requireSecret("databasePassword")
 const cloudflareApiToken = sharedStack.requireOutput("cloudflareApiToken")
 const cloudflareZoneId = sharedStack.requireOutput("cloudflareZoneId")
 const nodeIpAddress = sharedStack.requireOutput("nodeIpAddress")
-const serverTokenSecret = config.requireSecret("serverTokenSecret")
 
 const cloudflareProvider = new cloudflare.raw.Provider("cloudflare", { apiToken: cloudflareApiToken })
 
 const namespace = k8s.createNamespace({ name: "attic" })
 
 const postgresRootPassword = postgresqlStack.getOutput("rootPassword")
-
-const postgresRootPasswordSecret = k8s.createSecret({
-  name: "postgres-root-password",
-  namespace,
-
-  key: "postgres-password",
-  value: postgresRootPassword,
-})
 
 const bundle = scripting.createBundle({
   name: "attic-postgresql",
@@ -47,7 +38,13 @@ const { initContainer, secret, volumes } = postgresql.createDatabase({
   bundle,
   password: databasePassword,
 
-  rootPasswordSecret: postgresRootPasswordSecret,
+  rootPasswordSecret: k8s.createSecret({
+    name: "postgres-root-password",
+    namespace,
+
+    key: "postgres-password",
+    value: postgresRootPassword,
+  }),
 })
 
 cloudflare.createRecord({

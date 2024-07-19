@@ -4,7 +4,6 @@
   "dependencies": {
     "@infra/cert-manager": "workspace:*",
     "@infra/cloudflare": "workspace:*",
-    "@infra/kruise": "workspace:*",
     "@infra/kubernetes-dashboard": "workspace:*",
     "@infra/tailscale": "workspace:*"
   }

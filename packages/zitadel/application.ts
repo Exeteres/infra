@@ -1,8 +1,5 @@
-import { pulumi } from "@infra/core"
-import { certManager } from "@infra/cert-manager"
-import { postgresql } from "@infra/postgresql"
+import { pulumi, random } from "@infra/core"
 import { k8s } from "@infra/k8s"
-import { traefik } from "@infra/traefik"
 
 export interface ApplicationOptions extends k8s.ApplicationOptions {
   /**
@@ -11,31 +8,39 @@ export interface ApplicationOptions extends k8s.ApplicationOptions {
   domain: pulumi.Input<string>
 
   /**
-   * The issuer to create the CA certificate to secure the communication between Zitadel components.
+   * The options to configure the ingress.
    */
-  bootstrapIssuer: pulumi.Input<certManager.Issuer>
+  ingress?: k8s.ChildComponentOptions<k8s.IngressOptions>
 
   /**
-   * The issuer to create the public certificate for the Zitadel web interface.
+   * The host of the database to connect to.
    */
-  publicIssuer: pulumi.Input<certManager.Issuer>
+  databaseHost: pulumi.Input<string>
 
   /**
-   * The extra options for the database application.
+   * The password for the zitadel user.
+   * If not provided, a random password will be created.
    */
-  databaseOptions?: postgresql.PostgreSQLOptions
+  databasePassword?: pulumi.Input<string>
+
+  /**
+   * The secret containing the postgres user password.
+   * Will be used to create the database user and grant permissions.
+   */
+  postgresRootPassword: pulumi.Input<string>
+
+  /**
+   * The master key secret.
+   * If not provided, a random secret will be created.
+   */
+  masterKey?: pulumi.Input<string>
 }
 
 export interface Application extends k8s.ReleaseApplication {
   /**
-   * The database application which was deployed for Zitadel.
+   * The ingress which exposes the application.
    */
-  database: postgresql.PostgreSQLApplication
-
-  /**
-   * The ingress route to access the Zitadel application.
-   */
-  ingressRoute: traefik.raw.traefik.v1alpha1.IngressRouteTCP
+  ingress?: k8s.raw.networking.v1.Ingress
 }
 
 /**
@@ -49,60 +54,57 @@ export function createApplication(options: ApplicationOptions): Application {
   const namespace = options.namespace ?? k8s.createNamespace({ name })
   const fullName = k8s.getPrefixedName(name, options.prefix)
 
-  // Create the database
-  const database = postgresql.createApplication({
-    namespace,
-    prefix: fullName,
-
-    bootstrapIssuer: options.bootstrapIssuer,
-    nodeSelector: options.nodeSelector,
-
-    ...options.databaseOptions,
-  })
-
-  // Create certificates for database users
-  const postgresUserCertBundle = postgresql.createClientCertificate({
-    application: database,
-    roleName: "postgres",
-  })
-
-  const zitadelUserCertBundle = postgresql.createClientCertificate({
-    application: database,
-    roleName: "zitadel",
-  })
-
-  // Create public certificate for the web interface
-  const webCertBundle = certManager.createCertificate({
-    name: `${fullName}-web`,
-    namespace,
-
-    domain: options.domain,
-    issuer: options.publicIssuer,
-  })
-
   // Create secret for master key
   const masterKeySecret = k8s.createRandomSecret({
-    name: `${fullName}-masterkey`,
+    name: k8s.getPrefixedName("masterkey", fullName),
     namespace,
+
+    realName: "masterkey",
+
     key: "masterkey",
     length: 16,
+
+    existingValue: options.masterKey,
+  })
+
+  const databasePassword =
+    options.databasePassword ??
+    random.createPassword({
+      name: k8s.getPrefixedName("database-password", fullName),
+      parent: namespace,
+      length: 16,
+    }).result
+
+  const secretConfig = k8s.createSecret({
+    name: k8s.getPrefixedName("config", fullName),
+    namespace,
+
+    realName: "config",
+
+    key: "config-yaml",
+    value: pulumi
+      .output({
+        Database: {
+          Postgres: {
+            User: {
+              Password: databasePassword,
+            },
+            Admin: {
+              Password: options.postgresRootPassword,
+            },
+          },
+        },
+      })
+      .apply(JSON.stringify),
   })
 
   const release = k8s.createHelmRelease({
-    name,
+    name: fullName,
     namespace,
 
     repo: "https://charts.zitadel.com",
     chart: "zitadel",
     version: "7.14.0",
-
-    dependsOn: [
-      database.release,
-      postgresUserCertBundle.certificate,
-      zitadelUserCertBundle.certificate,
-      webCertBundle.certificate,
-      masterKeySecret,
-    ],
 
     values: {
       replicaCount: 1,
@@ -116,11 +118,11 @@ export function createApplication(options: ApplicationOptions): Application {
           ExternalDomain: options.domain,
           ExternalPort: 443,
           TLS: {
-            Enabled: true,
+            Enabled: false,
           },
           Database: {
             Postgres: {
-              Host: database.name,
+              Host: options.databaseHost,
               Port: 5432,
               Database: "zitadel",
               MaxOpenConns: 20,
@@ -130,42 +132,50 @@ export function createApplication(options: ApplicationOptions): Application {
               User: {
                 Username: "zitadel",
                 SSL: {
-                  Mode: "verify-full",
+                  Mode: "disable",
                 },
               },
               Admin: {
                 Username: "postgres",
                 SSL: {
-                  Mode: "verify-full",
+                  Mode: "disable",
                 },
               },
             },
           },
         },
 
-        dbSslCaCrtSecret: postgresUserCertBundle.secretName,
-        dbSslAdminCrtSecret: postgresUserCertBundle.secretName,
-        dbSslUserCrtSecret: zitadelUserCertBundle.secretName,
-        serverSslCrtSecret: webCertBundle.secretName,
+        configSecretName: secretConfig.metadata.name,
       },
     },
   })
 
-  const ingressRoute = traefik.createTcpIngressRoute({
-    name: fullName,
-    namespace,
+  const ingress =
+    options.ingress &&
+    k8s.createIngress({
+      name: fullName,
+      namespace,
 
-    route: {
-      domain: options.domain,
+      ...options.ingress,
 
-      service: {
-        name: release.name,
-        port: 8080,
+      rule: {
+        ...options.ingress.rule,
+        http: {
+          paths: [
+            {
+              path: "/",
+              pathType: "Prefix",
+              backend: {
+                service: {
+                  name: release.name,
+                  port: { number: 8080 },
+                },
+              },
+            },
+          ],
+        },
       },
-    },
-
-    tlsPassthrough: true,
-  })
+    })
 
   return {
     name,
@@ -173,8 +183,7 @@ export function createApplication(options: ApplicationOptions): Application {
     prefix: options.prefix,
     fullName,
 
-    database,
     release,
-    ingressRoute,
+    ingress,
   }
 }

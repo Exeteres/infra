@@ -1,7 +1,0 @@
-{
-  "name": "@infra/radicale",
-  "private": true,
-  "dependencies": {
-    "@infra/k8s": "workspace:*"
-  }
-}

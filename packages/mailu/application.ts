@@ -13,6 +13,18 @@ export interface ApplicationOptions extends k8s.ReleaseApplicationOptions {
    * The issuer to create the public certificate for the Mailu web interface.
    */
   publicIssuer: pulumi.Input<certManager.Issuer>
+
+  /**
+   * The secret key to use for the Mailu application.
+   * If not provided, a random secret key will be generated.
+   */
+  secretKey?: pulumi.Input<string>
+
+  /**
+   * The admin password to use for the Mailu application.
+   * If not provided, a random password will be generated.
+   */
+  adminPassword?: pulumi.Input<string>
 }
 
 export interface Application extends k8s.ReleaseApplication {}
@@ -34,6 +46,8 @@ export function createApplication(options: ApplicationOptions): Application {
 
     key: "secret-key",
     length: 32,
+
+    existingValue: options.secretKey,
   })
 
   const adminPasswordSecret = k8s.createPasswordSecret({
@@ -42,6 +56,8 @@ export function createApplication(options: ApplicationOptions): Application {
 
     key: "password",
     length: 16,
+
+    existingValue: options.adminPassword,
   })
 
   const release = k8s.createHelmRelease({
@@ -66,7 +82,7 @@ export function createApplication(options: ApplicationOptions): Application {
       },
 
       persistence: {
-        single_pvc: false,
+        size: "1Gi",
       },
 
       redis: {
@@ -77,6 +93,8 @@ export function createApplication(options: ApplicationOptions): Application {
           },
         },
       },
+
+      existingSecret: secretKeySecret.metadata.name,
 
       initialAccount: {
         enabled: true,
@@ -96,42 +114,22 @@ export function createApplication(options: ApplicationOptions): Application {
 
       admin: {
         nodeSelector: options.nodeSelector,
-
-        persistence: {
-          size: "100Mi",
-        },
       },
 
       postfix: {
         nodeSelector: options.nodeSelector,
-
-        persistence: {
-          size: "200Mi",
-        },
       },
 
       dovecot: {
         nodeSelector: options.nodeSelector,
-
-        persistence: {
-          size: "100Mi",
-        },
       },
 
       rspamd: {
         nodeSelector: options.nodeSelector,
-
-        persistence: {
-          size: "200Mi",
-        },
       },
 
       webmail: {
         nodeSelector: options.nodeSelector,
-
-        persistence: {
-          size: "100Mi",
-        },
       },
 
       oletools: {

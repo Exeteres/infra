@@ -15,18 +15,12 @@ export const scriptEnvironment: scripting.ScriptEnvironment = {
       set -e
 
       echo "Initializing database..."
-      psql -h $DATABASE_HOST -U postgres <<EOF
-      -- Check if the database exists
-      SELECT datname FROM pg_catalog.pg_database WHERE datname = '$DATABASE_NAME';
       
-      -- If the database does not exist, create it
-      DO \\$\\$
-      BEGIN
-          IF NOT EXISTS (SELECT datname FROM pg_catalog.pg_database WHERE datname = '$DATABASE_NAME') THEN
-              CREATE DATABASE "$DATABASE_NAME";
-          END IF;
-      END \\$\\$;
-      
+      # Connect to postgres database to create the new database if it does not exist
+      psql -h $DATABASE_HOST -U postgres -d postgres -tc "SELECT 1 FROM pg_database WHERE datname = '$DATABASE_NAME'" | grep -q 1 || psql -h $DATABASE_HOST -U postgres -d postgres -c "CREATE DATABASE \"$DATABASE_NAME\";"
+
+      # Connect to the target database to create the user if it does not exist and grant privileges
+      psql -h $DATABASE_HOST -U postgres -d "$DATABASE_NAME" <<EOF
       -- Check if the user exists
       SELECT usename FROM pg_catalog.pg_user WHERE usename = '$DATABASE_USER';
       
@@ -42,7 +36,6 @@ export const scriptEnvironment: scripting.ScriptEnvironment = {
       GRANT ALL PRIVILEGES ON DATABASE "$DATABASE_NAME" TO "$DATABASE_USER";
       
       -- Grant schema privileges to the user
-      \\c "$DATABASE_NAME"
       GRANT ALL ON SCHEMA public TO "$DATABASE_USER";
       EOF
 

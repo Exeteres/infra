@@ -2,7 +2,6 @@
   "name": "@infra/traefik",
   "private": true,
   "dependencies": {
-    "@infra/k8s": "workspace:*",
-    "@pulumi/traefik": "workspace:*"
+    "@infra/k8s": "workspace:*"
   }
 }

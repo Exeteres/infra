@@ -62,6 +62,7 @@ __metadata:
   dependencies:
     "@pulumi/pulumi": "npm:^3.119.0"
     "@pulumi/random": "npm:^4.16.2"
+    fnts: "npm:^3.0.1"
     ts-deepmerge: "npm:^7.0.0"
   languageName: unknown
   linkType: soft
@@ -74,23 +75,30 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@infra/gateway@workspace:*, @infra/gateway@workspace:packages/gateway":
+  version: 0.0.0-use.local
+  resolution: "@infra/gateway@workspace:packages/gateway"
+  dependencies:
+    "@infra/cert-manager": "workspace:*"
+    "@infra/k8s": "workspace:*"
+    "@pulumi/gateway": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@infra/headscale@workspace:*, @infra/headscale@workspace:packages/headscale":
+  version: 0.0.0-use.local
+  resolution: "@infra/headscale@workspace:packages/headscale"
+  dependencies:
+    "@infra/k8s": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
 "@infra/k8s@workspace:*, @infra/k8s@workspace:packages/k8s":
   version: 0.0.0-use.local
   resolution: "@infra/k8s@workspace:packages/k8s"
   dependencies:
     "@infra/core": "workspace:*"
-    "@pulumi/kubernetes": "npm:^4.13.1"
-    execa: "npm:^9.2.0"
-    get-port-please: "npm:^3.1.2"
-  languageName: unknown
-  linkType: soft
-
-"@infra/kruise@workspace:*, @infra/kruise@workspace:packages/kruise":
-  version: 0.0.0-use.local
-  resolution: "@infra/kruise@workspace:packages/kruise"
-  dependencies:
-    "@infra/k8s": "workspace:*"
-    "@pulumi/kruise": "workspace:*"
+    "@pulumi/kubernetes": "npm:^4.15.0"
   languageName: unknown
   linkType: soft
 
@@ -120,6 +128,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@infra/minio@workspace:*, @infra/minio@workspace:packages/minio":
+  version: 0.0.0-use.local
+  resolution: "@infra/minio@workspace:packages/minio"
+  dependencies:
+    "@infra/k8s": "workspace:*"
+    "@infra/restic": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
 "@infra/netbird@workspace:packages/netbird":
   version: 0.0.0-use.local
   resolution: "@infra/netbird@workspace:packages/netbird"
@@ -139,10 +156,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@infra/nix-serve@workspace:*, @infra/nix-serve@workspace:packages/nix-serve":
+"@infra/nix-serve@workspace:packages/nix-serve":
   version: 0.0.0-use.local
   resolution: "@infra/nix-serve@workspace:packages/nix-serve"
   dependencies:
+    "@infra/k8s": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@infra/plane@workspace:*, @infra/plane@workspace:packages/plane":
+  version: 0.0.0-use.local
+  resolution: "@infra/plane@workspace:packages/plane"
+  dependencies:
+    "@infra/gateway": "workspace:*"
     "@infra/k8s": "workspace:*"
   languageName: unknown
   linkType: soft
@@ -153,14 +179,6 @@ __metadata:
   dependencies:
     "@infra/k8s": "workspace:*"
     "@pulumi/postgresql": "npm:^3.11.1"
-  languageName: unknown
-  linkType: soft
-
-"@infra/radicale@workspace:*, @infra/radicale@workspace:packages/radicale":
-  version: 0.0.0-use.local
-  resolution: "@infra/radicale@workspace:packages/radicale"
-  dependencies:
-    "@infra/k8s": "workspace:*"
   languageName: unknown
   linkType: soft
 
@@ -202,7 +220,6 @@ __metadata:
   resolution: "@infra/tailscale@workspace:packages/tailscale"
   dependencies:
     "@infra/k8s": "workspace:*"
-    "@infra/kruise": "workspace:*"
   languageName: unknown
   linkType: soft
 
@@ -211,7 +228,6 @@ __metadata:
   resolution: "@infra/traefik@workspace:packages/traefik"
   dependencies:
     "@infra/k8s": "workspace:*"
-    "@pulumi/traefik": "workspace:*"
   languageName: unknown
   linkType: soft
 
@@ -707,6 +723,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@pulumi/cert-manager@workspace:packages/cert-manager-crds"
   dependencies:
+    "@pulumi/kubernetes": "npm:^4.0.0"
     "@pulumi/pulumi": "npm:^3.42.0"
     "@types/node": "npm:^14"
     typescript: "npm:^4.3.5"
@@ -722,19 +739,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pulumi/kruise@workspace:*, @pulumi/kruise@workspace:packages/kruise-crds":
+"@pulumi/gateway@workspace:*, @pulumi/gateway@workspace:packages/gateway-crds":
   version: 0.0.0-use.local
-  resolution: "@pulumi/kruise@workspace:packages/kruise-crds"
+  resolution: "@pulumi/gateway@workspace:packages/gateway-crds"
   dependencies:
+    "@pulumi/kubernetes": "npm:^4.0.0"
     "@pulumi/pulumi": "npm:^3.42.0"
     "@types/node": "npm:^14"
     typescript: "npm:^4.3.5"
   languageName: unknown
   linkType: soft
 
-"@pulumi/kubernetes@npm:^4.13.1":
-  version: 4.13.1
-  resolution: "@pulumi/kubernetes@npm:4.13.1"
+"@pulumi/kubernetes@npm:^4.0.0, @pulumi/kubernetes@npm:^4.15.0":
+  version: 4.15.0
+  resolution: "@pulumi/kubernetes@npm:4.15.0"
   dependencies:
     "@pulumi/pulumi": "npm:^3.25.0"
     "@types/node-fetch": "npm:^2.1.4"
@@ -743,7 +761,7 @@ __metadata:
     node-fetch: "npm:^2.3.0"
     shell-quote: "npm:^1.6.1"
     tmp: "npm:^0.0.33"
-  checksum: 10c0/561816099e98571d76888fce9b6fa9c0871ad366c919ff65b7a01121b17c6763dfc799988deffad10f5399edda4433f516480c209daf135f15f6f735bac3a838
+  checksum: 10c0/13e9c76e42cccd9db9a57539329b1173dde201819a0242985648f180dbf079cdac60a9ba289152d2a24351646a66cc6515da3005c2a6faf6cffc68224252ce14
   languageName: node
   linkType: hard
 
@@ -904,23 +922,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pulumi/traefik@workspace:*, @pulumi/traefik@workspace:packages/traefik-crds":
-  version: 0.0.0-use.local
-  resolution: "@pulumi/traefik@workspace:packages/traefik-crds"
-  dependencies:
-    "@pulumi/pulumi": "npm:^3.42.0"
-    "@types/node": "npm:^14"
-    typescript: "npm:^4.3.5"
-  languageName: unknown
-  linkType: soft
-
-"@sec-ant/readable-stream@npm:^0.4.1":
-  version: 0.4.1
-  resolution: "@sec-ant/readable-stream@npm:0.4.1"
-  checksum: 10c0/64e9e9cf161e848067a5bf60cdc04d18495dc28bb63a8d9f8993e4dd99b91ad34e4b563c85de17d91ffb177ec17a0664991d2e115f6543e73236a906068987af
-  languageName: node
-  linkType: hard
-
 "@sigstore/bundle@npm:^2.3.0, @sigstore/bundle@npm:^2.3.1":
   version: 2.3.1
   resolution: "@sigstore/bundle@npm:2.3.1"
@@ -984,13 +985,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sindresorhus/merge-streams@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "@sindresorhus/merge-streams@npm:4.0.0"
-  checksum: 10c0/482ee543629aa1933b332f811a1ae805a213681ecdd98c042b1c1b89387df63e7812248bb4df3910b02b3cc5589d3d73e4393f30e197c9dde18046ccd471fc6b
-  languageName: node
-  linkType: hard
-
 "@stacks/attic@workspace:stacks/attic":
   version: 0.0.0-use.local
   resolution: "@stacks/attic@workspace:stacks/attic"
@@ -1009,11 +1003,37 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@stacks/common@workspace:*, @stacks/common@workspace:stacks/common":
+  version: 0.0.0-use.local
+  resolution: "@stacks/common@workspace:stacks/common"
+  dependencies:
+    "@infra/cloudflare": "workspace:*"
+    "@infra/gateway": "workspace:*"
+    "@infra/k8s": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
 "@stacks/factorio@workspace:stacks/factorio":
   version: 0.0.0-use.local
   resolution: "@stacks/factorio@workspace:stacks/factorio"
   dependencies:
     "@infra/factorio": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@stacks/headscale@workspace:stacks/headscale":
+  version: 0.0.0-use.local
+  resolution: "@stacks/headscale@workspace:stacks/headscale"
+  dependencies:
+    "@infra/headscale": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@stacks/internal-gateway@workspace:stacks/internal-gateway":
+  version: 0.0.0-use.local
+  resolution: "@stacks/internal-gateway@workspace:stacks/internal-gateway"
+  dependencies:
+    "@infra/traefik": "workspace:*"
   languageName: unknown
   linkType: soft
 
@@ -1041,11 +1061,20 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@stacks/nix-serve@workspace:stacks/nix-serve":
+"@stacks/minio@workspace:stacks/minio":
   version: 0.0.0-use.local
-  resolution: "@stacks/nix-serve@workspace:stacks/nix-serve"
+  resolution: "@stacks/minio@workspace:stacks/minio"
   dependencies:
-    "@infra/nix-serve": "workspace:*"
+    "@infra/minio": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@stacks/plane@workspace:stacks/plane":
+  version: 0.0.0-use.local
+  resolution: "@stacks/plane@workspace:stacks/plane"
+  dependencies:
+    "@infra/plane": "workspace:*"
+    "@stacks/common": "workspace:*"
   languageName: unknown
   linkType: soft
 
@@ -1054,14 +1083,6 @@ __metadata:
   resolution: "@stacks/postgresql@workspace:stacks/postgresql"
   dependencies:
     "@infra/postgresql": "workspace:*"
-  languageName: unknown
-  linkType: soft
-
-"@stacks/radicale@workspace:stacks/radicale":
-  version: 0.0.0-use.local
-  resolution: "@stacks/radicale@workspace:stacks/radicale"
-  dependencies:
-    "@infra/radicale": "workspace:*"
   languageName: unknown
   linkType: soft
 
@@ -1097,7 +1118,6 @@ __metadata:
   dependencies:
     "@infra/cert-manager": "workspace:*"
     "@infra/cloudflare": "workspace:*"
-    "@infra/kruise": "workspace:*"
     "@infra/kubernetes-dashboard": "workspace:*"
     "@infra/tailscale": "workspace:*"
   languageName: unknown
@@ -1109,6 +1129,15 @@ __metadata:
   dependencies:
     "@infra/tailscale": "workspace:*"
     "@infra/vaultwarden": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@stacks/vpn-static@workspace:stacks/vpn-static":
+  version: 0.0.0-use.local
+  resolution: "@stacks/vpn-static@workspace:stacks/vpn-static"
+  dependencies:
+    "@infra/k8s": "workspace:*"
+    "@infra/vpn": "workspace:*"
   languageName: unknown
   linkType: soft
 
@@ -1704,26 +1733,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"execa@npm:^9.2.0":
-  version: 9.2.0
-  resolution: "execa@npm:9.2.0"
-  dependencies:
-    "@sindresorhus/merge-streams": "npm:^4.0.0"
-    cross-spawn: "npm:^7.0.3"
-    figures: "npm:^6.1.0"
-    get-stream: "npm:^9.0.0"
-    human-signals: "npm:^7.0.0"
-    is-plain-obj: "npm:^4.1.0"
-    is-stream: "npm:^4.0.1"
-    npm-run-path: "npm:^5.2.0"
-    pretty-ms: "npm:^9.0.0"
-    signal-exit: "npm:^4.1.0"
-    strip-final-newline: "npm:^4.0.0"
-    yoctocolors: "npm:^2.0.0"
-  checksum: 10c0/339e69bd01bfdc032122ef18d412ccda4386c7752b864607c2e8683a1531b4aab436744aeacee548e1be239adb2b52888da64ffd761e7e22f56f8f14cf66e4a7
-  languageName: node
-  linkType: hard
-
 "exponential-backoff@npm:^3.1.1":
   version: 3.1.1
   resolution: "exponential-backoff@npm:3.1.1"
@@ -1750,15 +1759,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"figures@npm:^6.1.0":
-  version: 6.1.0
-  resolution: "figures@npm:6.1.0"
-  dependencies:
-    is-unicode-supported: "npm:^2.0.0"
-  checksum: 10c0/9159df4264d62ef447a3931537de92f5012210cf5135c35c010df50a2169377581378149abfe1eb238bd6acbba1c0d547b1f18e0af6eee49e30363cedaffcfe4
-  languageName: node
-  linkType: hard
-
 "find-up@npm:^6.3.0":
   version: 6.3.0
   resolution: "find-up@npm:6.3.0"
@@ -1766,6 +1766,18 @@ __metadata:
     locate-path: "npm:^7.1.0"
     path-exists: "npm:^5.0.0"
   checksum: 10c0/07e0314362d316b2b13f7f11ea4692d5191e718ca3f7264110127520f3347996349bf9e16805abae3e196805814bc66ef4bff2b8904dc4a6476085fc9b0eba07
+  languageName: node
+  linkType: hard
+
+"fnts@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "fnts@npm:3.0.1"
+  peerDependencies:
+    typescript: ">=5.0"
+  peerDependenciesMeta:
+    typescript:
+      optional: true
+  checksum: 10c0/943e037d9e1e5f9a4de927146c7a2fba301f8c4ec7eb6801785fede60e285db8120e96270a3c8fc3014b066bf8e372c0c24b0cdfc22716d4f1170b51f57103a0
   languageName: node
   linkType: hard
 
@@ -1838,13 +1850,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"get-port-please@npm:^3.1.2":
-  version: 3.1.2
-  resolution: "get-port-please@npm:3.1.2"
-  checksum: 10c0/61237342fe035967e5ad1b67a2dee347a64de093bf1222b7cd50072568d73c48dad5cc5cd4fa44635b7cfdcd14d6c47554edb9891c2ec70ab33ecb831683e257
-  languageName: node
-  linkType: hard
-
 "get-stream@npm:^5.1.0":
   version: 5.2.0
   resolution: "get-stream@npm:5.2.0"
@@ -1858,16 +1863,6 @@ __metadata:
   version: 6.0.1
   resolution: "get-stream@npm:6.0.1"
   checksum: 10c0/49825d57d3fd6964228e6200a58169464b8e8970489b3acdc24906c782fb7f01f9f56f8e6653c4a50713771d6658f7cfe051e5eb8c12e334138c9c918b296341
-  languageName: node
-  linkType: hard
-
-"get-stream@npm:^9.0.0":
-  version: 9.0.1
-  resolution: "get-stream@npm:9.0.1"
-  dependencies:
-    "@sec-ant/readable-stream": "npm:^0.4.1"
-    is-stream: "npm:^4.0.1"
-  checksum: 10c0/d70e73857f2eea1826ac570c3a912757dcfbe8a718a033fa0c23e12ac8e7d633195b01710e0559af574cbb5af101009b42df7b6f6b29ceec8dbdf7291931b948
   languageName: node
   linkType: hard
 
@@ -1988,13 +1983,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"human-signals@npm:^7.0.0":
-  version: 7.0.0
-  resolution: "human-signals@npm:7.0.0"
-  checksum: 10c0/ce0c6d62d2e9bfe529d48f7c7fdf4b8c70fce950eef7850719b4e3f5bc71795ae7d61a3699ce13262bed7847705822601cc81f1921ea6a2906852e16228a94ab
-  languageName: node
-  linkType: hard
-
 "iconv-lite@npm:^0.6.2":
   version: 0.6.3
   resolution: "iconv-lite@npm:0.6.3"
@@ -2079,31 +2067,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-plain-obj@npm:^4.1.0":
-  version: 4.1.0
-  resolution: "is-plain-obj@npm:4.1.0"
-  checksum: 10c0/32130d651d71d9564dc88ba7e6fda0e91a1010a3694648e9f4f47bb6080438140696d3e3e15c741411d712e47ac9edc1a8a9de1fe76f3487b0d90be06ac9975e
-  languageName: node
-  linkType: hard
-
 "is-stream@npm:^2.0.0":
   version: 2.0.1
   resolution: "is-stream@npm:2.0.1"
   checksum: 10c0/7c284241313fc6efc329b8d7f08e16c0efeb6baab1b4cd0ba579eb78e5af1aa5da11e68559896a2067cd6c526bd29241dda4eb1225e627d5aa1a89a76d4635a5
-  languageName: node
-  linkType: hard
-
-"is-stream@npm:^4.0.1":
-  version: 4.0.1
-  resolution: "is-stream@npm:4.0.1"
-  checksum: 10c0/2706c7f19b851327ba374687bc4a3940805e14ca496dc672b9629e744d143b1ad9c6f1b162dece81c7bfbc0f83b32b61ccc19ad2e05aad2dd7af347408f60c7f
-  languageName: node
-  linkType: hard
-
-"is-unicode-supported@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "is-unicode-supported@npm:2.0.0"
-  checksum: 10c0/3013dfb8265fe9f9a0d1e9433fc4e766595631a8d85d60876c457b4bedc066768dab1477c553d02e2f626d88a4e019162706e04263c94d74994ef636a33b5f94
   languageName: node
   linkType: hard
 
@@ -2618,15 +2585,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"npm-run-path@npm:^5.2.0":
-  version: 5.3.0
-  resolution: "npm-run-path@npm:5.3.0"
-  dependencies:
-    path-key: "npm:^4.0.0"
-  checksum: 10c0/124df74820c40c2eb9a8612a254ea1d557ddfab1581c3e751f825e3e366d9f00b0d76a3c94ecd8398e7f3eee193018622677e95816e8491f0797b21e30b2deba
-  languageName: node
-  linkType: hard
-
 "npmlog@npm:^7.0.1":
   version: 7.0.1
   resolution: "npmlog@npm:7.0.1"
@@ -2737,13 +2695,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"parse-ms@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "parse-ms@npm:4.0.0"
-  checksum: 10c0/a7900f4f1ebac24cbf5e9708c16fb2fd482517fad353aecd7aefb8c2ba2f85ce017913ccb8925d231770404780df46244ea6fec598b3bde6490882358b4d2d16
-  languageName: node
-  linkType: hard
-
 "path-exists@npm:^5.0.0":
   version: 5.0.0
   resolution: "path-exists@npm:5.0.0"
@@ -2755,13 +2706,6 @@ __metadata:
   version: 3.1.1
   resolution: "path-key@npm:3.1.1"
   checksum: 10c0/748c43efd5a569c039d7a00a03b58eecd1d75f3999f5a28303d75f521288df4823bc057d8784eb72358b2895a05f29a070bc9f1f17d28226cc4e62494cc58c4c
-  languageName: node
-  linkType: hard
-
-"path-key@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "path-key@npm:4.0.0"
-  checksum: 10c0/794efeef32863a65ac312f3c0b0a99f921f3e827ff63afa5cb09a377e202c262b671f7b3832a4e64731003fa94af0263713962d317b9887bd1e0c48a342efba3
   languageName: node
   linkType: hard
 
@@ -2823,15 +2767,6 @@ __metadata:
   bin:
     prettier: bin/prettier.cjs
   checksum: 10c0/c25a709c9f0be670dc6bcb190b622347e1dbeb6c3e7df8b0711724cb64d8647c60b839937a4df4df18e9cfb556c2b08ca9d24d9645eb5488a7fc032a2c4d5cb3
-  languageName: node
-  linkType: hard
-
-"pretty-ms@npm:^9.0.0":
-  version: 9.0.0
-  resolution: "pretty-ms@npm:9.0.0"
-  dependencies:
-    parse-ms: "npm:^4.0.0"
-  checksum: 10c0/ba4a2acd1fe92a1c629e5cdeb555d7fa344ae9920e20fa00e8ac1db61b8d3dff8638ffc70c7569f681e375df68c9f31291c2c1912cefd02ef1b1bdd0861a4aed
   languageName: node
   linkType: hard
 
@@ -3075,7 +3010,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"signal-exit@npm:^4.0.1, signal-exit@npm:^4.1.0":
+"signal-exit@npm:^4.0.1":
   version: 4.1.0
   resolution: "signal-exit@npm:4.1.0"
   checksum: 10c0/41602dce540e46d599edba9d9860193398d135f7ff72cab629db5171516cfae628d21e7bfccde1bbfdf11c48726bc2a6d1a8fb8701125852fbfda7cf19c6aa83
@@ -3242,13 +3177,6 @@ __metadata:
   version: 2.0.0
   resolution: "strip-final-newline@npm:2.0.0"
   checksum: 10c0/bddf8ccd47acd85c0e09ad7375409d81653f645fda13227a9d459642277c253d877b68f2e5e4d819fe75733b0e626bac7e954c04f3236f6d196f79c94fa4a96f
-  languageName: node
-  linkType: hard
-
-"strip-final-newline@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "strip-final-newline@npm:4.0.0"
-  checksum: 10c0/b0cf2b62d597a1b0e3ebc42b88767f0a0d45601f89fd379a928a1812c8779440c81abba708082c946445af1d6b62d5f16e2a7cf4f30d9d6587b89425fae801ff
   languageName: node
   linkType: hard
 
@@ -3615,12 +3543,5 @@ __metadata:
   version: 1.0.0
   resolution: "yocto-queue@npm:1.0.0"
   checksum: 10c0/856117aa15cf5103d2a2fb173f0ab4acb12b4b4d0ed3ab249fdbbf612e55d1cadfd27a6110940e24746fb0a78cf640b522cc8bca76f30a3b00b66e90cf82abe0
-  languageName: node
-  linkType: hard
-
-"yoctocolors@npm:^2.0.0":
-  version: 2.0.2
-  resolution: "yoctocolors@npm:2.0.2"
-  checksum: 10c0/27ec9659c49084ea6da7bef50b2927128d874dc944fe4a72c2b62910b0b6e15b24747bb1c5da54a94d03b96c3c1a429c288cb9be0f8c834e9a2639e1b9ced732
   languageName: node
   linkType: hard

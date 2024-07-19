@@ -3,11 +3,11 @@ import { k8s } from "@infra/k8s"
 import { mariadb } from "@infra/mariadb"
 import { scripting } from "@infra/scripting"
 import { vaultwarden } from "@infra/vaultwarden"
+import { exposeInternalService } from "@stacks/common"
 
 const config = new pulumi.Config("vaultwarden")
 
 const domain = config.require("domain")
-const hostname = config.require("hostname")
 const nodeSelector = config.requireObject<k8s.NodeSelector>("nodeSelector")
 const databasePassword = config.requireSecret("databasePassword")
 
@@ -41,17 +41,13 @@ const { initContainer, secret, volumes } = mariadb.createDatabase({
   rootPasswordSecret: mariadbRootPasswordSecret,
 })
 
+const { gateway } = exposeInternalService(namespace, domain)
+
 vaultwarden.createApplication({
   namespace,
   domain,
 
-  ingress: {
-    className: "tailscale",
-
-    tls: {
-      hosts: [hostname],
-    },
-  },
+  gateway,
 
   databaseSecret: secret,
   initContainers: [initContainer],

@@ -1,0 +1,9 @@
+{
+  "name": "@stacks/common",
+  "private": true,
+  "dependencies": {
+    "@infra/cloudflare": "workspace:*",
+    "@infra/gateway": "workspace:*",
+    "@infra/k8s": "workspace:*"
+  }
+}

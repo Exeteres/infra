@@ -1,25 +1,20 @@
 import { pulumi } from "@infra/core"
 import { k8s } from "@infra/k8s"
 import { syncthing } from "@infra/syncthing"
+import { exposeInternalService } from "@stacks/common"
 
 const config = new pulumi.Config("syncthing")
-
+const domain = config.require("domain")
 const hostname = config.require("hostname")
-const webHostname = config.require("webHostname")
-const nodeSelector = config.requireObject<k8s.NodeSelector>("nodeSelector")
 
 const namespace = k8s.createNamespace({ name: "syncthing" })
+
+const { gateway } = exposeInternalService(namespace, domain)
 
 syncthing.createApplication({
   namespace,
 
-  ingress: {
-    className: "tailscale",
-
-    tls: {
-      hosts: [webHostname],
-    },
-  },
+  gateway,
 
   service: {
     type: "LoadBalancer",
@@ -38,6 +33,4 @@ syncthing.createApplication({
       },
     ],
   },
-
-  nodeSelector,
 })

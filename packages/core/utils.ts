@@ -1,3 +1,4 @@
+import { merge } from "ts-deepmerge"
 import { pulumi } from "./imports"
 
 /**
@@ -79,4 +80,16 @@ export function trimIndentation(str: string): string {
 
 export function mergeInputArrays<T>(...arrays: (pulumi.Input<T[]> | undefined | null)[]): pulumi.Output<T[]> {
   return pulumi.all(arrays).apply(arrays => arrays.filter(Boolean).flat()) as any
+}
+
+export type InputArray<T> = pulumi.Input<pulumi.Input<T>[]>
+
+export type HasFields = Record<string, any>
+
+export type RecursivePartial<T> = {
+  [P in keyof T]?: T[P] extends (infer U)[]
+    ? RecursivePartial<U>[]
+    : T[P] extends object | undefined
+      ? RecursivePartial<T[P]>
+      : T[P]
 }

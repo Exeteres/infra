@@ -61,6 +61,10 @@ export function createScriptBundle(options: ScriptBundleOptions): ScriptBundle {
           # Backup the volume
           echo "| Backing up volume"
           restic backup -H "$RESTIC_HOSTNAME" /data $@
+
+          # Forget old snapshots
+          echo "| Forgetting old snapshots"
+          restic forget --host "$RESTIC_HOSTNAME" --keep-daily 7 --keep-weekly 4 --keep-monthly 6
           echo "| Backup complete"
         `),
 

@@ -1,7 +1,0 @@
-{
-  "name": "@stacks/nix-serve",
-  "private": true,
-  "dependencies": {
-    "@infra/nix-serve": "workspace:*"
-  }
-}

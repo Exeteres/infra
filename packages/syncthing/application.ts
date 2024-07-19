@@ -1,8 +1,9 @@
 import { pulumi } from "@infra/core"
+import { gw } from "@infra/gateway"
 import { k8s } from "@infra/k8s"
 import { restic } from "@infra/restic"
 
-export interface ApplicationOptions extends k8s.ApplicationOptions {
+export interface ApplicationOptions extends k8s.ApplicationOptions, gw.GatewayApplicationOptions {
   volumeClaims?: {
     /**
      * The options for volume claim for the application state.
@@ -26,18 +27,13 @@ export interface ApplicationOptions extends k8s.ApplicationOptions {
   service?: k8s.ChildComponentOptions<k8s.ServiceOptions>
 
   /**
-   * The options to configure the ingress.
-   */
-  ingress?: k8s.ChildComponentOptions<k8s.IngressOptions>
-
-  /**
    * The options for the state backup.
    * If not specified, backups will be disabled.
    */
   stateBackup?: restic.BackupOptions
 }
 
-export interface Application extends k8s.Application {
+export interface Application extends k8s.Application, gw.GatewayApplication {
   /**
    * The workload service that powers the application.
    */
@@ -54,11 +50,6 @@ export interface Application extends k8s.Application {
      */
     dataClaims: k8s.raw.core.v1.PersistentVolumeClaim[]
   }
-
-  /**
-   * The ingress which exposes the application.
-   */
-  ingress?: k8s.raw.networking.v1.Ingress
 }
 
 /**
@@ -175,33 +166,20 @@ export function createApplication(options: ApplicationOptions = {}): Application
     volumes: [stateVolumeClaim, ...dataVolumeClaims, ...extraVolumes],
   })
 
-  const ingress =
-    options.ingress &&
-    k8s.createIngress({
+  const gateway = gw.createApplicationGateway(options.gateway, {
+    name: fullName,
+    namespace,
+
+    httpRoute: {
       name: fullName,
-      namespace,
-
-      ...options.ingress,
-
-      rules: [
-        {
-          http: {
-            paths: [
-              {
-                path: "/",
-                pathType: "Prefix",
-                backend: {
-                  service: {
-                    name: workloadService.service.metadata.name,
-                    port: { name: "http" },
-                  },
-                },
-              },
-            ],
-          },
+      rule: {
+        backendRef: {
+          name: workloadService.service.metadata.name,
+          port: 8384,
         },
-      ],
-    })
+      },
+    },
+  })
 
   return {
     name,
@@ -216,6 +194,6 @@ export function createApplication(options: ApplicationOptions = {}): Application
       dataClaims: dataVolumeClaims,
     },
 
-    ingress,
+    gateway,
   }
 }

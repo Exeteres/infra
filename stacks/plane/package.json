@@ -1,0 +1,8 @@
+{
+  "name": "@stacks/plane",
+  "private": true,
+  "dependencies": {
+    "@infra/plane": "workspace:*",
+    "@stacks/common": "workspace:*"
+  }
+}

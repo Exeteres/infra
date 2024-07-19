@@ -1,0 +1,221 @@
+version: 3
+
+vars:
+  BOOTSTRAP_STACK_COMMAND: pulumi up -s main --non-interactive -y -C ./stacks/
+
+tasks:
+  bootstrap:
+    desc: Bootstrap the entire infrastructure
+    deps:
+      # VPN
+      - bootstrap-vpn-static
+      - bootstrap-vpn
+
+      # Applications
+      - bootstrap-plane
+      - bootstrap-syncthing
+      - bootstrap-vaultwarden
+      - bootstrap-kubernetes-dashboard
+
+  # Infra
+  bootstrap-shared:
+    desc: Bootstrap the shared stack
+    run: once
+    cmd: "{{.BOOTSTRAP_STACK_COMMAND}}shared"
+    sources:
+      - ./stacks/shared
+
+  bootstrap-cert-manager:
+    desc: Bootstrap the Cert Manager
+    run: once
+    cmd: "{{.BOOTSTRAP_STACK_COMMAND}}cert-manager"
+    sources:
+      - ./stacks/cert-manager/**
+      - ./packages/{core,k8s,cert-manager}/**
+    deps:
+      - bootstrap-shared
+
+  bootstrap-mariadb:
+    desc: Bootstrap the MariaDB database
+    run: once
+    cmd: "{{.BOOTSTRAP_STACK_COMMAND}}mariadb"
+    sources:
+      - ./stacks/{common,mariadb}/**
+      - ./packages/{core,k8s,mariadb}/**
+    deps:
+      - bootstrap-shared
+
+  bootstrap-postgresql:
+    desc: Bootstrap the PostgreSQL database
+    run: once
+    cmd: "{{.BOOTSTRAP_STACK_COMMAND}}postgresql"
+    sources:
+      - ./stacks/{common,postgresql}/**
+      - ./packages/{core,k8s,postgresql}/**
+    deps:
+      - bootstrap-shared
+
+  # Infra 2
+  bootstrap-mailu:
+    desc: Bootstrap the Mailu email server
+    run: once
+    cmd: "{{.BOOTSTRAP_STACK_COMMAND}}mailu"
+    sources:
+      - ./stacks/{common,mailu}/**
+      - ./packages/{core,k8s,gateway,mailu}/**
+    deps:
+      - bootstrap-cert-manager
+
+  bootstrap-zitadel:
+    desc: Bootstrap the Zitadel identity and access management service
+    run: once
+    cmd: "{{.BOOTSTRAP_STACK_COMMAND}}zitadel"
+    sources:
+      - ./stacks/{common,zitadel}/**
+      - ./packages/{core,k8s,gateway,zitadel}/**
+    deps:
+      - bootstrap-cert-manager
+      - bootstrap-mailu
+      - bootstrap-postgresql
+
+  # VPN
+  bootstrap-headscale:
+    desc: Bootstrap the Headscale VPN management service
+    run: once
+    cmd: "{{.BOOTSTRAP_STACK_COMMAND}}headscale"
+    sources:
+      - ./stacks/{common,headscale}/**
+      - ./packages/{core,k8s,gateway,headscale}/**
+    deps:
+      - bootstrap-zitadel
+
+  bootstrap-vpn-static:
+    desc: Bootstrap the static VPN listeners
+    run: once
+    cmd: "{{.BOOTSTRAP_STACK_COMMAND}}vpn-static"
+    sources:
+      - ./stacks/vpn-static/**
+      - ./packages/{core,k8s,vpn}/**
+    deps:
+      - bootstrap-shared
+
+  bootstrap-vpn:
+    desc: Bootstrap the VPN nodes available via Tailscale
+    run: once
+    cmd: "{{.BOOTSTRAP_STACK_COMMAND}}vpn"
+    sources:
+      - ./stacks/vpn/**
+      - ./packages/{core,k8s,vpn}/**
+    deps:
+      - bootstrap-headscale
+
+  # Infra 3
+  bootstrap-internal-gateway:
+    desc: Bootstrap the Internal Gateway
+    run: once
+    cmd: "{{.BOOTSTRAP_STACK_COMMAND}}internal-gateway"
+    sources:
+      - ./stacks/internal-gateway/**
+      - ./packages/{core,k8s,gateway,traefik,tailscale}/**
+    deps:
+      - bootstrap-headscale
+
+  bootstrap-minio:
+    desc: Bootstrap the Minio S3-compatible object storage
+    run: once
+    cmd: "{{.BOOTSTRAP_STACK_COMMAND}}minio"
+    sources:
+      - ./stacks/{common,minio}/**
+      - ./packages/{core,k8s,gateway,minio}/**
+    deps:
+      - bootstrap-internal-gateway
+
+  # Applications
+  bootstrap-plane:
+    desc: Bootstrap the Plane task manager
+    run: once
+    cmd: "{{.BOOTSTRAP_STACK_COMMAND}}plane"
+    sources:
+      - ./stacks/{common,plane}/**
+      - ./packages/{core,k8s,gateway,plane}/**
+    deps:
+      - bootstrap-minio
+
+  bootstrap-syncthing:
+    desc: Bootstrap the Syncthing file synchronization service
+    run: once
+    cmd: "{{.BOOTSTRAP_STACK_COMMAND}}syncthing"
+    sources:
+      - ./stacks/{common,syncthing}/**
+      - ./packages/{core,k8s,gateway,syncthing}/**
+    deps:
+      - bootstrap-internal-gateway
+
+  bootstrap-vaultwarden:
+    desc: Bootstrap the Vaultwarden password manager
+    run: once
+    cmd: "{{.BOOTSTRAP_STACK_COMMAND}}vaultwarden"
+    sources:
+      - ./stacks/{common,vaultwarden}/**
+      - ./packages/{core,k8s,gateway,vaultwarden}/**
+    deps:
+      - bootstrap-internal-gateway
+
+  bootstrap-kubernetes-dashboard:
+    desc: Bootstrap the Kubernetes dashboard
+    run: once
+    cmd: "{{.BOOTSTRAP_STACK_COMMAND}}kubernetes-dashboard"
+    sources:
+      - ./stacks/{common,kubernetes-dashboard}/**
+      - ./packages/{core,k8s,gateway,kubernetes-dashboard}/**
+    deps:
+      - bootstrap-internal-gateway
+
+  bootstrap-standardnotes:
+    desc: Bootstrap the Standard Notes personal notes service
+    run: once
+    cmd: "{{.BOOTSTRAP_STACK_COMMAND}}standardnotes"
+    sources:
+      - ./stacks/{common,standardnotes}/**
+      - ./packages/{core,k8s,gateway,standardnotes}/**
+    deps:
+      - bootstrap-internal-gateway
+      - bootstrap-mariadb
+
+  # Public applications
+  bootstrap-attic:
+    desc: Bootstrap the Attic Nix cache
+    run: once
+    cmd: "{{.BOOTSTRAP_STACK_COMMAND}}attic"
+    sources:
+      - ./stacks/{common,attic}/**
+      - ./packages/{core,k8s,gateway,attic}/**
+    deps:
+      - bootstrap-cert-manager
+      - bootstrap-postgresql
+
+  bootstrap-factorio:
+    desc: Bootstrap the Factorio game server
+    run: once
+    cmd: "{{.BOOTSTRAP_STACK_COMMAND}}factorio"
+    sources:
+      - ./stacks/{common,factorio}/**
+      - ./packages/{core,k8s,factorio}/**
+
+  # CRDs
+  generate-crds:
+    desc: Generate all CRDs
+    run: once
+    deps:
+      - generate-crds-gateway
+      - generate-crds-cert-manager
+
+  generate-crds-gateway:
+    desc: Generate the Gateway CRDs
+    run: once
+    cmd: crd2pulumi -n --nodejsPath packages/gateway-crds --nodejsName gateway --force https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.1.0/experimental-install.yaml
+
+  generate-crds-cert-manager:
+    desc: Generate the Cert Manager CRDs
+    run: once
+    cmd: crd2pulumi -n --nodejsPath packages/cert-manager-crds --nodejsName cert-manager --force https://github.com/cert-manager/cert-manager/releases/download/v1.14.5/cert-manager.yaml

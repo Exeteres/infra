@@ -1,0 +1,7 @@
+{
+  "name": "@stacks/headscale",
+  "private": true,
+  "dependencies": {
+    "@infra/headscale": "workspace:*"
+  }
+}

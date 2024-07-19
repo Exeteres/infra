@@ -1,0 +1,9 @@
+{
+  "name": "@infra/gateway",
+  "private": true,
+  "dependencies": {
+    "@infra/cert-manager": "workspace:*",
+    "@infra/k8s": "workspace:*",
+    "@pulumi/gateway": "workspace:*"
+  }
+}
