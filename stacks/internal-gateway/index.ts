@@ -33,7 +33,9 @@ const { release } = traefik.createApplication({
       },
 
       ingressClass: {
-        enabled: false,
+        enabled: true,
+        isDefaultClass: false,
+        name: "internal",
       },
 
       gatewayClass: {

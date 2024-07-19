@@ -25,6 +25,14 @@ tasks:
     sources:
       - ./stacks/shared
 
+  bootstrap-public-gateway:
+    desc: Bootstrap the Public Gateway
+    run: once
+    cmd: "{{.BOOTSTRAP_STACK_COMMAND}}public-gateway"
+    sources:
+      - ./stacks/public-gateway/**
+      - ./packages/{core,k8s,traefik}/**
+
   bootstrap-cert-manager:
     desc: Bootstrap the Cert Manager
     run: once
@@ -65,6 +73,7 @@ tasks:
       - ./packages/{core,k8s,gateway,mailu}/**
     deps:
       - bootstrap-cert-manager
+      - bootstrap-public-gateway
 
   bootstrap-zitadel:
     desc: Bootstrap the Zitadel identity and access management service
@@ -74,7 +83,6 @@ tasks:
       - ./stacks/{common,zitadel}/**
       - ./packages/{core,k8s,gateway,zitadel}/**
     deps:
-      - bootstrap-cert-manager
       - bootstrap-mailu
       - bootstrap-postgresql
 
@@ -116,7 +124,7 @@ tasks:
     cmd: "{{.BOOTSTRAP_STACK_COMMAND}}internal-gateway"
     sources:
       - ./stacks/internal-gateway/**
-      - ./packages/{core,k8s,gateway,traefik,tailscale}/**
+      - ./packages/{core,k8s,traefik,tailscale}/**
     deps:
       - bootstrap-headscale
 
@@ -191,6 +199,7 @@ tasks:
       - ./stacks/{common,attic}/**
       - ./packages/{core,k8s,gateway,attic}/**
     deps:
+      - bootstrap-public-gateway
       - bootstrap-cert-manager
       - bootstrap-postgresql
 
