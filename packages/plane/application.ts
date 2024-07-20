@@ -1,12 +1,13 @@
 import { pulumi, random } from "@infra/core"
 import { k8s } from "@infra/k8s"
 import { gw } from "@infra/gateway"
+import { postgresql } from "@infra/postgresql"
 
 export interface ApplicationOptions extends k8s.ApplicationOptions, gw.GatewayApplicationOptions {
   /**
-   * The secret containing the database configuration.
+   * The database credentials.
    */
-  databaseSecret: k8s.raw.core.v1.Secret
+  databaseCredentials: postgresql.DatabaseCredentials
 
   /**
    * The secret containing the S3 configuration.
@@ -39,7 +40,6 @@ export function createApplication(options: ApplicationOptions): Application {
   const namespace = options.namespace ?? k8s.createNamespace({ name })
   const fullName = k8s.getPrefixedName(name, options.prefix)
 
-  const databaseSecret = pulumi.output(options.databaseSecret)
   const s3Secret = pulumi.output(options.s3Secret)
 
   const secretKey =
@@ -76,10 +76,11 @@ export function createApplication(options: ApplicationOptions): Application {
       },
 
       env: {
-        pgdb_username: databaseSecret.stringData.username,
-        pgdb_password: databaseSecret.stringData.password,
-        pgdb_name: databaseSecret.stringData.database,
-        pgdb_remote_url: databaseSecret.stringData.url,
+        pgdb_username: options.databaseCredentials.username,
+
+        pgdb_password: options.databaseCredentials.password,
+        pgdb_name: options.databaseCredentials.database,
+        pgdb_remote_url: options.databaseCredentials.url,
 
         aws_access_key: s3Secret.stringData.access_key,
         aws_secret_access_key: s3Secret.stringData.secret_key,

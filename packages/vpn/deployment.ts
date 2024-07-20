@@ -36,7 +36,7 @@ export interface DeploymentOptions {
   /**
    * The node selector to use for the deployment.
    */
-  nodeSelector: k8s.NodeSelector
+  nodeSelector?: k8s.NodeSelector
 
   /**
    * The name of the frontend interface.

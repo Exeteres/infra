@@ -1,10 +1,12 @@
-import { mergeInputArrays, pulumi } from "@infra/core"
+import { pulumi } from "@infra/core"
+import { gw } from "@infra/gateway"
 import { k8s } from "@infra/k8s"
+import { mariadb } from "@infra/mariadb"
 import { restic } from "@infra/restic"
 import { readFile } from "fs/promises"
 import { join } from "path"
 
-export interface StandardNotesOptions extends k8s.ApplicationOptions {
+export interface StandardNotesOptions extends k8s.ApplicationOptions, gw.GatewayApplicationOptions {
   /**
    * The domain to expose the application.
    */
@@ -16,39 +18,16 @@ export interface StandardNotesOptions extends k8s.ApplicationOptions {
   filesDomain: pulumi.Input<string>
 
   /**
-   * The options to configure the service.
+   * The options to configure the volume claim.
    */
-  service?: k8s.ChildComponentOptions<k8s.ServiceOptions>
+  uploadsVolumeClaim?: k8s.ChildComponentOptions<k8s.PersistentVolumeClaimOptions>
+
+  filesGateway?: gw.ApplicationGatewayOptions
 
   /**
-   * The options to configure the volume claims.
+   * The database credentials.
    */
-  volumeClaims?: {
-    serverUploads?: k8s.ChildComponentOptions<k8s.PersistentVolumeClaimOptions>
-  }
-
-  /**
-   * The secret containing the database configuration.
-   */
-  databaseSecret: pulumi.Input<k8s.raw.core.v1.Secret>
-
-  /**
-   * The options to configure the ingresses
-   */
-  ingresses?: {
-    server?: k8s.ChildComponentOptions<k8s.IngressOptions>
-    files?: k8s.ChildComponentOptions<k8s.IngressOptions>
-  }
-
-  /**
-   * The options for init containers.
-   */
-  initContainers?: pulumi.Input<k8s.raw.types.input.core.v1.Container[]>
-
-  /**
-   * The options for extra volumes.
-   */
-  volumes?: pulumi.Input<k8s.raw.types.input.core.v1.Volume[]>
+  databaseCredentials: mariadb.DatabaseCredentials
 
   /**
    * The options for the uploads backup.
@@ -75,7 +54,7 @@ export interface StandardNotesOptions extends k8s.ApplicationOptions {
   valetTokenSecret?: pulumi.Input<string>
 }
 
-export interface StandardNotesApplication extends k8s.Application {
+export interface StandardNotesApplication extends k8s.Application, gw.GatewayApplication {
   /**
    * The workload services which define the application.
    */
@@ -86,19 +65,11 @@ export interface StandardNotesApplication extends k8s.Application {
   }
 
   /**
-   * The volume claims which store the application data.
+   * The volume claim for the uploads.
    */
-  volumeClaims: {
-    serverUploads: k8s.raw.core.v1.PersistentVolumeClaim
-  }
+  uploadsVolumeClaim: k8s.raw.core.v1.PersistentVolumeClaim
 
-  /**
-   * The ingresses which exposes the application.
-   */
-  ingresses: {
-    server?: k8s.raw.networking.v1.Ingress
-    files?: k8s.raw.networking.v1.Ingress
-  }
+  filesGateway?: gw.Bundle
 }
 
 /**
@@ -112,17 +83,15 @@ export function createApplication(options: StandardNotesOptions): StandardNotesA
   const namespace = options.namespace ?? k8s.createNamespace({ name })
   const fullName = k8s.getPrefixedName(name, options.prefix)
 
-  const volumeClaims = {
-    serverUploads: k8s.createPersistentVolumeClaim({
-      name: k8s.getPrefixedName("server-uploads", fullName),
-      namespace,
+  const uploadsVolumeClaim = k8s.createPersistentVolumeClaim({
+    name: k8s.getPrefixedName("server-uploads", fullName),
+    namespace,
 
-      realName: "server-uploads",
+    realName: "server-uploads",
 
-      ...options.volumeClaims?.serverUploads,
-      capacity: "1Gi",
-    }),
-  }
+    ...options.uploadsVolumeClaim,
+    capacity: "1Gi",
+  })
 
   const authJwtSecret = k8s.createRandomSecret({
     name: k8s.getPrefixedName("auth-secret", fullName),
@@ -227,7 +196,7 @@ export function createApplication(options: StandardNotesOptions): StandardNotesA
     },
   })
 
-  const databaseSecret = pulumi.output(options.databaseSecret)
+  const databaseSecret = pulumi.output(options.databaseCredentials.secret)
 
   const initContainers: pulumi.Input<k8s.raw.types.input.core.v1.Container[]> = []
   const sidecarContainers: pulumi.Input<k8s.raw.types.input.core.v1.Container[]> = []
@@ -247,7 +216,7 @@ export function createApplication(options: StandardNotesOptions): StandardNotesA
 
       options: options.uploadsBackup,
       bundle,
-      volumeClaim: volumeClaims.serverUploads,
+      volumeClaim: uploadsVolumeClaim,
     })
 
     const { volumes, initContainer, sidecarContainer } = restic.createExtraContainers({
@@ -256,7 +225,7 @@ export function createApplication(options: StandardNotesOptions): StandardNotesA
 
       options: options.uploadsBackup,
       bundle,
-      volume: volumeClaims.serverUploads.metadata.name,
+      volume: uploadsVolumeClaim.metadata.name,
     })
 
     initContainers.push(initContainer)
@@ -276,10 +245,10 @@ export function createApplication(options: StandardNotesOptions): StandardNotesA
       { name: "files", port: 3104 },
     ],
 
-    initContainers: mergeInputArrays(initContainers, options.initContainers),
+    initContainers: initContainers,
 
-    volume: volumeClaims.serverUploads,
-    volumes: mergeInputArrays(options.volumes, extraVolumes),
+    volume: uploadsVolumeClaim,
+    volumes: extraVolumes,
     nodeSelector: options.nodeSelector,
 
     container: {
@@ -324,9 +293,7 @@ export function createApplication(options: StandardNotesOptions): StandardNotesA
         PUBLIC_FILES_SERVER_URL: pulumi.interpolate`https://${options.filesDomain}`,
       },
 
-      volumeMounts: [
-        { name: volumeClaims.serverUploads.metadata.name, mountPath: "/opt/server/packages/files/dist/uploads" },
-      ],
+      volumeMounts: [{ name: uploadsVolumeClaim.metadata.name, mountPath: "/opt/server/packages/files/dist/uploads" }],
     },
 
     containers: sidecarContainers,
@@ -338,57 +305,35 @@ export function createApplication(options: StandardNotesOptions): StandardNotesA
     redis,
   }
 
-  const serverIngress =
-    options.ingresses?.server &&
-    k8s.createIngress({
-      name: fullName,
-      namespace,
-      ...options.ingresses.server,
-      rules: [
-        {
-          http: {
-            paths: [
-              {
-                path: "/",
-                pathType: "Prefix",
-                backend: {
-                  service: {
-                    name: workloadServices.server.service.metadata.name,
-                    port: { number: workloadServices.server.service.spec.ports[0].port },
-                  },
-                },
-              },
-            ],
-          },
-        },
-      ],
-    })
+  const gateway = gw.createApplicationGateway(options.gateway, {
+    name: fullName,
+    namespace,
 
-  const filesIngress =
-    options.ingresses?.files &&
-    k8s.createIngress({
-      name: k8s.getPrefixedName("files", fullName),
-      namespace,
-      ...options.ingresses.files,
-      rules: [
-        {
-          http: {
-            paths: [
-              {
-                path: "/",
-                pathType: "Prefix",
-                backend: {
-                  service: {
-                    name: workloadServices.server.service.metadata.name,
-                    port: { number: workloadServices.server.service.spec.ports[1].port },
-                  },
-                },
-              },
-            ],
-          },
+    httpRoute: {
+      name: fullName,
+      rule: {
+        backendRef: {
+          name: workloadServices.server.service.metadata.name,
+          port: workloadServices.server.service.spec.ports[0].port,
         },
-      ],
-    })
+      },
+    },
+  })
+
+  const filesGateway = gw.createApplicationGateway(options.gateway, {
+    name: k8s.getPrefixedName("files", fullName),
+    namespace,
+
+    httpRoute: {
+      name: k8s.getPrefixedName("files", fullName),
+      rule: {
+        backendRef: {
+          name: workloadServices.server.service.metadata.name,
+          port: workloadServices.server.service.spec.ports[1].port,
+        },
+      },
+    },
+  })
 
   return {
     name,
@@ -397,11 +342,9 @@ export function createApplication(options: StandardNotesOptions): StandardNotesA
     fullName,
 
     workloadServices,
-    volumeClaims,
+    uploadsVolumeClaim,
 
-    ingresses: {
-      server: serverIngress,
-      files: filesIngress,
-    },
+    gateway,
+    filesGateway,
   }
 }

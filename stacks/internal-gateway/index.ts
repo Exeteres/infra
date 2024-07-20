@@ -66,7 +66,7 @@ const service = release.status.status.apply(() => k8s.raw.core.v1.Service.get("t
 export const gatewayIp = service.spec.clusterIP
 
 tailscale.createAuthSecret({
-  name: "vpn-tailscale-auth",
+  name: "tailscale-auth",
   namespace,
   value: tailscaleAuthKey,
 })

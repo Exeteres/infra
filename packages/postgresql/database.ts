@@ -10,6 +10,12 @@ export interface DatabaseOptions extends k8s.CommonOptions {
   host: pulumi.Input<string>
 
   /**
+   * The port of the database.
+   * By default, it is set to 5432.
+   */
+  port?: pulumi.Input<string>
+
+  /**
    * The name of the database.
    * If not provided, the name option will be used.
    */
@@ -39,23 +45,30 @@ export interface DatabaseOptions extends k8s.CommonOptions {
   bundle: scripting.Bundle
 }
 
-export interface Database {
+export interface DatabaseCredentials {
   /**
    * The secret containing the database credentials.
    */
   secret: k8s.raw.core.v1.Secret
 
+  host: pulumi.Output<string>
+  port: pulumi.Output<string>
+  username: pulumi.Output<string>
+  password: pulumi.Output<string>
+  database: pulumi.Output<string>
+  url: pulumi.Output<string>
+}
+
+export interface Database {
   /**
-   * The spec for the init container that will create the database and user.
-   * Should be added to the pod spec of the container that will use the database.
+   * The job that will create the database and user.
    */
-  initContainer: k8s.raw.types.input.core.v1.Container
+  setupJob: k8s.raw.batch.v1.Job
 
   /**
-   * The extra volumes used by the init container.
-   * Should be added to the pod spec of the container that will use the database.
+   * The database credentials.
    */
-  volumes: k8s.raw.types.input.core.v1.Volume[]
+  credentials: DatabaseCredentials
 }
 
 /**
@@ -68,29 +81,33 @@ export interface Database {
  * @returns The database resources.
  */
 export function createDatabase(options: DatabaseOptions): Database {
-  const databasePassword =
-    options.password ??
-    random.createPassword({
-      name: `${options.name}-password`,
-      parent: options.namespace,
-      length: 16,
-    }).result
+  const databasePassword = options.password
+    ? pulumi.output(options.password)
+    : random.createPassword({
+        name: `${options.name}-password`,
+        parent: options.namespace,
+        length: 16,
+      }).result
 
-  const database = options.database ?? options.name
-  const username = options.username ?? database
+  const host = pulumi.output(options.host)
+  const port = pulumi.output(options.port ?? "5432")
+  const database = pulumi.output(options.database ?? options.name)
+  const username = pulumi.output(options.username ?? database)
 
-  const databaseSecret = k8s.createSecret({
+  const credentials = {
+    host,
+    database,
+    username,
+    port,
+    password: databasePassword,
+    url: pulumi.interpolate`postgresql://${username}:${databasePassword}@${host}:${port}/${database}`,
+  }
+
+  const secret = k8s.createSecret({
     name: `${options.name}-postgres-credentials`,
     namespace: options.namespace,
 
-    data: {
-      host: options.host,
-      database,
-      username,
-      port: "5432",
-      password: databasePassword,
-      url: pulumi.interpolate`postgresql://${username}:${databasePassword}@${options.host}/${database}`,
-    },
+    data: credentials,
   })
 
   const { container, volumes } = scripting.createContainerSpec({
@@ -101,8 +118,12 @@ export function createDatabase(options: DatabaseOptions): Database {
     main: "/scripts/init-database.sh",
   })
 
-  return {
-    initContainer: {
+  const setupJob = k8s.createWorkload({
+    name: `${options.name}-init-database`,
+    namespace: options.namespace,
+
+    kind: "Job",
+    container: {
       ...container,
 
       env: [
@@ -110,7 +131,7 @@ export function createDatabase(options: DatabaseOptions): Database {
           name: "DATABASE_HOST",
           valueFrom: {
             secretKeyRef: {
-              name: databaseSecret.metadata.name,
+              name: secret.metadata.name,
               key: "host",
             },
           },
@@ -119,7 +140,7 @@ export function createDatabase(options: DatabaseOptions): Database {
           name: "DATABASE_NAME",
           valueFrom: {
             secretKeyRef: {
-              name: databaseSecret.metadata.name,
+              name: secret.metadata.name,
               key: "database",
             },
           },
@@ -128,7 +149,7 @@ export function createDatabase(options: DatabaseOptions): Database {
           name: "DATABASE_USER",
           valueFrom: {
             secretKeyRef: {
-              name: databaseSecret.metadata.name,
+              name: secret.metadata.name,
               key: "username",
             },
           },
@@ -137,7 +158,7 @@ export function createDatabase(options: DatabaseOptions): Database {
           name: "DATABASE_PASSWORD",
           valueFrom: {
             secretKeyRef: {
-              name: databaseSecret.metadata.name,
+              name: secret.metadata.name,
               key: "password",
             },
           },
@@ -154,16 +175,14 @@ export function createDatabase(options: DatabaseOptions): Database {
       ],
     },
 
-    volumes: [
-      ...volumes,
-      {
-        name: databaseSecret.metadata.name,
-        secret: {
-          secretName: databaseSecret.metadata.name,
-        },
-      },
-    ],
+    volumes,
+  })
 
-    secret: databaseSecret,
+  return {
+    setupJob,
+    credentials: {
+      secret,
+      ...credentials,
+    },
   }
 }

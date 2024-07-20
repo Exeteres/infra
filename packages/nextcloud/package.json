@@ -1,7 +1,0 @@
-{
-  "name": "@infra/nextcloud",
-  "private": true,
-  "dependencies": {
-    "@infra/k8s": "workspace:*"
-  }
-}

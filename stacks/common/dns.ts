@@ -11,19 +11,20 @@ export const getCloudflareProvider = singleton(() => {
   return new cloudflare.raw.Provider("cloudflare", { apiToken: cloudflareApiToken })
 })
 
-function createDnsRecord(namespace: k8s.raw.core.v1.Namespace, domain: string, ip: pulumi.Input<string>) {
+export function createDnsRecord(
+  namespace: k8s.raw.core.v1.Namespace,
+  options: Omit<cloudflare.RecordOptions, "parent" | "zoneId" | "provider">,
+) {
   const sharedStack = getSharedStack()
   const provider = getCloudflareProvider()
   const cloudflareZoneId = sharedStack.requireOutput("cloudflareZoneId")
 
   return cloudflare.createRecord({
-    name: domain,
-    type: "A",
-    value: ip,
     zoneId: cloudflareZoneId,
 
     parent: namespace,
     provider: provider,
+    ...options,
   })
 }
 
@@ -31,12 +32,12 @@ export function createPublicDnsRecord(namespace: k8s.raw.core.v1.Namespace, doma
   const sharedStack = getSharedStack()
   const nodeIpAddress = sharedStack.requireOutput("nodeIpAddress")
 
-  return createDnsRecord(namespace, domain, nodeIpAddress)
+  return createDnsRecord(namespace, { name: domain, type: "A", value: nodeIpAddress })
 }
 
 export function createInternalDnsRecord(namespace: k8s.raw.core.v1.Namespace, domain: string) {
   const internalGatewayStack = resolveStack("internal-gateway")
   const gatewayIp = internalGatewayStack.requireOutput("gatewayIp")
 
-  return createDnsRecord(namespace, domain, gatewayIp)
+  return createDnsRecord(namespace, { name: domain, type: "A", value: gatewayIp })
 }

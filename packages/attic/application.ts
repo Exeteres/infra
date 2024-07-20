@@ -1,31 +1,13 @@
 import { pulumi, trimIndentation } from "@infra/core"
+import { gw } from "@infra/gateway"
 import { k8s } from "@infra/k8s"
+import { postgresql } from "@infra/postgresql"
 
-export interface ApplicationOptions extends k8s.ApplicationOptions {
+export interface ApplicationOptions extends k8s.ApplicationOptions, gw.GatewayApplicationOptions {
   /**
-   * The options to configure the ingress.
+   * The database credentials.
    */
-  ingress?: k8s.ChildComponentOptions<k8s.IngressOptions>
-
-  /**
-   * The secret containing the database configuration.
-   */
-  databaseSecret: pulumi.Input<k8s.raw.core.v1.Secret>
-
-  /**
-   * The options to configure the service.
-   */
-  service?: k8s.ChildComponentOptions<k8s.ServiceOptions>
-
-  /**
-   * The options for init containers.
-   */
-  initContainers?: pulumi.Input<k8s.raw.types.input.core.v1.Container[]>
-
-  /**
-   * The options for extra volumes.
-   */
-  volumes?: pulumi.Input<k8s.raw.types.input.core.v1.Volume[]>
+  databaseCredentials: postgresql.DatabaseCredentials
 
   /**
    * The value of the server token secret.
@@ -34,12 +16,7 @@ export interface ApplicationOptions extends k8s.ApplicationOptions {
   serverTokenSecret?: pulumi.Input<string>
 }
 
-export interface Application extends k8s.Application {
-  /**
-   * The ingress which exposes the application.
-   */
-  ingress?: k8s.raw.networking.v1.Ingress
-
+export interface Application extends k8s.Application, gw.GatewayApplication {
   /**
    * The data volume claim.
    */
@@ -65,7 +42,7 @@ export function createApplication(options: ApplicationOptions): Application {
     key: "config.json",
     value: pulumi.interpolate`  
       [database]
-      url = "${pulumi.output(options.databaseSecret).stringData.url}"
+      url = "${options.databaseCredentials.url}"
 
       [storage]
       type = "local"
@@ -110,8 +87,6 @@ export function createApplication(options: ApplicationOptions): Application {
     labels: options.labels,
 
     nodeSelector: options.nodeSelector,
-    service: options.service,
-    initContainers: options.initContainers,
 
     port: 8080,
 
@@ -140,49 +115,23 @@ export function createApplication(options: ApplicationOptions): Application {
       },
     },
 
-    volumes: pulumi.output(options.volumes).apply(volumes => [
-      ...(volumes ?? []),
-      {
-        name: configSecret.metadata.name,
-        secret: {
-          secretName: configSecret.metadata.name,
-        },
-      },
-      {
-        name: dataVolumeClaim.metadata.name,
-        persistentVolumeClaim: {
-          claimName: dataVolumeClaim.metadata.name,
-        },
-      },
-    ]),
+    volumes: [configSecret, dataVolumeClaim],
   })
 
-  const ingress =
-    options.ingress &&
-    k8s.createIngress({
+  const gateway = gw.createApplicationGateway(options.gateway, {
+    name: fullName,
+    namespace,
+
+    httpRoute: {
       name: fullName,
-      namespace,
-
-      ...options.ingress,
-
       rule: {
-        ...options.ingress.rule,
-        http: {
-          paths: [
-            {
-              path: "/",
-              pathType: "Prefix",
-              backend: {
-                service: {
-                  name: workloadService.service.metadata.name,
-                  port: { number: workloadService.service.spec.ports[0].port },
-                },
-              },
-            },
-          ],
+        backendRef: {
+          name: workloadService.service.metadata.name,
+          port: workloadService.service.spec.ports[0].port,
         },
       },
-    })
+    },
+  })
 
   return {
     name,
@@ -191,7 +140,7 @@ export function createApplication(options: ApplicationOptions): Application {
     fullName,
 
     workloadService,
-    ingress,
     dataVolumeClaim,
+    gateway,
   }
 }

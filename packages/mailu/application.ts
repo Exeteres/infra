@@ -2,6 +2,7 @@ import { certManager } from "@infra/cert-manager"
 import { pulumi } from "@infra/core"
 import { k8s } from "@infra/k8s"
 import { getPrefixedName } from "@infra/k8s/application"
+import { restic } from "@infra/restic"
 
 export interface ApplicationOptions extends k8s.ReleaseApplicationOptions {
   /**
@@ -25,6 +26,12 @@ export interface ApplicationOptions extends k8s.ReleaseApplicationOptions {
    * If not provided, a random password will be generated.
    */
   adminPassword?: pulumi.Input<string>
+
+  /**
+   * The options for the backup.
+   * If not specified, backups will be disabled.
+   */
+  backup?: restic.BackupOptions
 }
 
 export interface Application extends k8s.ReleaseApplication {}
@@ -60,6 +67,54 @@ export function createApplication(options: ApplicationOptions): Application {
     existingValue: options.adminPassword,
   })
 
+  const dataVolumeClaim = k8s.createPersistentVolumeClaim({
+    name: k8s.getPrefixedName("storage", fullName),
+    namespace,
+
+    capacity: "1Gi",
+  })
+
+  const dependencies: pulumi.Resource[] = [secretKeySecret, adminPasswordSecret, dataVolumeClaim]
+
+  if (options.backup) {
+    const bundle = restic.createScriptBundle({
+      name: k8s.getPrefixedName("backup", fullName),
+      namespace,
+
+      repository: options.backup.repository,
+    })
+
+    restic.createBackupCronJob({
+      name: fullName,
+      namespace,
+
+      options: options.backup,
+      bundle,
+      volumeClaim: dataVolumeClaim,
+    })
+
+    const { volumes, initContainer } = restic.createExtraContainers({
+      name: fullName,
+      namespace,
+
+      options: options.backup,
+      bundle,
+      volume: dataVolumeClaim.metadata.name,
+    })
+
+    const restoreJob = k8s.createWorkload({
+      name: k8s.getPrefixedName("restore", fullName),
+      namespace,
+
+      kind: "Job",
+      container: initContainer,
+      volume: dataVolumeClaim,
+      volumes,
+    })
+
+    dependencies.push(restoreJob)
+  }
+
   const release = k8s.createHelmRelease({
     name: fullName,
     namespace,
@@ -83,6 +138,7 @@ export function createApplication(options: ApplicationOptions): Application {
 
       persistence: {
         size: "1Gi",
+        existingClaim: dataVolumeClaim.metadata.name,
       },
 
       redis: {

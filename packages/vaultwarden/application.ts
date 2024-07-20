@@ -1,6 +1,7 @@
 import { pulumi } from "@infra/core"
 import { gw } from "@infra/gateway"
 import { k8s } from "@infra/k8s"
+import { postgresql } from "@infra/postgresql"
 
 export interface ApplicationOptions extends k8s.ApplicationOptions, gw.GatewayApplicationOptions {
   /**
@@ -9,24 +10,9 @@ export interface ApplicationOptions extends k8s.ApplicationOptions, gw.GatewayAp
   domain: pulumi.Input<string>
 
   /**
-   * The options to configure the service.
+   * The database credentials.
    */
-  service?: k8s.ChildComponentOptions<k8s.ServiceOptions>
-
-  /**
-   * The options for init containers.
-   */
-  initContainers?: pulumi.Input<k8s.raw.types.input.core.v1.Container[]>
-
-  /**
-   * The options for extra volumes.
-   */
-  volumes?: pulumi.Input<k8s.raw.types.input.core.v1.Volume[]>
-
-  /**
-   * The secret containing the database configuration.
-   */
-  databaseSecret: pulumi.Input<k8s.raw.core.v1.Secret>
+  databaseCredentials: postgresql.DatabaseCredentials
 }
 
 export interface Application extends k8s.Application, gw.GatewayApplication {
@@ -57,8 +43,6 @@ export function createApplication(options: ApplicationOptions): Application {
     labels: options.labels,
 
     nodeSelector: options.nodeSelector,
-    service: options.service,
-    initContainers: options.initContainers,
 
     port: 80,
 
@@ -68,14 +52,12 @@ export function createApplication(options: ApplicationOptions): Application {
       environment: {
         DATABASE_URL: {
           secretKeyRef: {
-            name: pulumi.output(options.databaseSecret).metadata.name,
+            name: options.databaseCredentials.secret.metadata.name,
             key: "url",
           },
         },
       },
     },
-
-    volumes: options.volumes,
   })
 
   const gateway = gw.createApplicationGateway(options.gateway, {

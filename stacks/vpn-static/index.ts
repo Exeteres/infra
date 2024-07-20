@@ -13,7 +13,6 @@ const frontendAddress = config.require("frontendAddress")
 const dnsServerAddress = config.require("dnsServerAddress")
 const locations = config.getObject<StaticLocationConfig[]>("locations") ?? []
 const privateKey = config.requireSecret("privateKey")
-const nodeSelector = config.requireObject<k8s.NodeSelector>("nodeSelector")
 const frontendPrivateKey = config.requireSecret("frontendPrivateKey")
 const clients = config.getObject<vpn.StaticClientConfig[]>("clients") ?? []
 
@@ -27,7 +26,6 @@ for (const location of locations) {
     dnsServerAddress,
     privateKey,
     location,
-    nodeSelector,
     frontendPort: location.port,
     frontendPrivateKey,
     clients,

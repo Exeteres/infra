@@ -1,4 +1,4 @@
-import { pulumi } from "@infra/core"
+import { InputArray, pulumi } from "@infra/core"
 import { gw } from "@infra/gateway"
 import { k8s } from "@infra/k8s"
 import { restic } from "@infra/restic"
@@ -31,6 +31,11 @@ export interface ApplicationOptions extends k8s.ApplicationOptions, gw.GatewayAp
    * If not specified, backups will be disabled.
    */
   stateBackup?: restic.BackupOptions
+
+  /**
+   * The sidecar containers to add to the application.
+   */
+  sidecarContainers?: k8s.raw.types.input.core.v1.Container[]
 }
 
 export interface Application extends k8s.Application, gw.GatewayApplication {
@@ -90,6 +95,10 @@ export function createApplication(options: ApplicationOptions = {}): Application
   const initContainers: pulumi.Input<k8s.raw.types.input.core.v1.Container[]> = []
   const sidecarContainers: pulumi.Input<k8s.raw.types.input.core.v1.Container[]> = []
   const extraVolumes: pulumi.Input<k8s.raw.types.input.core.v1.Volume[]> = []
+
+  if (options.sidecarContainers) {
+    sidecarContainers.push(...options.sidecarContainers)
+  }
 
   if (options.stateBackup) {
     const bundle = restic.createScriptBundle({

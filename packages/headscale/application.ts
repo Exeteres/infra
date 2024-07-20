@@ -1,31 +1,18 @@
 import { pulumi } from "@infra/core"
+import { gw } from "@infra/gateway"
 import { k8s } from "@infra/k8s"
+import { postgresql } from "@infra/postgresql"
 
-export interface ApplicationOptions extends k8s.ApplicationOptions {
+export interface ApplicationOptions extends k8s.ApplicationOptions, gw.GatewayApplicationOptions {
   /**
    * The options to configure the service.
    */
   service?: k8s.ChildComponentOptions<k8s.ServiceOptions>
 
   /**
-   * The options to configure the ingress.
+   * The database credentials.
    */
-  ingress?: k8s.ChildComponentOptions<k8s.IngressOptions>
-
-  /**
-   * The options for init containers.
-   */
-  initContainers?: pulumi.Input<k8s.raw.types.input.core.v1.Container[]>
-
-  /**
-   * The options for extra volumes.
-   */
-  volumes?: pulumi.Input<k8s.raw.types.input.core.v1.Volume[]>
-
-  /**
-   * The secret containing the database configuration.
-   */
-  databaseSecret: pulumi.Input<k8s.raw.core.v1.Secret>
+  databaseCredentials: postgresql.DatabaseCredentials
 
   /**
    * The fully qualified domain name of the application.
@@ -87,16 +74,11 @@ export interface OidcConfig {
   clientSecret: pulumi.Input<string>
 }
 
-export interface Application extends k8s.Application {
+export interface Application extends k8s.Application, gw.GatewayApplication {
   /**
    * The workload service that powers the application.
    */
   workloadService: k8s.WorkloadService<"Deployment">
-
-  /**
-   * The ingress which exposes the application.
-   */
-  ingress?: k8s.raw.networking.v1.Ingress
 }
 
 /**
@@ -200,11 +182,11 @@ export function createApplication(options: ApplicationOptions): Application {
         database: {
           type: "postgres",
           postgres: {
-            host: pulumi.output(options.databaseSecret).stringData.host,
-            port: pulumi.output(options.databaseSecret).stringData.port,
-            name: pulumi.output(options.databaseSecret).stringData.database,
-            user: pulumi.output(options.databaseSecret).stringData.username,
-            pass: pulumi.output(options.databaseSecret).stringData.password,
+            host: options.databaseCredentials.host,
+            port: options.databaseCredentials.port,
+            name: options.databaseCredentials.database,
+            user: options.databaseCredentials.username,
+            pass: options.databaseCredentials.password,
             max_open_conns: 10,
             max_idle_conns: 10,
             conn_max_idle_time_secs: 3600,
@@ -300,7 +282,6 @@ export function createApplication(options: ApplicationOptions): Application {
     },
 
     service: options.service,
-    initContainers: options.initContainers,
     nodeSelector: options.nodeSelector,
 
     ports: [
@@ -308,44 +289,29 @@ export function createApplication(options: ApplicationOptions): Application {
       { name: "stun", port: 3478 },
     ],
 
-    volumes: pulumi
-      .output(options.volumes)
-      .apply(volumes => [
-        aclConfigMap,
-        configSecret,
-        ...(volumes ?? []),
-        ...(secretsVolume ? [secretsVolume] : []),
-        ...(noisePrivateKeySecret ? [noisePrivateKeySecret] : []),
-        ...(derpServerPrivateKeySecret ? [derpServerPrivateKeySecret] : []),
-      ]),
+    volumes: [
+      aclConfigMap,
+      configSecret,
+      ...(secretsVolume ? [secretsVolume] : []),
+      ...(noisePrivateKeySecret ? [noisePrivateKeySecret] : []),
+      ...(derpServerPrivateKeySecret ? [derpServerPrivateKeySecret] : []),
+    ],
   })
 
-  const ingress =
-    options.ingress &&
-    k8s.createIngress({
+  const gateway = gw.createApplicationGateway(options.gateway, {
+    name: fullName,
+    namespace,
+
+    httpRoute: {
       name: fullName,
-      namespace,
-
-      ...options.ingress,
-
       rule: {
-        ...options.ingress.rule,
-        http: {
-          paths: [
-            {
-              path: "/",
-              pathType: "Prefix",
-              backend: {
-                service: {
-                  name: workloadService.service.metadata.name,
-                  port: { name: "http" },
-                },
-              },
-            },
-          ],
+        backendRef: {
+          name: workloadService.service.metadata.name,
+          port: workloadService.service.spec.ports[0].port,
         },
       },
-    })
+    },
+  })
 
   return {
     name,
@@ -354,6 +320,6 @@ export function createApplication(options: ApplicationOptions): Application {
     fullName,
 
     workloadService,
-    ingress,
+    gateway,
   }
 }

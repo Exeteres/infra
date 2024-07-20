@@ -16,6 +16,7 @@ tasks:
       - bootstrap-syncthing
       - bootstrap-vaultwarden
       - bootstrap-kubernetes-dashboard
+      - bootstrap-standardnotes
 
   # Infra
   bootstrap-shared:
@@ -168,6 +169,7 @@ tasks:
       - ./packages/{core,k8s,gateway,vaultwarden}/**
     deps:
       - bootstrap-internal-gateway
+      - bootstrap-mariadb
 
   bootstrap-kubernetes-dashboard:
     desc: Bootstrap the Kubernetes dashboard

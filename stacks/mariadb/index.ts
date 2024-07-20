@@ -1,42 +1,24 @@
 import { pulumi } from "@infra/core"
 import { k8s } from "@infra/k8s"
 import { mariadb } from "@infra/mariadb"
-import { restic } from "@infra/restic"
-
-const sharedStack = new pulumi.StackReference("organization/shared/main")
-
-const config = new pulumi.Config("mariadb")
-
-const rootPassword = config.requireSecret("rootPassword")
-const backupPassword = config.requireSecret("backupPassword")
-const nodeSelector = config.requireObject<k8s.NodeSelector>("nodeSelector")
-const rcloneConfig = sharedStack.requireOutput("rcloneConfig")
+import { createBackupRepository } from "@stacks/common"
 
 const namespace = k8s.createNamespace({ name: "mariadb" })
 
-const backupRepository = restic.createRepository({
-  name: "mariadb",
+const config = new pulumi.Config("mariadb")
+const rootPassword = config.requireSecret("rootPassword")
+const backupPassword = config.requireSecret("backupPassword")
+
+const { backup } = createBackupRepository("mariadb", namespace, backupPassword)
+
+const { release } = mariadb.createApplication({
   namespace,
 
-  remotePath: "rclone:backup:mariadb",
-  password: backupPassword,
-
-  environment: restic.createRcloneEnvironment({
-    namespace,
-    rcloneConfig,
-  }),
-})
-
-mariadb.createApplication({
-  namespace,
-
-  backup: {
-    repository: backupRepository,
-    hostname: "mariadb",
-  },
-
+  backup,
   rootPassword,
-  nodeSelector,
 })
 
-export { rootPassword }
+const host = pulumi.interpolate`${release.name}.${namespace.metadata.name}`
+const port = 3306
+
+export { host, port, rootPassword }

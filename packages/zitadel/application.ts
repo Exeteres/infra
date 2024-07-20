@@ -1,7 +1,8 @@
 import { pulumi, random } from "@infra/core"
+import { gw } from "@infra/gateway"
 import { k8s } from "@infra/k8s"
 
-export interface ApplicationOptions extends k8s.ApplicationOptions {
+export interface ApplicationOptions extends k8s.ApplicationOptions, gw.GatewayApplicationOptions {
   /**
    * The fully qualified domain name of the Zitadel application.
    */
@@ -36,12 +37,7 @@ export interface ApplicationOptions extends k8s.ApplicationOptions {
   masterKey?: pulumi.Input<string>
 }
 
-export interface Application extends k8s.ReleaseApplication {
-  /**
-   * The ingress which exposes the application.
-   */
-  ingress?: k8s.raw.networking.v1.Ingress
-}
+export interface Application extends k8s.ReleaseApplication, gw.GatewayApplication {}
 
 /**
  * Creates a ready-to-use Zitadel application.
@@ -150,32 +146,20 @@ export function createApplication(options: ApplicationOptions): Application {
     },
   })
 
-  const ingress =
-    options.ingress &&
-    k8s.createIngress({
+  const gateway = gw.createApplicationGateway(options.gateway, {
+    name: fullName,
+    namespace,
+
+    httpRoute: {
       name: fullName,
-      namespace,
-
-      ...options.ingress,
-
       rule: {
-        ...options.ingress.rule,
-        http: {
-          paths: [
-            {
-              path: "/",
-              pathType: "Prefix",
-              backend: {
-                service: {
-                  name: release.name,
-                  port: { number: 8080 },
-                },
-              },
-            },
-          ],
+        backendRef: {
+          name: release.name,
+          port: 8080,
         },
       },
-    })
+    },
+  })
 
   return {
     name,
@@ -184,6 +168,6 @@ export function createApplication(options: ApplicationOptions): Application {
     fullName,
 
     release,
-    ingress,
+    gateway,
   }
 }

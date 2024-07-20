@@ -1,42 +1,24 @@
 import { pulumi } from "@infra/core"
 import { k8s } from "@infra/k8s"
 import { postgresql } from "@infra/postgresql"
-import { restic } from "@infra/restic"
-
-const sharedStack = new pulumi.StackReference("organization/shared/main")
-
-const config = new pulumi.Config("postgresql")
-
-const rootPassword = config.requireSecret("rootPassword")
-const backupPassword = config.requireSecret("backupPassword")
-const nodeSelector = config.requireObject<k8s.NodeSelector>("nodeSelector")
-const rcloneConfig = sharedStack.requireOutput("rcloneConfig")
+import { createBackupRepository } from "@stacks/common"
 
 const namespace = k8s.createNamespace({ name: "postgresql" })
 
-const backupRepository = restic.createRepository({
-  name: "postgresql",
+const config = new pulumi.Config("postgresql")
+const rootPassword = config.requireSecret("rootPassword")
+const backupPassword = config.requireSecret("backupPassword")
+
+const { backup } = createBackupRepository("postgresql", namespace, backupPassword)
+
+const { release } = postgresql.createApplication({
   namespace,
 
-  remotePath: "rclone:backup:postgresql",
-  password: backupPassword,
-
-  environment: restic.createRcloneEnvironment({
-    namespace,
-    rcloneConfig,
-  }),
-})
-
-postgresql.createApplication({
-  namespace,
-
-  backup: {
-    repository: backupRepository,
-    hostname: "postgresql",
-  },
-
+  backup,
   rootPassword,
-  nodeSelector,
 })
 
-export { rootPassword }
+const host = pulumi.interpolate`${release.name}.${namespace.metadata.name}`
+const port = 5432
+
+export { host, port, rootPassword }

@@ -153,6 +153,7 @@ export function createWorkload<T extends WorkloadKind>(options: TypedWorkloadOpt
       volumes: normalizeInputArrayAndMap(options.volume, options.volumes, mapWorkloadVolume),
 
       securityContext: options.securityContext,
+      restartPolicy: options.kind === "Job" ? "OnFailure" : undefined,
     },
   }
 
@@ -174,6 +175,20 @@ export function createWorkload<T extends WorkloadKind>(options: TypedWorkloadOpt
               },
             },
           },
+        },
+      },
+      mapPulumiOptions(options),
+    ) as WorkloadResources[T]
+  }
+
+  if (options.kind === "Job") {
+    return new raw.batch.v1.Job(
+      options.name,
+      {
+        metadata: mapMetadata(options, { labels }),
+        spec: {
+          template: podTemplate,
+          backoffLimit: 0,
         },
       },
       mapPulumiOptions(options),

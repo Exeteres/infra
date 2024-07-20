@@ -10,7 +10,6 @@ const dnsServerAddress = config.require("dnsServerAddress")
 const locations = config.getObject<vpn.LocationConfig[]>("locations") ?? []
 const privateKey = config.requireSecret("privateKey")
 const tailscaleAuthKey = config.requireSecret("tailscaleAuthKey")
-const nodeSelector = config.requireObject<k8s.NodeSelector>("nodeSelector")
 
 const namespace = k8s.createNamespace({ name: "vpn" })
 
@@ -27,6 +26,5 @@ for (const location of locations) {
     dnsServerAddress,
     privateKey,
     location,
-    nodeSelector,
   })
 }
