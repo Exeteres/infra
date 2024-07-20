@@ -1,26 +1,18 @@
 import { pulumi } from "@infra/core"
 import { k8s } from "@infra/k8s"
 import { kubernetesDashboard } from "@infra/kubernetes-dashboard"
+import { exposeInternalService } from "@stacks/common"
+
+const namespace = k8s.createNamespace({ name: "kubernetes-dashboard" })
 
 const config = new pulumi.Config("kubernetes-dashboard")
+const domain = config.require("domain")
 
-const hostname = config.require("hostname")
-const nodeSelector = config.requireObject<k8s.NodeSelector>("nodeSelector")
+const { gateway } = exposeInternalService(namespace, domain)
 
 const application = kubernetesDashboard.createApplication({
-  releaseOptions: {
-    values: {
-      app: {
-        ingress: {
-          enabled: true,
-          hosts: [hostname],
-          ingressClassName: "tailscale",
-        },
-      },
-    },
-  },
-
-  nodeSelector,
+  namespace,
+  gateway,
 })
 
 kubernetesDashboard.createServiceAccount({

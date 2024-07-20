@@ -1,8 +1,9 @@
 import { merge } from "@infra/core"
+import { gw } from "@infra/gateway"
 import { k8s } from "@infra/k8s"
 
-export interface ApplicationOptions extends k8s.ReleaseApplicationOptions {}
-export interface Application extends k8s.ReleaseApplication {}
+export interface ApplicationOptions extends k8s.ReleaseApplicationOptions, gw.GatewayApplicationOptions {}
+export interface Application extends k8s.ReleaseApplication, gw.GatewayApplication {}
 
 /**
  * Creates a Helm release for the Kubernetes Dashboard.
@@ -27,17 +28,34 @@ export function createApplication(options: ApplicationOptions = {}): Application
 
     values: merge(
       {
-        app: {
-          scheduling: {
-            nodeSelector: options.nodeSelector,
-          },
-        },
         kong: {
-          nodeSelector: options.nodeSelector,
+          proxy: {
+            tls: {
+              enabled: false,
+            },
+            http: {
+              enabled: true,
+            },
+          },
         },
       },
       options.releaseOptions?.values ?? {},
     ),
+  })
+
+  const gateway = gw.createApplicationGateway(options.gateway, {
+    name: fullName,
+    namespace,
+
+    httpRoute: {
+      name: fullName,
+      rule: {
+        backendRef: {
+          name: "kubernetes-dashboard-kong-proxy",
+          port: 80,
+        },
+      },
+    },
   })
 
   return {
@@ -46,5 +64,6 @@ export function createApplication(options: ApplicationOptions = {}): Application
     fullName,
     namespace,
     release,
+    gateway,
   }
 }

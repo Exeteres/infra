@@ -51,6 +51,12 @@ const { release } = traefik.createApplication({
       service: {
         type: "ClusterIP",
       },
+
+      logs: {
+        access: {
+          enabled: true,
+        },
+      },
     },
   },
 })
