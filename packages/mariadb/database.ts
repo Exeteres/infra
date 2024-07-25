@@ -89,9 +89,11 @@ export function createDatabase(options: DatabaseOptions): Database {
         length: 16,
       }).result
 
+  const normalizedName = pulumi.output(options.name).apply(name => name.replace(/-/g, "_"))
+
   const host = pulumi.output(options.host)
   const port = pulumi.output(options.port ?? "3306")
-  const database = pulumi.output(options.database ?? options.name)
+  const database = pulumi.output(options.database ?? normalizedName)
   const username = pulumi.output(options.username ?? database)
 
   const credentials = {

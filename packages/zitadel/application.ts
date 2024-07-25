@@ -100,7 +100,7 @@ export function createApplication(options: ApplicationOptions): Application {
 
     repo: "https://charts.zitadel.com",
     chart: "zitadel",
-    version: "7.14.0",
+    version: "8.1.0",
 
     values: {
       replicaCount: 1,

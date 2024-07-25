@@ -21,15 +21,15 @@ export function createApplication(options: ApplicationOptions = {}): Application
 
     chart: "cert-manager",
     repo: "https://charts.jetstack.io",
-    version: "1.14.5",
+    version: "1.15.1",
 
-    ...options.releaseOptions,
+    ...options.release,
 
     values: merge(
       {
         installCRDs: true,
       },
-      options.releaseOptions?.values ?? {},
+      options.release?.values ?? {},
     ),
   })
 

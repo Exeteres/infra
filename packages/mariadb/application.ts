@@ -132,9 +132,9 @@ export function createApplication(options: ApplicationOptions = {}): Application
 
     repo: "https://charts.bitnami.com/bitnami",
     chart: "mariadb",
-    version: "18.2.2",
+    version: "19.0.1",
 
-    ...options.releaseOptions,
+    ...options.release,
 
     values: merge(
       {
@@ -152,7 +152,7 @@ export function createApplication(options: ApplicationOptions = {}): Application
           extraVolumes,
         },
       },
-      options.releaseOptions?.values ?? {},
+      options.release?.values ?? {},
     ),
   })
 

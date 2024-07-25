@@ -353,12 +353,15 @@ export function createGateway(options: Options): Bundle {
                 protocol: listener.protocol,
                 allowedRoutes: listener.allowedRoutes,
                 hostname: listener.hostname,
-                tls: {
-                  ...listener?.tls,
-                  certificateRefs: listener?.certificate
-                    ? [{ kind: "Secret", name: listener.certificate.secretName }]
-                    : [],
-                },
+                tls:
+                  listener.protocol === "HTTPS"
+                    ? {
+                        ...listener?.tls,
+                        certificateRefs: listener?.certificate
+                          ? [{ kind: "Secret", name: listener.certificate.secretName }]
+                          : [],
+                      }
+                    : undefined,
               } satisfies raw.types.input.gateway.v1.GatewaySpecListenersArgs
             })
           }),

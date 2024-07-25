@@ -138,9 +138,9 @@ export function createApplication(options: ApplicationOptions): Application {
 
     repo: "https://charts.bitnami.com/bitnami",
     chart: "postgresql",
-    version: "15.4.0",
+    version: "15.5.17",
 
-    ...options.releaseOptions,
+    ...options.release,
 
     values: merge(
       {
@@ -171,7 +171,7 @@ export function createApplication(options: ApplicationOptions): Application {
           existingSecret: rootPasswordSecret.metadata.name,
         },
       },
-      options.releaseOptions?.values ?? {},
+      options.release?.values ?? {},
     ),
   })
 

@@ -85,6 +85,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@infra/ghost@workspace:packages/ghost":
+  version: 0.0.0-use.local
+  resolution: "@infra/ghost@workspace:packages/ghost"
+  dependencies:
+    "@infra/gateway": "workspace:*"
+    "@infra/k8s": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
 "@infra/headscale@workspace:*, @infra/headscale@workspace:packages/headscale":
   version: 0.0.0-use.local
   resolution: "@infra/headscale@workspace:packages/headscale"
@@ -145,22 +154,6 @@ __metadata:
     "@infra/k8s": "workspace:*"
     "@infra/postgresql": "workspace:*"
     "@infra/traefik": "workspace:*"
-  languageName: unknown
-  linkType: soft
-
-"@infra/nextcloud@workspace:packages/nextcloud":
-  version: 0.0.0-use.local
-  resolution: "@infra/nextcloud@workspace:packages/nextcloud"
-  dependencies:
-    "@infra/k8s": "workspace:*"
-  languageName: unknown
-  linkType: soft
-
-"@infra/nix-serve@workspace:packages/nix-serve":
-  version: 0.0.0-use.local
-  resolution: "@infra/nix-serve@workspace:packages/nix-serve"
-  dependencies:
-    "@infra/k8s": "workspace:*"
   languageName: unknown
   linkType: soft
 
@@ -1086,6 +1079,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@stacks/public-gateway@workspace:stacks/public-gateway":
+  version: 0.0.0-use.local
+  resolution: "@stacks/public-gateway@workspace:stacks/public-gateway"
+  dependencies:
+    "@infra/traefik": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
 "@stacks/shared@workspace:stacks/shared":
   version: 0.0.0-use.local
   resolution: "@stacks/shared@workspace:stacks/shared"
@@ -1108,17 +1109,6 @@ __metadata:
   resolution: "@stacks/syncthing@workspace:stacks/syncthing"
   dependencies:
     "@infra/syncthing": "workspace:*"
-    "@infra/tailscale": "workspace:*"
-  languageName: unknown
-  linkType: soft
-
-"@stacks/tailscale@workspace:stacks/tailscale":
-  version: 0.0.0-use.local
-  resolution: "@stacks/tailscale@workspace:stacks/tailscale"
-  dependencies:
-    "@infra/cert-manager": "workspace:*"
-    "@infra/cloudflare": "workspace:*"
-    "@infra/kubernetes-dashboard": "workspace:*"
     "@infra/tailscale": "workspace:*"
   languageName: unknown
   linkType: soft

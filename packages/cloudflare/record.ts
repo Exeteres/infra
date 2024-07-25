@@ -29,6 +29,11 @@ export interface RecordOptions extends CommonOptions {
    * The priority of the DNS record.
    */
   priority?: pulumi.Input<number>
+
+  /**
+   * Whether the DNS record is proxied through Cloudflare.
+   */
+  proxied?: pulumi.Input<boolean>
 }
 
 /**
@@ -49,7 +54,7 @@ export function createRecord(options: RecordOptions) {
       value: options.value,
       ttl: options.ttl,
       priority: options.priority,
-      proxied: false,
+      proxied: options.proxied ?? false,
     },
     resource.mapPulumiOptions(options),
   )

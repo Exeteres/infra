@@ -2,6 +2,7 @@ import { pulumi, random } from "@infra/core"
 import { k8s } from "@infra/k8s"
 import { gw } from "@infra/gateway"
 import { postgresql } from "@infra/postgresql"
+import { minio } from "@infra/minio"
 
 export interface ApplicationOptions extends k8s.ApplicationOptions, gw.GatewayApplicationOptions {
   /**
@@ -10,15 +11,9 @@ export interface ApplicationOptions extends k8s.ApplicationOptions, gw.GatewayAp
   databaseCredentials: postgresql.DatabaseCredentials
 
   /**
-   * The secret containing the S3 configuration.
-   * Must contain the:
-   * - access_key
-   * - secret_key
-   * - region
-   * - endpoint
-   * - bucket
+   * The S3 credentials.
    */
-  s3Secret: pulumi.Input<k8s.raw.core.v1.Secret>
+  s3Credentials: minio.S3Credentials
 
   /**
    * The secret key to use for encrypting sensitive data.
@@ -39,8 +34,6 @@ export function createApplication(options: ApplicationOptions): Application {
   const name = options.name ?? "plane"
   const namespace = options.namespace ?? k8s.createNamespace({ name })
   const fullName = k8s.getPrefixedName(name, options.prefix)
-
-  const s3Secret = pulumi.output(options.s3Secret)
 
   const secretKey =
     options.secretKey ??
@@ -82,11 +75,11 @@ export function createApplication(options: ApplicationOptions): Application {
         pgdb_name: options.databaseCredentials.database,
         pgdb_remote_url: options.databaseCredentials.url,
 
-        aws_access_key: s3Secret.stringData.access_key,
-        aws_secret_access_key: s3Secret.stringData.secret_key,
-        aws_region: s3Secret.stringData.region,
-        aws_s3_endpoint_url: s3Secret.stringData.endpoint,
-        docstore_bucket: s3Secret.stringData.bucket,
+        aws_access_key: options.s3Credentials.accessKey,
+        aws_secret_access_key: options.s3Credentials.secretKey,
+        aws_region: options.s3Credentials.region,
+        aws_s3_endpoint_url: options.s3Credentials.endpoint,
+        docstore_bucket: options.s3Credentials.bucket,
 
         secret_key: secretKey,
       },

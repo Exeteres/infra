@@ -46,7 +46,7 @@ export function createApplication(options: ApplicationOptions): Application {
     repo: "https://sqljames.github.io/factorio-server-charts/",
     version: "1.2.5",
 
-    ...options.releaseOptions,
+    ...options.release,
 
     values: merge(
       {
@@ -66,7 +66,7 @@ export function createApplication(options: ApplicationOptions): Application {
 
         admin_list: options.admins,
       },
-      options.releaseOptions?.values ?? {},
+      options.release?.values ?? {},
     ),
   })
 

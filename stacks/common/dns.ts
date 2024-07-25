@@ -32,12 +32,20 @@ export function createPublicDnsRecord(namespace: k8s.raw.core.v1.Namespace, doma
   const sharedStack = getSharedStack()
   const nodeIpAddress = sharedStack.requireOutput("nodeIpAddress")
 
-  return createDnsRecord(namespace, { name: domain, type: "A", value: nodeIpAddress })
+  return createDnsRecord(namespace, {
+    name: domain,
+    type: "A",
+    value: nodeIpAddress,
+  })
 }
 
 export function createInternalDnsRecord(namespace: k8s.raw.core.v1.Namespace, domain: string) {
   const internalGatewayStack = resolveStack("internal-gateway")
   const gatewayIp = internalGatewayStack.requireOutput("gatewayIp")
 
-  return createDnsRecord(namespace, { name: domain, type: "A", value: gatewayIp })
+  return createDnsRecord(namespace, {
+    name: domain,
+    type: "A",
+    value: gatewayIp,
+  })
 }

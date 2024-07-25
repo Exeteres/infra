@@ -12,6 +12,12 @@ export function normalizeInputArray<T>(
   single: pulumi.Input<T> | undefined,
   multiple: pulumi.Input<pulumi.Input<T>[]> | undefined,
 ): pulumi.Input<pulumi.Input<T>[]> {
+  if (single && multiple) {
+    return pulumi
+      .all([single, multiple])
+      .apply(([singleValue, multipleValues]) => [singleValue, ...multipleValues]) as any
+  }
+
   if (single) {
     return [single]
   }
@@ -80,6 +86,13 @@ export function trimIndentation(str: string): string {
 
 export function mergeInputArrays<T>(...arrays: (pulumi.Input<T[]> | undefined | null)[]): pulumi.Output<T[]> {
   return pulumi.all(arrays).apply(arrays => arrays.filter(Boolean).flat()) as any
+}
+
+export function appendToInputArray<T>(
+  array: pulumi.Input<T[]> | undefined,
+  value: pulumi.Input<T>,
+): pulumi.Output<T[]> {
+  return mergeInputArrays<T>(array, [value as any])
 }
 
 export type InputArray<T> = pulumi.Input<pulumi.Input<T>[]>

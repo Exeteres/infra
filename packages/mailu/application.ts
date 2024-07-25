@@ -123,7 +123,7 @@ export function createApplication(options: ApplicationOptions): Application {
 
     chart: "mailu",
     repo: "https://mailu.github.io/helm-charts",
-    version: "1.5.0",
+    version: "2.0.0",
 
     values: {
       domain: options.domain,

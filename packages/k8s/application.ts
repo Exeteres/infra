@@ -24,7 +24,7 @@ export interface ReleaseApplicationOptions extends ApplicationOptions {
   /**
    * The extra options to pass to the Helm release.
    */
-  releaseOptions?: Partial<HelmOptions>
+  release?: Partial<HelmOptions>
 }
 
 export interface ChartApplicationOptions extends ApplicationOptions {

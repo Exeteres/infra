@@ -6,7 +6,7 @@ const namespace = k8s.createNamespace({ name: "public-gateway" })
 traefik.createApplication({
   namespace,
 
-  releaseOptions: {
+  release: {
     values: {
       providers: {
         kubernetesCRD: {

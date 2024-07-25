@@ -15,6 +15,14 @@ export interface Application extends k8s.ReleaseApplication, gw.GatewayApplicati
   consoleGateway?: gw.Bundle
 }
 
+export interface S3Credentials {
+  accessKey: pulumi.Input<string>
+  secretKey: pulumi.Input<string>
+  region: pulumi.Input<string>
+  endpoint: pulumi.Input<string>
+  bucket: pulumi.Input<string>
+}
+
 export function createApplication(options: ApplicationOptions = {}): Application {
   const name = options.name ?? "minio"
   const fullName = k8s.getPrefixedName(name, options.prefix)
@@ -88,7 +96,7 @@ export function createApplication(options: ApplicationOptions = {}): Application
     chart: "minio",
     version: "14.6.21",
 
-    ...options.releaseOptions,
+    ...options.release,
 
     values: merge(
       {
@@ -105,7 +113,7 @@ export function createApplication(options: ApplicationOptions = {}): Application
         sidecars: sidecarContainers,
         extraVolumes,
       },
-      options.releaseOptions?.values ?? {},
+      options.release?.values ?? {},
     ),
   })
 

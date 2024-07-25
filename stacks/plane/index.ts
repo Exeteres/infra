@@ -15,21 +15,6 @@ const s3Bucket = config.require("s3Bucket")
 const s3Endpoint = config.require("s3Endpoint")
 const secretKey = config.getSecret("secretKey")
 
-const s3Secret = k8s.createSecret({
-  name: k8s.getPrefixedName("s3-credentials", "plane"),
-  namespace,
-
-  realName: "s3-credentials",
-
-  data: {
-    access_key: s3AccessKey,
-    secret_key: s3SecretKey,
-    bucket: s3Bucket,
-    region: s3Region,
-    endpoint: s3Endpoint,
-  },
-})
-
 const { gateway } = exposeInternalService(namespace, domain)
 const { credentials } = createPostgresqlDatabase("plane", namespace, databasePassword)
 
@@ -39,6 +24,13 @@ plane.createApplication({
   gateway,
   databaseCredentials: credentials,
 
-  s3Secret,
+  s3Credentials: {
+    accessKey: s3AccessKey,
+    secretKey: s3SecretKey,
+    bucket: s3Bucket,
+    region: s3Region,
+    endpoint: s3Endpoint,
+  },
+
   secretKey,
 })

@@ -22,9 +22,9 @@ export function createApplication(options: ApplicationOptions = {}): Application
 
     chart: "kubernetes-dashboard",
     repo: "https://kubernetes.github.io/dashboard",
-    version: "7.4.0",
+    version: "7.5.0",
 
-    ...options.releaseOptions,
+    ...options.release,
 
     values: merge(
       {
@@ -39,7 +39,7 @@ export function createApplication(options: ApplicationOptions = {}): Application
           },
         },
       },
-      options.releaseOptions?.values ?? {},
+      options.release?.values ?? {},
     ),
   })
 

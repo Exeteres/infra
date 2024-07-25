@@ -17,6 +17,8 @@ tasks:
       - bootstrap-vaultwarden
       - bootstrap-kubernetes-dashboard
       - bootstrap-standardnotes
+      - bootstrap-ghost
+      - bootstrap-ghost-ru
 
   # Infra
   bootstrap-shared:
@@ -212,6 +214,30 @@ tasks:
     sources:
       - ./stacks/{common,factorio}/**
       - ./packages/{core,k8s,factorio}/**
+
+  bootstrap-ghost:
+    desc: Bootstrap the Ghost blogging platform
+    run: once
+    cmd: "{{.BOOTSTRAP_STACK_COMMAND}}ghost"
+    sources:
+      - ./stacks/{common,ghost}/**
+      - ./packages/{core,k8s,gateway,ghost}/**
+    deps:
+      - bootstrap-public-gateway
+      - bootstrap-cert-manager
+      - bootstrap-mariadb
+
+  bootstrap-ghost-ru:
+    desc: Bootstrap the Ghost blogging platform for Russian users
+    run: once
+    cmd: "{{.BOOTSTRAP_STACK_COMMAND}}ghost-ru"
+    sources:
+      - ./stacks/{common,ghost-ru}/**
+      - ./packages/{core,k8s,gateway,ghost-ru}/**
+    deps:
+      - bootstrap-public-gateway
+      - bootstrap-cert-manager
+      - bootstrap-mariadb
 
   # CRDs
   generate-crds:

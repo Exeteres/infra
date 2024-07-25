@@ -1,6 +1,5 @@
-import { resource, pulumi, PartialKeys } from "@infra/core"
+import { resource, pulumi } from "@infra/core"
 import { raw } from "./imports"
-import { HelmOptions } from "./helm"
 
 export interface CommonOptions extends resource.CommonOptions {
   /**

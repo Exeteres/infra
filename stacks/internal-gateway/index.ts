@@ -11,7 +11,7 @@ const tailscaleAuthKey = config.requireSecret("tailscaleAuthKey")
 const { release } = traefik.createApplication({
   namespace,
 
-  releaseOptions: {
+  release: {
     values: {
       providers: {
         kubernetesCRD: {
