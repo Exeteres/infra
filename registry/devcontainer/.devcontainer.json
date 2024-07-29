@@ -21,7 +21,7 @@
     "ghcr.io/devcontainers-contrib/features/protoc:1": {},
 
     "ghcr.io/devcontainers/features/nix:1": {
-      "packages": "crd2pulumi, nil, alejandra, flutter"
+      "packages": "crd2pulumi, nil, alejandra, flutter-wrapped"
     }
   },
 
