@@ -1,0 +1,29 @@
+name: Dev Container
+
+on:
+  push:
+    branches: ["master"]
+    paths:
+      - "registry/devcontainer/**"
+      - ".github/workflows/devcontainer.yaml"
+
+jobs:
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Pre-build dev container image
+        uses: devcontainers/ci@v0.3
+        with:
+          imageName: ghcr.io/exeteres/devcontainer
+          cacheFrom: ghcr.io/exeteres/devcontainer
+          push: always
+          subFolder: registry/devcontainer
