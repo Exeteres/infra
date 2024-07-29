@@ -1,14 +1,10 @@
 {
-  "image": "buildpack-deps:24.04-curl",
+  "image": "buildpack-deps:24.04-scm",
   "remoteUser": "dev",
 
   "features": {
     "ghcr.io/devcontainers/features/common-utils:2": {
       "configureZshAsDefaultShell": true
-    },
-    "ghcr.io/devcontainers/features/git:1": {
-      "version": "latest",
-      "ppa": "false"
     },
     "ghcr.io/devcontainers/features/docker-in-docker:2": {
       "azureDnsAutoDetection": false
@@ -23,6 +19,7 @@
     "ghcr.io/devcontainers-contrib/features/pulumi:1": {},
     "ghcr.io/audacioustux/devcontainers/knative:1": {},
     "ghcr.io/audacioustux/devcontainers/taskfile:1": {},
+    "ghcr.io/devcontainers-contrib/features/dive:1": {},
     "ghcr.io/devcontainers-contrib/features/protoc:1": {},
 
     "ghcr.io/devcontainers/features/nix:1": {
