@@ -23,7 +23,6 @@
     "ghcr.io/devcontainers-contrib/features/pulumi:1": {},
     "ghcr.io/audacioustux/devcontainers/knative:1": {},
     "ghcr.io/audacioustux/devcontainers/taskfile:1": {},
-    "ghcr.io/devcontainers-contrib/features/dive:1": {},
     "ghcr.io/devcontainers-contrib/features/protoc:1": {},
 
     "ghcr.io/devcontainers/features/nix:1": {
