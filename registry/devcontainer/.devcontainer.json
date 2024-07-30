@@ -1,5 +1,8 @@
 {
-  "image": "buildpack-deps:24.04-scm",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+
   "remoteUser": "dev",
 
   "features": {
