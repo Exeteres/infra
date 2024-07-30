@@ -2,8 +2,9 @@
   "name": "infra",
   "packageManager": "yarn@4.1.1",
   "workspaces": [
-    "packages/*",
-    "stacks/*"
+    "packages/**/*",
+    "stacks/*",
+    "functions/*"
   ],
   "scripts": {
     "proxy:dashboard": "kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443",
@@ -11,7 +12,9 @@
     "headscale": "kubectl exec -n headscale deploy/headscale -- /ko-app/headscale"
   },
   "devDependencies": {
+    "@types/eslint": "^9",
     "@types/node": "^20.14.2",
+    "eslint": "^9.7.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.3",
     "prettier": "^3.3.1",

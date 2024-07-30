@@ -1,0 +1,5 @@
+secrets
+users
+hosts
+.sops.yaml
+timezone.nix

@@ -1,7 +1,7 @@
 {
-  "name": "@stacks/internal-gateway",
+  "name": "@stacks/knative-dns",
   "private": true,
   "dependencies": {
-    "@infra/traefik": "workspace:*"
+    "@infra/cloudflare": "workspace:*"
   }
 }

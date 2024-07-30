@@ -1,55 +1,24 @@
 # Personal Infrastructure
 
-Here you can find some of configuration files I use to setup my personal infrastructure.
-It uses [Pulumi](https://www.pulumi.com/) to manage the Kubernetes cluster and the applications running on it.
+Here you can find almost all the configuration files I use to setup my personal infrastructure.
+
+## Stack
+
+- [NixOS](https://nixos.org/) as the base operating system;
+- [Pulumi](https://www.pulumi.com/) to manage the Kubernetes cluster and the applications running on it, as well as DNS records;
+- [Knative](https://knative.dev/) to run the cloud functions which automate some tasks in the infrastructure;
 
 ## Repository Structure
 
-- **packages/core**: The handy utility wrappers around the Pulumi SDK and some common infrastructure components;
-- **packages/\<package\>**: The ready-to-use application and their infrastructure components;
-- **packages/\<package\>-crds**: The generated SDK for SRDs of the application;
-- **stacks/**: The final Pulumi stacks, may contain some environment-specific configuration.
-
-## Usage
-
-Feel free to use this repository as a reference or a starting point for your own infrastructure.
-
-You can also add it as a submodule and use some parts of it in your own repository:
-
-```bash
-git submodule add git@github.com:Exeteres/infra.git lib
-```
-
-If you are using Yarn, you can add it as a workspace:
-
-```json
-// package.json
-{
-  "workspaces": ["lib/packages/*"]
-}
-```
-
-Then you can reference the packages in your stacks:
-
-```json
-// stacks/<my-stack>/package.json
-{
-  "dependencies": {
-    "@infra/core": "workspace:*",
-    "@infra/<package>": "workspace:*"
-  }
-}
-```
-
-Run `yarn` to install and link the packages.
-
-To see the example of how to use the packages, check the `stacks/` folder.
-
-## Ready-to-Use Applications
-
-- [**Zitadel**](https://zitadel.com): The Identity and Access Management solution;
-- [**Mailu**](https://mailu.io): The Mailu mail server;
-- [**Factorio**](https://www.factorio.com): The Factorio game server.
+- **nixos/**: The NixOS configuration files excluding the secrets and the host-specific configuration;
+- **packages/infra/core**: The handy utility wrappers around the Pulumi SDK and some common infrastructure components;
+- **packages/infra/\<package\>**: The ready-to-use application and their infrastructure components;
+- **packages/infra/\<package\>-crds**: The generated SDK for SRDs of the application if needed;
+- **stacks/common/**: Some utilities consuming outputs of the Pulumi stacks;
+- **stacks/**: The final Pulumi stacks, may contain some environment-specific configuration;
+- **packages/scripting/**: Some auxiliary packages to be used in functions;
+- **functions/**: The Knative functions to automate some tasks in the infrastructure;
+- **registry/**: The Dockerfiles and other resources to build some images used in the infrastructure;
 
 ## License
 

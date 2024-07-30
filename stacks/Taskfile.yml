@@ -1,0 +1,128 @@
+version: "3"
+
+includes:
+  cert-manager:
+    taskfile: common/Taskfile.yml
+    dir: cert-manager
+    vars:
+      NAME: cert-manager
+
+  functions:
+    taskfile: common/Taskfile.yml
+    dir: functions
+    vars:
+      NAME: functions
+
+  ghost:
+    taskfile: common/Taskfile.yml
+    dir: ghost
+    vars:
+      NAME: ghost
+
+  ghost-ru:
+    taskfile: common/Taskfile.yml
+    dir: ghost-ru
+    vars:
+      NAME: ghost-ru
+
+  headscale:
+    taskfile: common/Taskfile.yml
+    dir: headscale
+    vars:
+      NAME: headscale
+
+  internal-gateway:
+    taskfile: common/Taskfile.yml
+    dir: internal-gateway
+    vars:
+      NAME: internal-gateway
+
+  knative:
+    taskfile: common/Taskfile.yml
+    dir: knative
+    vars:
+      NAME: knative
+
+  kubernetes-dashboard:
+    taskfile: common/Taskfile.yml
+    dir: kubernetes-dashboard
+    vars:
+      NAME: kubernetes-dashboard
+
+  mailu:
+    taskfile: common/Taskfile.yml
+    dir: mailu
+    vars:
+      NAME: mailu
+
+  mariadb:
+    taskfile: common/Taskfile.yml
+    dir: mariadb
+    vars:
+      NAME: mariadb
+
+  minio:
+    taskfile: common/Taskfile.yml
+    dir: minio
+    vars:
+      NAME: minio
+
+  plane:
+    taskfile: common/Taskfile.yml
+    dir: plane
+    vars:
+      NAME: plane
+
+  postgresql:
+    taskfile: common/Taskfile.yml
+    dir: postgresql
+    vars:
+      NAME: postgresql
+
+  public-gateway:
+    taskfile: common/Taskfile.yml
+    dir: public-gateway
+    vars:
+      NAME: public-gateway
+
+  shared:
+    taskfile: common/Taskfile.yml
+    dir: shared
+    vars:
+      NAME: shared
+
+  standardnotes:
+    taskfile: common/Taskfile.yml
+    dir: standardnotes
+    vars:
+      NAME: standardnotes
+
+  syncthing:
+    taskfile: common/Taskfile.yml
+    dir: syncthing
+    vars:
+      NAME: syncthing
+
+  vaultwarden:
+    taskfile: common/Taskfile.yml
+    dir: vaultwarden
+    vars:
+      NAME: vaultwarden
+
+  vpn:
+    taskfile: common/Taskfile.yml
+    dir: vpn
+    vars:
+      NAME: vpn
+
+  vpn-static:
+    taskfile: common/Taskfile.yml
+    dir: vpn-static
+    vars:
+      NAME: vpn-static
+
+  zitadel:
+    taskfile: common/Taskfile.yml
+    dir: zitadel
+    vars:
+      NAME: zitadel

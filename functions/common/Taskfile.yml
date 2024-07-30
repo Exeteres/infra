@@ -1,0 +1,33 @@
+version: "3"
+
+vars:
+  REGISTRY: ghcr.io/exeteres/infra/functions
+
+tasks:
+  build:
+    desc: Build the {{.NAME}} image
+    cmds:
+      - yarn esbuild --bundle index.ts --platform=node --target=node22 --outfile=build/index.js
+      - docker build -t {{.REGISTRY}}/{{.NAME}} -f ../common/Dockerfile .
+
+  push:
+    desc: Push the {{.NAME}} image
+    cmds:
+      - docker push {{.REGISTRY}}/{{.NAME}}
+
+  build-push:
+    desc: Build and push the {{.NAME}} image
+    label: Build & Push
+    cmds:
+      - task: build
+      - task: push
+
+  deploy:
+    desc: Deploy the {{.NAME}} function
+    deps:
+      - build-push
+    cmd: kn func deploy --build=false --push=false
+
+  deploy-no-build:
+    desc: Deploy the {{.NAME}} function without building
+    cmd: kn func deploy --build=false --push=false

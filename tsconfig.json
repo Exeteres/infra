@@ -13,5 +13,5 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true
   },
-  "files": ["stacks/**/*.ts", "packages/**/*.ts"]
+  "files": ["stacks/**/*.ts", "packages/**/*.ts", "functions/**/*.ts"]
 }

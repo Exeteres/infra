@@ -1,0 +1,11 @@
+{
+  "name": "@infra/core",
+  "private": true,
+  "dependencies": {
+    "@pulumi/command": "^1.0.1",
+    "@pulumi/pulumi": "^3.119.0",
+    "@pulumi/random": "^4.16.2",
+    "fnts": "^3.0.1",
+    "ts-deepmerge": "^7.0.0"
+  }
+}

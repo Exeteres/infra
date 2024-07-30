@@ -19,7 +19,7 @@ const { release } = traefik.createApplication({
         },
 
         kubernetesIngress: {
-          enabled: false,
+          enabled: true,
         },
 
         kubernetesGateway: {
@@ -51,12 +51,6 @@ const { release } = traefik.createApplication({
       service: {
         type: "ClusterIP",
       },
-
-      logs: {
-        access: {
-          enabled: true,
-        },
-      },
     },
   },
 })
@@ -81,7 +75,7 @@ k8s.createWorkload({
     env: [
       {
         name: "TS_EXTRA_ARGS",
-        value: pulumi.interpolate`--advertise-routes=${gatewayIp}/32`,
+        value: pulumi.interpolate`--advertise-routes=10.43.0.0/16`,
       },
     ],
   }),

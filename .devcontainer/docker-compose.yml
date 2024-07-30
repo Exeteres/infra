@@ -1,0 +1,16 @@
+version: "3.9"
+
+services:
+  main:
+    image: ghcr.io/exeteres/devcontainer:latest
+    volumes:
+      - ..:/home/dev/workspace:cached
+      - /home/exeteres/.kube/config:/home/dev/.kube/config
+      - /home/exeteres/.pulumi:/home/dev/.pulumi
+    command: sleep infinity
+
+networks:
+  default:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1200

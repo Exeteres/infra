@@ -13,3 +13,7 @@ node_modules
 .pulumi
 Pulumi.*.yaml
 .task
+
+# Knative
+.func
+build

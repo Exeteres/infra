@@ -1,0 +1,7 @@
+{
+  "name": "@infra/knative",
+  "private": true,
+  "dependencies": {
+    "@infra/k8s": "workspace:*"
+  }
+}

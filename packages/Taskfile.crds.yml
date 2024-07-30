@@ -1,0 +1,6 @@
+version: "3"
+
+tasks:
+  generate-crds:
+    desc: Generate CRDs for {{.NAME}}
+    cmd: crd2pulumi -n --nodejsPath packages/infra/{{.NAME}}-crds --nodejsName {{.NAME}} --force {{.SOURCES}}

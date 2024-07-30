@@ -9,6 +9,11 @@ const config = new pulumi.Config("ghost")
 const domain = config.require("domain")
 const databasePassword = config.requireSecret("databasePassword")
 const backupPassword = config.requireSecret("backupPassword")
+const smtpHost = config.require("smtpHost")
+const smtpPort = config.requireNumber("smtpPort")
+const smtpUsername = config.require("smtpUsername")
+const smtpPassword = config.requireSecret("smtpPassword")
+const smtpFrom = config.require("smtpFrom")
 
 const { gateway } = exposePublicService(namespace, domain)
 const { credentials } = createMariadbDatabase("ghost", namespace, databasePassword)
@@ -22,4 +27,12 @@ ghost.createApplication({
   databaseCredentials: credentials,
 
   backup,
+
+  smtpCredentials: {
+    host: smtpHost,
+    port: smtpPort,
+    username: smtpUsername,
+    password: smtpPassword,
+    from: smtpFrom,
+  },
 })

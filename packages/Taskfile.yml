@@ -1,0 +1,20 @@
+version: "3"
+
+includes:
+  cert-manager:
+    taskfile: Taskfile.crds.yml
+    vars:
+      NAME: cert-manager
+      SOURCES: https://github.com/cert-manager/cert-manager/releases/download/v1.14.5/cert-manager.yaml
+
+  gateway:
+    taskfile: Taskfile.crds.yml
+    vars:
+      NAME: gateway
+      SOURCES: https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.1.0/experimental-install.yaml
+
+  knative:
+    taskfile: Taskfile.crds.yml
+    vars:
+      NAME: knative
+      SOURCES: https://github.com/knative/serving/releases/download/knative-v1.14.1/serving-crds.yaml

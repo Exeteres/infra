@@ -2,7 +2,7 @@ import { pulumi } from "@infra/core"
 import { mailu } from "@infra/mailu"
 import { k8s } from "@infra/k8s"
 
-import { createBackupRepository, createDnsRecord, createPublicDnsRecord, getPublicIssuer } from "@stacks/common"
+import { createBackupRepository, createDnsRecord, exposePublicService } from "@stacks/common"
 
 const namespace = k8s.createNamespace({ name: "mailu" })
 
@@ -13,7 +13,7 @@ const adminPassword = config.getSecret("adminPassword")
 const dkimPublickKey = config.get("dkimPublicKey")
 const backupPassword = config.requireSecret("backupPassword")
 
-createPublicDnsRecord(namespace, `mail.${domain}`)
+const { gateway } = exposePublicService(namespace, `mail.${domain}`)
 const { backup } = createBackupRepository("mailu", namespace, backupPassword)
 
 createDnsRecord(namespace, {
@@ -56,10 +56,10 @@ if (dkimPublickKey) {
 
 mailu.createApplication({
   namespace,
-  publicIssuer: getPublicIssuer(),
   domain,
 
   secretKey,
   adminPassword,
   backup,
+  gateway,
 })

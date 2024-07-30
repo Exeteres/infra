@@ -1,0 +1,28 @@
+version: "3"
+
+tasks:
+  rebuild:*:
+    desc: Rebuild the NixOS configuration on the target host
+    vars:
+      HOST: "{{index .MATCH 0}}"
+    cmds:
+      - task: prepare
+      - nixos-rebuild switch --flake . --target-host {{.HOST}}
+      - task: cleanup
+    ignore_error: true
+
+  rebuild:
+    desc: Rebuild the NixOS configuration on the local host
+    cmds:
+      - task: prepare
+      - sudo nixos-rebuild switch --flake .
+      - task: cleanup
+    ignore_error: true
+
+  prepare:
+    cmd: git add . --force
+
+  cleanup:
+    cmds:
+      - git rm -r --cached .
+      - git add .

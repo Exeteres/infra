@@ -12,7 +12,7 @@ export const getPublicIssuer = singleton(() => {
 
 export function createWebCertificate(namespace: k8s.raw.core.v1.Namespace, domain: string) {
   return certManager.createCertificate({
-    name: domain,
+    name: domain.replace("*", "wildcard"),
     namespace,
 
     issuer: getPublicIssuer(),
