@@ -354,6 +354,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@infra/etebase@workspace:*, @infra/etebase@workspace:packages/infra/etebase":
+  version: 0.0.0-use.local
+  resolution: "@infra/etebase@workspace:packages/infra/etebase"
+  dependencies:
+    "@infra/k8s": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
 "@infra/factorio@workspace:*, @infra/factorio@workspace:packages/infra/factorio":
   version: 0.0.0-use.local
   resolution: "@infra/factorio@workspace:packages/infra/factorio"
@@ -1363,6 +1371,14 @@ __metadata:
     "@infra/cloudflare": "workspace:*"
     "@infra/gateway": "workspace:*"
     "@infra/k8s": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@stacks/etebase@workspace:stacks/etebase":
+  version: 0.0.0-use.local
+  resolution: "@stacks/etebase@workspace:stacks/etebase"
+  dependencies:
+    "@infra/etebase": "workspace:*"
   languageName: unknown
   linkType: soft
 

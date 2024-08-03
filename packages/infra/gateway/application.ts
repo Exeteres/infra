@@ -36,6 +36,7 @@ export function createApplicationGateway(
         name: "http",
         port: 8000,
         protocol: "HTTP",
+        hostname: gatewayOptions.domain,
 
         httpRoute: {
           name: k8s.getPrefixedName("http-to-https", options.name),

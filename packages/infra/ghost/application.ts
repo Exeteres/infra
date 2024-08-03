@@ -201,6 +201,13 @@ export function createApplication(options: ApplicationOptions): Application {
         },
       },
 
+      resources: {
+        limits: {
+          cpu: "500m",
+          memory: "512Mi",
+        },
+      },
+
       volumeMounts: [
         {
           name: contentVolumeClaim.metadata.name,

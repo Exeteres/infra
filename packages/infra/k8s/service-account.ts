@@ -17,7 +17,7 @@ interface ServiceAccountOptions extends CommonOptions {
   roles?: pulumi.Input<pulumi.Input<Role>[]>
 }
 
-interface ServiceAccountResult {
+export interface ServiceAccountBundle {
   /**
    * The created service account.
    */
@@ -35,7 +35,7 @@ interface ServiceAccountResult {
  * @param options The options for creating the service account.
  * @returns The created service account and bindings.
  */
-export function createServiceAccount(options: ServiceAccountOptions): ServiceAccountResult {
+export function createServiceAccount(options: ServiceAccountOptions): ServiceAccountBundle {
   const serviceAccount = new raw.core.v1.ServiceAccount(
     options.name,
     {
@@ -48,7 +48,7 @@ export function createServiceAccount(options: ServiceAccountOptions): ServiceAcc
     return roles.map(role => {
       return role.metadata.name.apply(name => {
         return createRoleBinding({
-          name: `${options.name}-${name}`,
+          name: options.name !== name ? `${options.name}-${name}` : name,
           namespace: options.namespace,
           isClusterScoped: k8s.raw.rbac.v1.ClusterRole.isInstance(role),
 

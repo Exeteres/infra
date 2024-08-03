@@ -106,6 +106,13 @@ export function createApplication(options: ApplicationOptions): Application {
       replicaCount: 1,
       nodeSelector: options.nodeSelector,
 
+      resources: {
+        limits: {
+          cpu: "500m",
+          memory: "512Mi",
+        },
+      },
+
       zitadel: {
         masterkeySecretName: masterKeySecret.metadata.name,
 

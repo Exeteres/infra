@@ -24,7 +24,10 @@ export interface ContainerOptions extends PartialKeys<raw.types.input.core.v1.Co
   environmentSources?: pulumi.Input<pulumi.Input<ContainerEnvironmentSource>[]>
 }
 
-export type ContainerEnvironment = Record<string, pulumi.Input<string | raw.types.input.core.v1.EnvVarSource>>
+export type ContainerEnvironment = Record<
+  string,
+  pulumi.Input<string | undefined | null | raw.types.input.core.v1.EnvVarSource>
+>
 
 export type ContainerEnvironmentSource =
   | raw.types.input.core.v1.EnvFromSource
@@ -277,9 +280,13 @@ export function mapWorkloadContainer(name: string, options: ContainerOptions) {
 
 function mapContainerEnvVar([name, value]: [
   string,
-  pulumi.Input<string | raw.types.input.core.v1.EnvVarSource>,
-]): pulumi.Input<raw.types.input.core.v1.EnvVar> {
+  pulumi.Input<string | undefined | null | raw.types.input.core.v1.EnvVarSource>,
+]): pulumi.Input<raw.types.input.core.v1.EnvVar | undefined> {
   return pulumi.output(value).apply(value => {
+    if (value === undefined || value === null) {
+      return undefined
+    }
+
     if (typeof value === "string") {
       return { name, value }
     } else {
@@ -292,9 +299,16 @@ export function mapEnvironment(
   env?: pulumi.Input<ContainerEnvironment>,
   env2?: pulumi.Input<pulumi.Input<raw.types.input.core.v1.EnvVar>[]>,
 ) {
-  return pulumi
-    .all([env, env2])
-    .apply(([env, env2]) => [...(env ? Object.entries(env).map(mapContainerEnvVar) : []), ...(env2 ?? [])])
+  return pulumi.all([env, env2]).apply(([env, env2]) => {
+    return [
+      ...(env
+        ? (Object.entries(env)
+            .map(mapContainerEnvVar)
+            .filter(Boolean) as pulumi.Input<raw.types.input.core.v1.EnvVar>[])
+        : []),
+      ...(env2 ?? []),
+    ]
+  })
 }
 
 export function mapEnvironmentSource(envFrom: ContainerEnvironmentSource): raw.types.input.core.v1.EnvFromSource {

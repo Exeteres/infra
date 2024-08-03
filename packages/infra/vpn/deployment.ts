@@ -53,6 +53,11 @@ export interface DeploymentOptions {
    * Extra volumes to define in the deployment.
    */
   volumes?: k8s.raw.types.input.core.v1.Volume[]
+
+  /**
+   * The service account to use for the deployment.
+   */
+  serviceAccount?: k8s.raw.core.v1.ServiceAccount
 }
 
 export interface Deployment {
@@ -69,7 +74,7 @@ export interface Deployment {
 
 export function createDeployment(options: DeploymentOptions): Deployment {
   const secret = k8s.createSecret({
-    name: `vpn-${options.location.name}-config`,
+    name: `${options.location.name}-config`,
     namespace: options.namespace,
 
     key: "wg0.conf",
@@ -94,7 +99,7 @@ export function createDeployment(options: DeploymentOptions): Deployment {
   })
 
   const workload = k8s.createWorkload({
-    name: `vpn-${options.location.name}`,
+    name: options.location.name,
     namespace: options.namespace,
 
     kind: "Deployment",
@@ -104,6 +109,8 @@ export function createDeployment(options: DeploymentOptions): Deployment {
     deploymentStrategy: {
       type: "Recreate", // to prevent conflicts with some frontend containers like tailscale
     },
+
+    serviceAccountName: options.serviceAccount?.metadata.name,
 
     containers: [
       // Frontend

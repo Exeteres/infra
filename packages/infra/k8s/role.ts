@@ -25,7 +25,7 @@ type RoleOptions = ScopedOptions & {
   subjects?: pulumi.Input<pulumi.Input<RoleBindingSubjct>[]>
 }
 
-interface RoleResult {
+export interface RoleBundle {
   /**
    * The created Role.
    */
@@ -45,7 +45,7 @@ export type Role = raw.rbac.v1.Role | raw.rbac.v1.ClusterRole
  * @param options The options for the Role.
  * @returns The Role and the RoleBinding if subjects were provided.
  */
-export function createRole(options: RoleOptions): RoleResult {
+export function createRole(options: RoleOptions): RoleBundle {
   const role = new raw.rbac.v1.Role(
     options.name,
     {

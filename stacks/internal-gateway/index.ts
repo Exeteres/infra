@@ -59,10 +59,12 @@ const service = release.status.status.apply(() => k8s.raw.core.v1.Service.get("t
 
 export const gatewayIp = service.spec.clusterIP
 
-tailscale.createAuthSecret({
-  name: "tailscale-auth",
+const { container, serviceAccount } = tailscale.createContainer({
   namespace,
-  value: tailscaleAuthKey,
+  secretName: "tailscale-router",
+  hostname: "internal-gateway",
+  authKey: tailscaleAuthKey,
+  advertiseRoutes: ["10.43.0.0/16"],
 })
 
 k8s.createWorkload({
@@ -71,12 +73,6 @@ k8s.createWorkload({
 
   kind: "Deployment",
 
-  container: tailscale.createContainerSpec("internal-gateway", {
-    env: [
-      {
-        name: "TS_EXTRA_ARGS",
-        value: pulumi.interpolate`--advertise-routes=10.43.0.0/16`,
-      },
-    ],
-  }),
+  container,
+  serviceAccountName: serviceAccount.metadata.name,
 })

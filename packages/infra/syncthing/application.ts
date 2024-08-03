@@ -35,7 +35,12 @@ export interface ApplicationOptions extends k8s.ApplicationOptions, gw.GatewayAp
   /**
    * The sidecar containers to add to the application.
    */
-  sidecarContainers?: k8s.raw.types.input.core.v1.Container[]
+  sidecarContainers?: k8s.ContainerOptions[]
+
+  /**
+   * The service account to use for the application.
+   */
+  serviceAccount?: k8s.raw.core.v1.ServiceAccount
 }
 
 export interface Application extends k8s.Application, gw.GatewayApplication {
@@ -93,7 +98,7 @@ export function createApplication(options: ApplicationOptions = {}): Application
   })
 
   const initContainers: pulumi.Input<k8s.raw.types.input.core.v1.Container[]> = []
-  const sidecarContainers: pulumi.Input<k8s.raw.types.input.core.v1.Container[]> = []
+  const sidecarContainers: k8s.ContainerOptions[] = []
   const extraVolumes: pulumi.Input<k8s.raw.types.input.core.v1.Volume[]> = []
 
   if (options.sidecarContainers) {
@@ -137,6 +142,7 @@ export function createApplication(options: ApplicationOptions = {}): Application
 
     kind: "StatefulSet",
     realName: "syncthing",
+    serviceAccountName: options.serviceAccount?.metadata.name,
 
     container: {
       image: "linuxserver/syncthing:1.27.8",

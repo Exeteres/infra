@@ -7,7 +7,7 @@ tasks:
       HOST: "{{index .MATCH 0}}"
     cmds:
       - task: prepare
-      - nixos-rebuild switch --flake . --target-host {{.HOST}}
+      - nixos-rebuild switch --flake . --target-host {{.HOST}} --use-remote-sudo
       - task: cleanup
     ignore_error: true
 

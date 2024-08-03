@@ -67,17 +67,17 @@ export function mergeEnvironments(...environments: (ScriptEnvironment | undefine
 
   const merged: Required<ScriptEnvironment> = {
     distro: resolvedEnvironments[0].distro,
-    preInstallScripts: resolvedEnvironments[0].preInstallScripts ?? {},
-    packages: resolvedEnvironments[0].packages ?? [],
-    setupScripts: resolvedEnvironments[0].setupScripts ?? {},
-    cleanupScripts: resolvedEnvironments[0].cleanupScripts ?? {},
-    scripts: resolvedEnvironments[0].scripts ?? {},
-    volumes: resolvedEnvironments[0].volumes ?? [],
-    volumeMounts: resolvedEnvironments[0].volumeMounts ?? [],
-    environment: resolvedEnvironments[0].environment ?? {},
+    preInstallScripts: {},
+    packages: [],
+    setupScripts: {},
+    cleanupScripts: {},
+    scripts: {},
+    volumes: [],
+    volumeMounts: [],
+    environment: {},
   }
 
-  for (const env of resolvedEnvironments.slice(1)) {
+  for (const env of resolvedEnvironments) {
     if (env.distro !== merged.distro) {
       throw new Error("All environments must have the same distribution")
     }

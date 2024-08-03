@@ -1,11 +1,59 @@
 version: "3"
 
+tasks:
+  bootstrap:
+    desc: Bootstrap all stacks in the correct order
+    cmds:
+      # Infra 0 (Shared)
+      - task: shared:bootstrap
+      - task: cert-manager:bootstrap
+      - task: public-gateway:bootstrap
+      - task: vpn-static:bootstrap
+
+      # Infra 1 (Database)
+      - task: postgresql:bootstrap
+      - task: mariadb:bootstrap
+
+      # Infra 2 (Mail+Identity+Headscale)
+      - task: mailu:bootstrap
+      - task: zitadel:bootstrap
+      - task: headscale:bootstrap
+
+      # Infra 3 (VPN-dependent)
+      - task: internal-gateway:bootstrap
+      - task: knative:bootstrap
+      - task: minio:bootstrap
+
+      # Applications
+      - task: kubernetes-dashboard:bootstrap
+      - task: ghost:bootstrap
+      - task: ghost-ru:bootstrap
+      - task: standardnotes:bootstrap
+      - task: syncthing:bootstrap
+      - task: vaultwarden:bootstrap
+      - task: plane:bootstrap
+      - task: vpn:bootstrap
+      - task: functions:bootstrap
+      - task: etebase:bootstrap
+
+  etebase:manage:
+    desc: Manage Etebase via Django CLI
+    cmd: |
+      pod=$(kubectl get pods -l app.kubernetes.io/name=etebase -o jsonpath="{.items[0].metadata.name}" -n etebase)
+      kubectl exec -n etebase -c etebase -it $pod -- /etebase/manage.py {{.CLI_ARGS}}
+
 includes:
   cert-manager:
     taskfile: common/Taskfile.yml
     dir: cert-manager
     vars:
       NAME: cert-manager
+
+  etebase:
+    taskfile: common/Taskfile.yml
+    dir: etebase
+    vars:
+      NAME: etebase
 
   functions:
     taskfile: common/Taskfile.yml

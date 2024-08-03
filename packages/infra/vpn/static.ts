@@ -85,7 +85,7 @@ export function createStaticDeployment(options: StaticDeploymentOptions): Static
     ],
 
     selector: {
-      "app.kubernetes.io/name": `vpn-${options.location.name}`,
+      "app.kubernetes.io/name": options.location.name,
     },
 
     type: "NodePort",

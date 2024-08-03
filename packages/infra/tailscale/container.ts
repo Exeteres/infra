@@ -1,48 +1,120 @@
 import { pulumi } from "@infra/core"
 import { k8s } from "@infra/k8s"
 
-export function createContainerSpec(
-  hostname: string,
-  extra?: Partial<k8s.raw.types.input.core.v1.Container>,
-): k8s.raw.types.input.core.v1.Container {
+export interface ContainerSpecOptions {
+  /**
+   * The name of the secret to store the auth key and session data.
+   */
+  secretName: string
+
+  /**
+   * The name of the host to register with Tailscale.
+   */
+  hostname: pulumi.Input<string>
+
+  /**
+   * The namespace where the container will be used.
+   */
+  namespace: k8s.raw.core.v1.Namespace
+
+  /**
+   * The tailscale auth key.
+   */
+  authKey: pulumi.Input<string>
+
+  /**
+   * Whether to advertise the exit node.
+   */
+  advertiseExitNode?: pulumi.Input<boolean>
+
+  /**
+   * The routes to advertise.
+   */
+  advertiseRoutes?: pulumi.Input<string[]>
+}
+
+export interface Container {
+  /**
+   * The container spec to be used in a pod.
+   */
+  container: k8s.ContainerOptions
+
+  /**
+   * The created service account which has access to the secret.
+   */
+  serviceAccount: k8s.raw.core.v1.ServiceAccount
+}
+
+export function createContainer(options: ContainerSpecOptions): Container {
+  const secret = k8s.createSecret({
+    name: options.secretName,
+    namespace: options.namespace,
+
+    key: "authkey",
+    value: options.authKey,
+
+    resourceOptions: {
+      ignoreChanges: ["spec.stringData", "spec.data"],
+    },
+  })
+
+  const { role } = k8s.createRole({
+    name: options.secretName,
+    namespace: options.namespace,
+
+    rule: {
+      apiGroups: [""],
+      resources: ["secrets"],
+      resourceNames: [secret.metadata.name],
+      verbs: ["get", "update", "patch"],
+    },
+  })
+
+  const { serviceAccount } = k8s.createServiceAccount({
+    name: options.secretName,
+    namespace: options.namespace,
+
+    role: role,
+  })
+
+  const extraArgs = pulumi.all([options.advertiseRoutes, options.advertiseExitNode]).apply(([routes, exitNode]) => {
+    const args: string[] = []
+
+    if (routes) {
+      args.push(`--advertise-routes=${routes.join(",")}`)
+    }
+
+    if (exitNode) {
+      args.push("--advertise-exit-node")
+    }
+
+    if (args.length === 0) {
+      return undefined
+    }
+
+    return args.join(" ")
+  })
+
   return {
-    name: "tailscale",
-    image: "ghcr.io/tailscale/tailscale:latest",
+    container: {
+      name: "tailscale",
+      image: "ghcr.io/tailscale/tailscale:latest",
 
-    ...extra,
+      environment: {
+        TS_AUTH_ONCE: "true",
+        TS_USERSPACE: "false",
+        TS_HOSTNAME: options.hostname,
+        TS_KUBE_SECRET: secret.metadata.name,
+        TS_EXTRA_ARGS: extraArgs,
+      },
 
-    env: pulumi.output(extra?.env ?? []).apply(env => [
-      {
-        name: "TS_AUTHKEY",
-        valueFrom: {
-          secretKeyRef: {
-            name: "tailscale-auth",
-            key: "authKey",
-          },
+      securityContext: {
+        capabilities: {
+          add: ["NET_ADMIN"],
         },
       },
-      {
-        name: "TS_AUTH_ONCE",
-        value: "true",
-      },
-      {
-        name: "TS_USERSPACE",
-        value: "false",
-      },
-      {
-        name: "TS_HOSTNAME",
-        value: hostname,
-      },
-      {
-        name: "TS_KUBE_SECRET",
-        value: "",
-      },
-      ...env,
-    ]),
-    securityContext: {
-      capabilities: {
-        add: ["NET_ADMIN"],
-      },
     },
+
+    serviceAccount,
   }
 }

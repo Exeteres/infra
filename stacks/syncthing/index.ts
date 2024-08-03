@@ -13,17 +13,19 @@ const namespace = k8s.createNamespace({ name: "syncthing" })
 
 const { gateway } = exposeInternalService(namespace, domain)
 
-tailscale.createAuthSecret({
-  name: "tailscale-auth",
+const { container, serviceAccount } = tailscale.createContainer({
   namespace,
-  value: tailscaleAuthKey,
+  authKey: tailscaleAuthKey,
+  hostname,
+  secretName: "tailscale",
 })
 
 syncthing.createApplication({
   namespace,
   gateway,
 
-  sidecarContainers: [tailscale.createContainerSpec(hostname)],
+  sidecarContainers: [container],
+  serviceAccount,
 
   volumeClaims: {
     dataClaims: [
