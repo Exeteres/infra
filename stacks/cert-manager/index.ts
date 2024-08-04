@@ -1,5 +1,5 @@
 import { certManager } from "@infra/cert-manager"
-import { pulumi, resource } from "@infra/core"
+import { pulumi } from "@infra/core"
 import { k8s } from "@infra/k8s"
 
 const sharedStack = new pulumi.StackReference("organization/shared/main")
@@ -42,5 +42,5 @@ const _plainIssuer = certManager.createPlainIssuer({
   dependsOn: release,
 })
 
-export const publicIssuer = resource.export(_publicIssuer)
-export const plainIssuer = resource.export(_plainIssuer)
+export const publicIssuer = k8s.export(_publicIssuer)
+export const plainIssuer = k8s.export(_plainIssuer)

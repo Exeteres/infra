@@ -25,6 +25,7 @@ plane.createApplication({
   databaseCredentials: credentials,
 
   s3Credentials: {
+    host: "minio.minio.svc",
     accessKey: s3AccessKey,
     secretKey: s3SecretKey,
     bucket: s3Bucket,

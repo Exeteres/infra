@@ -4,12 +4,26 @@ import { createWebCertificate } from "./tls"
 import { certManager } from "@infra/cert-manager"
 import { gw } from "@infra/gateway"
 import { cloudflare } from "@infra/cloudflare"
+import { singleton } from "./utils"
+import { resolveStack } from "./stack"
 
 interface ExposedService {
   dnsRecord: cloudflare.raw.Record
   certificate: certManager.CertificateBundle
   gateway: gw.ApplicationGatewayOptions
 }
+
+export const getInternalGatewayService = singleton(() => {
+  const internalGatewayStack = resolveStack("internal-gateway")
+
+  return k8s.import(internalGatewayStack, k8s.raw.core.v1.Service, "serviceId")
+})
+
+export const getPublicGatewayService = singleton(() => {
+  const publicGatewayStack = resolveStack("public-gateway")
+
+  return k8s.import(publicGatewayStack, k8s.raw.core.v1.Service, "serviceId")
+})
 
 export function exposePublicService(namespace: k8s.raw.core.v1.Namespace, domain: string): ExposedService {
   const certificate = createWebCertificate(namespace, domain)
@@ -19,7 +33,8 @@ export function exposePublicService(namespace: k8s.raw.core.v1.Namespace, domain
     certificate,
     gateway: {
       domain,
-      gatewayClassName: "public",
+      className: "public",
+      service: getPublicGatewayService(),
       certificate,
     },
   }
@@ -33,7 +48,8 @@ export function exposeInternalService(namespace: k8s.raw.core.v1.Namespace, doma
     certificate,
     gateway: {
       domain,
-      gatewayClassName: "internal",
+      className: "internal",
+      service: getInternalGatewayService(),
       certificate,
     },
   }

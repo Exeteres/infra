@@ -1,4 +1,4 @@
-import { appendToInputArray, pulumi } from "@infra/core"
+import { pulumi } from "@infra/core"
 import { certManager } from "@infra/cert-manager"
 import { Bundle, createGateway, Options } from "./gateway"
 import { k8s } from "@infra/k8s"
@@ -13,7 +13,8 @@ export interface GatewayApplication {
 
 export interface ApplicationGatewayOptions {
   domain: pulumi.Input<string>
-  gatewayClassName: pulumi.Input<string>
+  className: pulumi.Input<string>
+  service: pulumi.Input<k8s.raw.core.v1.Service>
   certificate: certManager.CertificateBundle
 }
 
@@ -29,7 +30,7 @@ export function createApplicationGateway(
     name: options.name,
     namespace: options.namespace,
 
-    gatewayClassName: gatewayOptions.gatewayClassName,
+    gatewayClassName: gatewayOptions.className,
 
     listeners: [
       {
@@ -80,6 +81,6 @@ export function createRawApplicationGateway(
     name: options.name,
     namespace: options.namespace,
 
-    gatewayClassName: gatewayOptions.gatewayClassName,
+    gatewayClassName: gatewayOptions.className,
   })
 }

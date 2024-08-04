@@ -18,3 +18,17 @@ includes:
     vars:
       NAME: knative
       SOURCES: https://github.com/knative/serving/releases/download/knative-v1.14.1/serving-crds.yaml
+
+  cilium:
+    taskfile: Taskfile.crds.yml
+    vars:
+      NAME: cilium
+      PREPARE: |
+        kubectl get crd -o json | jq '
+          .items[] | select(.spec.group == "cilium.io" and ( 
+            .metadata.name == "ciliumnetworkpolicies.cilium.io" or
+            .metadata.name == "ciliumclusterwidenetworkpolicies.cilium.io"
+          )
+        )' > cilium.json
+      SOURCES: cilium.json
+      CLEANUP: rm cilium.json

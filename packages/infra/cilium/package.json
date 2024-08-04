@@ -1,0 +1,8 @@
+{
+  "name": "@infra/cilium",
+  "private": true,
+  "dependencies": {
+    "@infra/k8s": "workspace:*",
+    "@pulumi/cilium": "workspace:*"
+  }
+}

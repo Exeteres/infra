@@ -76,3 +76,5 @@ k8s.createWorkload({
   container,
   serviceAccountName: serviceAccount.metadata.name,
 })
+
+export const serviceId = k8s.export(service)

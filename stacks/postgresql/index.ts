@@ -11,14 +11,12 @@ const backupPassword = config.requireSecret("backupPassword")
 
 const { backup } = createBackupRepository("postgresql", namespace, backupPassword)
 
-const { release } = postgresql.createApplication({
+const { service } = postgresql.createApplication({
   namespace,
 
   backup,
   rootPassword,
 })
 
-const host = pulumi.interpolate`${release.name}.${namespace.metadata.name}`
-const port = 5432
-
-export { host, port, rootPassword }
+export const serviceId = k8s.export(service)
+export { rootPassword }

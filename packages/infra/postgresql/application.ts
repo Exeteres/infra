@@ -28,6 +28,11 @@ export interface Application extends k8s.ReleaseApplication {
    * The data volume claim.
    */
   dataVolumeClaim: k8s.raw.core.v1.PersistentVolumeClaim
+
+  /**
+   * The service of the PostgreSQL database.
+   */
+  service: pulumi.Output<k8s.raw.core.v1.Service>
 }
 
 /**
@@ -184,5 +189,9 @@ export function createApplication(options: ApplicationOptions): Application {
 
     rootPasswordSecret,
     dataVolumeClaim,
+
+    service: release.name.apply(releaseName => {
+      return k8s.raw.core.v1.Service.get(releaseName, `${releaseName}/postgresql`, { parent: namespace })
+    }),
   }
 }

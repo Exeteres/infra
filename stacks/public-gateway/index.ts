@@ -3,7 +3,7 @@ import { traefik } from "@infra/traefik"
 
 const namespace = k8s.createNamespace({ name: "public-gateway" })
 
-traefik.createApplication({
+const { release } = traefik.createApplication({
   namespace,
 
   release: {
@@ -44,3 +44,7 @@ traefik.createApplication({
     },
   },
 })
+
+const service = release.status.status.apply(() => k8s.raw.core.v1.Service.get("traefik", "public-gateway/traefik"))
+
+export const serviceId = k8s.export(service)

@@ -1,5 +1,5 @@
-import { merge } from "ts-deepmerge"
 import { pulumi } from "./imports"
+import { Input } from "@pulumi/pulumi"
 
 /**
  * Transforms a pair of input options (single and multiple) into a single array input.
@@ -63,6 +63,10 @@ export function normalizeInputArrayAndMap<T, U>(
   return []
 }
 
+export function undefinedIfEmpty<T>(value: pulumi.Input<T[]>): pulumi.Output<T[] | undefined> {
+  return pulumi.output(value).apply(v => (v.length > 0 ? v : undefined)) as any
+}
+
 export type PartialKeys<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
 export type RequiredKeys<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>
 
@@ -106,4 +110,38 @@ export type RecursivePartial<T> = {
     : T[P] extends object | undefined
       ? RecursivePartial<T[P]>
       : T[P]
+}
+
+export { Input }
+
+export function mapOptional<T, U>(mapFn: (value: T) => U, value: T | undefined): U | undefined {
+  return value ? mapFn(value) : undefined
+}
+
+export function mapOptionalInput<T, U>(
+  mapFn: (value: T) => U,
+  value: pulumi.Input<T | undefined> | undefined,
+  defaultValue?: T,
+): pulumi.Output<U | undefined> {
+  return pulumi.output(value).apply(v => mapOptional(mapFn, v as T | undefined) ?? mapOptional(mapFn, defaultValue))
+}
+
+export function mergeInputObjects<T extends HasFields>(
+  ...objects: (pulumi.Input<T> | undefined | null)[]
+): pulumi.Output<T> {
+  return pulumi.all(objects).apply(objects => {
+    const result: T = {} as T
+    for (const obj of objects.filter(Boolean) as T[]) {
+      Object.assign(result, obj)
+    }
+    return result
+  }) as any
+}
+
+export function mapObjectKeys<T extends HasFields>(mapFn: (key: string) => string, obj: T): Record<string, T[keyof T]> {
+  const result: Record<string, T[keyof T]> = {}
+  for (const [key, value] of Object.entries(obj)) {
+    result[mapFn(key)] = value
+  }
+  return result
 }

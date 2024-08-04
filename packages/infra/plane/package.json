@@ -2,6 +2,7 @@
   "name": "@infra/plane",
   "private": true,
   "dependencies": {
+    "@infra/cilium": "workspace:*",
     "@infra/gateway": "workspace:*",
     "@infra/k8s": "workspace:*"
   }

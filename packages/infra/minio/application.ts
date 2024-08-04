@@ -16,10 +16,36 @@ export interface Application extends k8s.ReleaseApplication, gw.GatewayApplicati
 }
 
 export interface S3Credentials {
-  accessKey: pulumi.Input<string>
-  secretKey: pulumi.Input<string>
-  region: pulumi.Input<string>
+  /**
+   * The endpoint of the object storage.
+   * For example, "https://minio.minio.svc".
+   */
   endpoint: pulumi.Input<string>
+
+  /**
+   * The hostname of the object storage.
+   * For example, "minio.minio.svc".
+   */
+  host: pulumi.Input<string>
+
+  /**
+   * The access key for the S3 bucket.
+   */
+  accessKey: pulumi.Input<string>
+
+  /**
+   * The secret key for the S3 bucket.
+   */
+  secretKey: pulumi.Input<string>
+
+  /**
+   * The region for the S3 bucket.
+   */
+  region: pulumi.Input<string>
+
+  /**
+   * The name of the S3 bucket.
+   */
   bucket: pulumi.Input<string>
 }
 

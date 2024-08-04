@@ -12,7 +12,9 @@
         "ms-python.python",
         "jnoortheen.nix-ide",
         "kamadorueda.alejandra",
-        "redhat.vscode-yaml"
+        "redhat.vscode-yaml",
+        "EditorConfig.EditorConfig",
+        "ms-vscode.hexeditor"
       ]
     }
   }

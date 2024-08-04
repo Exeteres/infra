@@ -6,8 +6,7 @@ import { k8s } from "@infra/k8s"
 import { postgresql } from "@infra/postgresql"
 
 interface PostgresqlEnvironment {
-  host: pulumi.Output<string>
-  port: pulumi.Output<number>
+  service: pulumi.Output<k8s.raw.core.v1.Service>
   rootPassword: pulumi.Output<string>
 }
 
@@ -15,8 +14,7 @@ export const getPostgresqlEnvironment = singleton((): PostgresqlEnvironment => {
   const stack = resolveStack("postgresql")
 
   return {
-    host: stack.requireOutput("host") as pulumi.Output<string>,
-    port: stack.requireOutput("port") as pulumi.Output<number>,
+    service: k8s.import(stack, k8s.raw.core.v1.Service, "serviceId"),
     rootPassword: stack.requireOutput("rootPassword") as pulumi.Output<string>,
   }
 })
@@ -35,14 +33,13 @@ export function createPostgresqlDatabase(
   databasePassword?: pulumi.Input<string>,
 ) {
   const bundle = getPostgresqlScriptingBundle(namespace)
-  const { host, port, rootPassword } = getPostgresqlEnvironment()
+  const { service, rootPassword } = getPostgresqlEnvironment()
 
   return postgresql.createDatabase({
     name,
     namespace,
 
-    host,
-    port: pulumi.interpolate`${port}`,
+    service,
     bundle,
     password: databasePassword,
 

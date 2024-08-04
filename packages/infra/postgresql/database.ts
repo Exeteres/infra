@@ -4,10 +4,9 @@ import { scripting } from "@infra/scripting"
 
 export interface DatabaseOptions extends k8s.CommonOptions {
   /**
-   * The host of the database.
-   * For example, `postgresql`, `postgresql.postgresql`, or `postgresql.postgresql.svc.cluster.local`.
+   * The service of the database.
    */
-  host: pulumi.Input<string>
+  service: pulumi.Input<k8s.raw.core.v1.Service>
 
   /**
    * The port of the database.
@@ -51,11 +50,40 @@ export interface DatabaseCredentials {
    */
   secret: k8s.raw.core.v1.Secret
 
+  /**
+   * The service of the database.
+   */
+  service: pulumi.Output<k8s.raw.core.v1.Service>
+
+  /**
+   * The host of the database.
+   */
   host: pulumi.Output<string>
+
+  /**
+   * The port of the database.
+   */
   port: pulumi.Output<string>
+
+  /**
+   * The username to use for the database.
+   */
   username: pulumi.Output<string>
+
+  /**
+   * The password to use for the database.
+   */
   password: pulumi.Output<string>
+
+  /**
+   * The name of the database.
+   */
   database: pulumi.Output<string>
+
+  /**
+   * The full URL to connect to the database.
+   * For example, `postgresql://username:password@host:port/database`.
+   */
   url: pulumi.Output<string>
 }
 
@@ -89,7 +117,9 @@ export function createDatabase(options: DatabaseOptions): Database {
         length: 16,
       }).result
 
-  const host = pulumi.output(options.host)
+  const service = pulumi.output(options.service)
+
+  const host = pulumi.output(pulumi.interpolate`${service.metadata.name}.${service.metadata.namespace}.svc`)
   const port = pulumi.output(options.port ?? "5432")
   const database = pulumi.output(options.database ?? options.name)
   const username = pulumi.output(options.username ?? database)
@@ -182,6 +212,7 @@ export function createDatabase(options: DatabaseOptions): Database {
     setupJob,
     credentials: {
       secret,
+      service,
       ...credentials,
     },
   }

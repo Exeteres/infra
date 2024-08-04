@@ -333,6 +333,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@infra/cilium@workspace:*, @infra/cilium@workspace:packages/infra/cilium":
+  version: 0.0.0-use.local
+  resolution: "@infra/cilium@workspace:packages/infra/cilium"
+  dependencies:
+    "@infra/k8s": "workspace:*"
+    "@pulumi/cilium": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
 "@infra/cloudflare@workspace:*, @infra/cloudflare@workspace:packages/infra/cloudflare":
   version: 0.0.0-use.local
   resolution: "@infra/cloudflare@workspace:packages/infra/cloudflare"
@@ -464,6 +473,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@infra/plane@workspace:packages/infra/plane"
   dependencies:
+    "@infra/cilium": "workspace:*"
     "@infra/gateway": "workspace:*"
     "@infra/k8s": "workspace:*"
   languageName: unknown
@@ -1045,6 +1055,17 @@ __metadata:
 "@pulumi/cert-manager@workspace:*, @pulumi/cert-manager@workspace:packages/infra/cert-manager-crds":
   version: 0.0.0-use.local
   resolution: "@pulumi/cert-manager@workspace:packages/infra/cert-manager-crds"
+  dependencies:
+    "@pulumi/kubernetes": "npm:^4.0.0"
+    "@pulumi/pulumi": "npm:^3.42.0"
+    "@types/node": "npm:^14"
+    typescript: "npm:^4.3.5"
+  languageName: unknown
+  linkType: soft
+
+"@pulumi/cilium@workspace:*, @pulumi/cilium@workspace:packages/infra/cilium-crds":
+  version: 0.0.0-use.local
+  resolution: "@pulumi/cilium@workspace:packages/infra/cilium-crds"
   dependencies:
     "@pulumi/kubernetes": "npm:^4.0.0"
     "@pulumi/pulumi": "npm:^3.42.0"

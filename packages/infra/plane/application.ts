@@ -3,6 +3,7 @@ import { k8s } from "@infra/k8s"
 import { gw } from "../gateway"
 import { postgresql } from "@infra/postgresql"
 import { minio } from "@infra/minio"
+import { cilium } from "@infra/cilium"
 
 export interface ApplicationOptions extends k8s.ApplicationOptions, gw.GatewayApplicationOptions {
   /**
@@ -131,6 +132,88 @@ export function createApplication(options: ApplicationOptions): Application {
       ],
     },
   })
+
+  cilium.createPolicy({
+    name: "allow-whithin-namespace",
+    namespace,
+
+    description: "Allow Plane to communicate within the same namespace.",
+
+    ingress: {
+      fromEndpoint: {
+        "k8s:io.kubernetes.pod.namespace": namespace.metadata.name,
+      },
+    },
+
+    egress: {
+      toEndpoint: {
+        "k8s:io.kubernetes.pod.namespace": namespace.metadata.name,
+      },
+    },
+  })
+
+  cilium.createPolicy({
+    name: "allow-to-kube-dns",
+    namespace,
+
+    description: "Allow Plane to access the Kubernetes DNS service.",
+
+    egress: {
+      toEndpoint: {
+        "k8s:io.kubernetes.pod.namespace": "kube-system",
+        "k8s:k8s-app": "kube-dns",
+      },
+      toPort: {
+        port: 53,
+        protocol: "UDP",
+      },
+    },
+  })
+
+  cilium.createPolicy({
+    name: "allow-to-postgresql",
+    namespace,
+
+    description: "Allow Plane to access PostgreSQL.",
+
+    egress: {
+      toService: options.databaseCredentials.service,
+    },
+  })
+
+  if (options.gateway) {
+    cilium.createPolicy({
+      name: "allow-from-internal-gateway",
+      namespace,
+
+      description: "Allow Plane to receive traffic from the internal gateway.",
+
+      ingress: {
+        fromService: options.gateway.service,
+        toPorts: [
+          {
+            port: 8000,
+            protocol: "TCP",
+          },
+          {
+            port: 3000,
+            protocol: "TCP",
+          },
+        ],
+      },
+    })
+  }
+
+  // cilium.createPolicy({
+  //   name: "allow-to-minio",
+  //   namespace,
+
+  //   description: "Allow Plane to access Minio.",
+
+  //   egress: {
+  //     toFQDN: options.s3Credentials.host,
+  //   },
+  // })
 
   return {
     name,

@@ -95,3 +95,17 @@ export function mapPulumiOptions(
     ...extra,
   }
 }
+
+export type LabelSelector = raw.types.input.meta.v1.LabelSelector | pulumi.Input<Record<string, pulumi.Input<string>>>
+
+export function mapLabelSelector(selector: LabelSelector): pulumi.Output<raw.types.input.meta.v1.LabelSelector> {
+  return pulumi.output(selector).apply(selector => {
+    if ("matchLabels" in selector || "matchExpressions" in selector) {
+      return selector
+    }
+
+    return {
+      matchLabels: selector,
+    } as raw.types.input.meta.v1.LabelSelector
+  })
+}
