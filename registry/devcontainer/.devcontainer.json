@@ -8,7 +8,8 @@
   "features": {
     "ghcr.io/devcontainers/features/common-utils:2": {
       "userUid": 1000,
-      "userGid": 1000
+      "userGid": 1000,
+      "additionalPackages": "pass"
     },
     "ghcr.io/devcontainers/features/docker-in-docker:2": {
       "azureDnsAutoDetection": false
@@ -21,6 +22,7 @@
 
     "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {},
     "ghcr.io/devcontainers-contrib/features/pulumi:1": {},
+    "ghcr.io/devcontainers/features/terraform:1": {},
     "ghcr.io/audacioustux/devcontainers/knative:1": {},
     "ghcr.io/audacioustux/devcontainers/taskfile:1": {},
     "ghcr.io/devcontainers-contrib/features/dive:1": {},
@@ -40,6 +42,7 @@
     "ghcr.io/devcontainers/features/python:1",
     "ghcr.io/devcontainers/features/kubectl-helm-minikube:1",
     "ghcr.io/devcontainers-contrib/features/pulumi:1",
+    "ghcr.io/devcontainers/features/terraform:1",
     "ghcr.io/audacioustux/devcontainers/knative:1",
     "ghcr.io/audacioustux/devcontainers/taskfile:1",
     "ghcr.io/devcontainers-contrib/features/dive:1",
