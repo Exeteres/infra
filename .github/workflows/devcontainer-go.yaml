@@ -1,0 +1,41 @@
+name: Dev Container Go
+
+on:
+  push:
+    branches: ["master"]
+    paths:
+      - "registry/devcontainer/go/**"
+      - ".github/workflows/devcontainer-go.yaml"
+  workflow_run:
+    workflows: ["Dev Container Base"]
+    branches: ["master"]
+    types:
+      - completed
+
+jobs:
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to the registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pre-build dev container image
+        uses: devcontainers/ci@v0.3
+        with:
+          imageName: ghcr.io/exeteres/devcontainer/go
+          cacheFrom: ghcr.io/exeteres/devcontainer/go
+          push: always
+          subFolder: registry/devcontainer/go

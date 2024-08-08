@@ -1,0 +1,28 @@
+{
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+
+  "remoteUser": "dev",
+
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "userUid": 1000,
+      "userGid": 1000
+    },
+    "ghcr.io/devcontainers-contrib/features/apt-packages:1": {
+      "packages": "vim, age"
+    },
+    "ghcr.io/devcontainers/features/python:1": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "azureDnsAutoDetection": false
+    }
+  },
+
+  "overrideFeatureInstallOrder": [
+    "ghcr.io/devcontainers/features/common-utils:2",
+    "ghcr.io/devcontainers-contrib/features/apt-packages:1",
+    "ghcr.io/devcontainers/features/python:1",
+    "ghcr.io/devcontainers/features/docker-in-docker:2"
+  ]
+}

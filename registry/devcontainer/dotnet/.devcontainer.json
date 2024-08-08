@@ -1,0 +1,8 @@
+{
+  "image": "ghcr.io/exeteres/devcontainer/base:latest",
+  "remoteUser": "dev",
+
+  "features": {
+    "ghcr.io/devcontainers/features/dotnet:2": {}
+  }
+}

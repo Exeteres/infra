@@ -1,10 +1,6 @@
-# All-in-one devcontainer
+# Dev Container
 
-Here is a universal devcontainer image which I use for all my projects.
-It contains all the sdk's, tools and utilities and can be used to instantly start working on any project.
-
-It is quite large in size, but is shared across all projects, so actually it can save a lot of space in the long run.
-Moreover, it is partially built using Nix, so updates are incremental and fast.
+Here is a set of pre-build dev container images which I use for all my projects.
 
 ## Usage
 
@@ -29,7 +25,7 @@ version: "3.9"
 
 services:
   main:
-    image: ghcr.io/exeteres/devcontainer:latest
+    image: ghcr.io/exeteres/devcontainer/base:latest
     volumes:
       - ..:/home/dev/workspace:cached
     command: sleep infinity
@@ -43,13 +39,55 @@ networks:
 
 You can also add some credentials mounts like `~/.kube` or `~/.pulumi` to authenticate the tools.
 
-## Features
+## Images
 
-- Ubuntu 24.04
-- Docker in Docker
-- Golang
-- kubectl + helm + pulumi + crd2pulumi
-- Node.js + corepack
-- .NET SDK
-- Protoc
-- Python 3
+<table>
+  <tr>
+    <th>Image</th>
+    <th>Description</th>
+  </tr>
+
+  <tr>
+    <td><code>ghcr.io/exeteres/devcontainer/base:latest</code></td>
+    <td>Base image with common tools I use. <br>It is based on <b>Ubuntu 24.04</b> and includes: <ul>
+      <li>Docker in Docker</li>
+      <li>Python 3</li>
+    </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>ghcr.io/exeteres/devcontainer/go:latest</code></td>
+    <td>Image with Go installed. <br>It additionally includes: <ul>
+      <li>Go</li>
+      <li>protoc</li>
+    </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>ghcr.io/exeteres/devcontainer/node:latest</code></td>
+    <td>Image with Node.js installed. <br>It additionally includes: <ul>
+      <li>Node.js</li>
+      <li>corepack</li>
+      <li>protoc</li>
+    </ul>
+  </td>
+
+  <tr>
+    <td><code>ghcr.io/exeteres/devcontainer/dotnet:latest</code></td>
+    <td>Image with .NET SDK installed. <br>It additionally includes: <ul>
+      <li>.NET SDK</li>
+    </ul>
+  </td>
+
+  <tr>
+    <td><code>ghcr.io/exeteres/devcontainer/devops:latest</code></td>
+    <td>Image with all the tools I use for DevOps. <br>It additionally includes: <ul>
+      <li>kubectl</li>
+      <li>helm</li>
+      <li>pulumi</li>
+      <li>opentofu</li>
+      <li>nix + additional packages</li>
+    </ul>
+</table>

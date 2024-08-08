@@ -1,0 +1,9 @@
+{
+  "image": "ghcr.io/exeteres/devcontainer/base:latest",
+  "remoteUser": "dev",
+
+  "features": {
+    "ghcr.io/devcontainers/features/go:1": {},
+    "ghcr.io/devcontainers-contrib/features/protoc:1": {}
+  }
+}

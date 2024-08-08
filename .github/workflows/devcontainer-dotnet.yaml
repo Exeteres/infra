@@ -1,11 +1,16 @@
-name: Dev Container
+name: Dev Container .NET
 
 on:
   push:
     branches: ["master"]
     paths:
-      - "registry/devcontainer/**"
-      - ".github/workflows/devcontainer.yaml"
+      - "registry/devcontainer/dotnet/**"
+      - ".github/workflows/devcontainer-dotnet.yaml"
+  workflow_run:
+    workflows: ["Dev Container Base"]
+    branches: ["master"]
+    types:
+      - completed
 
 jobs:
   publish:
@@ -30,7 +35,7 @@ jobs:
       - name: Pre-build dev container image
         uses: devcontainers/ci@v0.3
         with:
-          imageName: ghcr.io/exeteres/devcontainer
-          cacheFrom: ghcr.io/exeteres/devcontainer
+          imageName: ghcr.io/exeteres/devcontainer/dotnet
+          cacheFrom: ghcr.io/exeteres/devcontainer/dotnet
           push: always
-          subFolder: registry/devcontainer
+          subFolder: registry/devcontainer/dotnet
