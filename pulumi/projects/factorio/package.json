@@ -1,0 +1,7 @@
+{
+  "name": "@projects/factorio",
+  "private": true,
+  "dependencies": {
+    "@infra/factorio": "workspace:*"
+  }
+}

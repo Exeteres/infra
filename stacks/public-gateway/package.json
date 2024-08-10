@@ -1,7 +1,0 @@
-{
-  "name": "@stacks/public-gateway",
-  "private": true,
-  "dependencies": {
-    "@infra/traefik": "workspace:*"
-  }
-}

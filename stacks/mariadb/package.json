@@ -1,7 +1,0 @@
-{
-  "name": "@stacks/mariadb",
-  "private": true,
-  "dependencies": {
-    "@infra/mariadb": "workspace:*"
-  }
-}

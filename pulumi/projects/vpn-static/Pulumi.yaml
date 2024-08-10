@@ -1,0 +1,20 @@
+name: vpn-static
+runtime: nodejs
+config:
+  vpn-static:address: 10.67.191.204/32
+  vpn-static:frontendAddress: 192.168.10.1/32
+  vpn-static:dnsServerAddress: "10.64.0.1"
+  vpn-static:locations:
+    # de-ber-wg-001
+    - endpoint: 193.32.248.66:51820
+      name: berlin
+      publicKey: 0qSP0VxoIhEhRK+fAHVvmfRdjPs2DmmpOCNLFP/7cGw=
+      port: 31901
+    # nl-ams-wg-007
+    - endpoint: 185.65.134.76:51820
+      name: amsterdam
+      publicKey: Os/BwxAIWehlypQ8QjrKVEK5PhY84b413+U3YWZJYXQ=
+      port: 31902
+  vpn-static:clients:
+    - address: 192.168.10.2/32
+      publicKey: wR12r7zUiu3/ZcfO/mvwbe/lE6S9FguromRJEo5erVY=

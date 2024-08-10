@@ -36,7 +36,9 @@
     nixosConfigurations = {
       desktop = mkHostSystem ./hosts/desktop/configuration.nix;
       laptop = mkHostSystem ./hosts/laptop/configuration.nix;
-      public-ams = mkHostSystem ./hosts/public-ams/configuration.nix;
+
+      server-a = mkHostSystem ./hosts/server-a/configuration.nix;
+      server-b = mkHostSystem ./hosts/server-b/configuration.nix;
     };
   };
 }

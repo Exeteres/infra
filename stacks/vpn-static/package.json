@@ -1,8 +1,0 @@
-{
-  "name": "@stacks/vpn-static",
-  "private": true,
-  "dependencies": {
-    "@infra/k8s": "workspace:*",
-    "@infra/vpn": "workspace:*"
-  }
-}

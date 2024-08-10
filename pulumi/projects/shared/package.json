@@ -1,0 +1,8 @@
+{
+  "name": "@projects/shared",
+  "private": true,
+  "dependencies": {
+    "@infra/core": "workspace:*",
+    "@pulumi/terraform": "^5.13.4"
+  }
+}

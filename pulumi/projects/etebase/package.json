@@ -1,0 +1,7 @@
+{
+  "name": "@projects/etebase",
+  "private": true,
+  "dependencies": {
+    "@infra/etebase": "workspace:*"
+  }
+}

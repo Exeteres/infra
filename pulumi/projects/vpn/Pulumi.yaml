@@ -1,0 +1,31 @@
+name: vpn
+runtime: nodejs
+config:
+  vpn:address: 10.67.230.163/32
+  vpn:dnsServerAddress: "10.64.0.1"
+  vpn:locations:
+    # de-ber-wg-001
+    - endpoint: 193.32.248.66:51820
+      name: berlin
+      publicKey: 0qSP0VxoIhEhRK+fAHVvmfRdjPs2DmmpOCNLFP/7cGw=
+      authStateSecret: berlinAuthState
+    # us-nyc-wg-302
+    - endpoint: 143.244.47.78:51820
+      name: new-york
+      publicKey: gH/fZJwc9iLv9fazk09J/DUWT2X7/LFXijRS15e2n34=
+      authStateSecret: newYorkAuthState
+    # ch-zrh-wg-003
+    - endpoint: 193.32.127.68:51820
+      name: zurich
+      publicKey: 5Ms10UxGjCSzwImTrvEjcygsWY8AfMIdYyRvgFuTqH8=
+      authStateSecret: zurichAuthState
+    # se-mma-wg-004
+    - endpoint: 193.138.218.130:51820
+      name: malmo
+      publicKey: m4jnogFbACz7LByjo++8z5+1WV0BuR1T7E1OWA+n8h0=
+      authStateSecret: malmoAuthState
+    # nl-ams-wg-007
+    - endpoint: 185.65.134.76:51820
+      name: amsterdam
+      publicKey: Os/BwxAIWehlypQ8QjrKVEK5PhY84b413+U3YWZJYXQ=
+      authStateSecret: amsterdamAuthState

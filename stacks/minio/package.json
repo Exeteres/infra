@@ -1,7 +1,0 @@
-{
-  "name": "@stacks/minio",
-  "private": true,
-  "dependencies": {
-    "@infra/minio": "workspace:*"
-  }
-}

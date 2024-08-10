@@ -1,0 +1,7 @@
+{
+  "name": "@projects/cilium",
+  "private": true,
+  "dependencies": {
+    "@infra/cilium": "workspace:*"
+  }
+}

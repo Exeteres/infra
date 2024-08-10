@@ -1,7 +1,0 @@
-{
-  "name": "@functions/plane-bot",
-  "private": true,
-  "devDependencies": {
-    "esbuild": "^0.23.0"
-  }
-}

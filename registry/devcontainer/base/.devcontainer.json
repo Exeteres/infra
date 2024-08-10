@@ -11,7 +11,7 @@
       "userGid": 1000
     },
     "ghcr.io/devcontainers-contrib/features/apt-packages:1": {
-      "packages": "vim, age"
+      "packages": "vim, age, host"
     },
     "ghcr.io/devcontainers/features/python:1": {},
     "ghcr.io/devcontainers/features/docker-in-docker:2": {

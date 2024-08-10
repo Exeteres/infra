@@ -1,0 +1,7 @@
+{
+  "name": "@projects/minio",
+  "private": true,
+  "dependencies": {
+    "@infra/minio": "workspace:*"
+  }
+}

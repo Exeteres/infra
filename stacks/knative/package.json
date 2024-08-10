@@ -1,7 +1,0 @@
-{
-  "name": "@stacks/knative",
-  "private": true,
-  "dependencies": {
-    "@infra/knative": "workspace:*"
-  }
-}

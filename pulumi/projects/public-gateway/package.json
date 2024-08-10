@@ -1,0 +1,7 @@
+{
+  "name": "@projects/public-gateway",
+  "private": true,
+  "dependencies": {
+    "@infra/traefik": "workspace:*"
+  }
+}

@@ -2,11 +2,13 @@ version: "3.9"
 
 services:
   main:
-    image: ghcr.io/exeteres/devcontainer:latest
+    image: ghcr.io/exeteres/devcontainer/devops
     volumes:
       - ..:/home/dev/workspace:cached
-      - /home/exeteres/.kube/config:/home/dev/.kube/config
-      - /home/exeteres/.pulumi:/home/dev/.pulumi
+      - ~/.kube/config:/home/dev/.kube/config
+      - ~/.pulumi:/home/dev/.pulumi
+      - ~/.config/age/key:/home/dev/.config/age/key
+      - ~/.ssh/id_ed25519.pub:/home/dev/.ssh/id_ed25519.pub
     command: sleep infinity
 
 networks:

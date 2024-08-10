@@ -1,7 +1,0 @@
-{
-  "name": "@stacks/ghost",
-  "private": true,
-  "dependencies": {
-    "@infra/ghost": "workspace:*"
-  }
-}

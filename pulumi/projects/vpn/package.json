@@ -1,0 +1,9 @@
+{
+  "name": "@projects/vpn",
+  "private": true,
+  "dependencies": {
+    "@infra/k8s": "workspace:*",
+    "@infra/tailscale": "workspace:*",
+    "@infra/vpn": "workspace:*"
+  }
+}

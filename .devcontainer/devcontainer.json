@@ -14,8 +14,11 @@
         "kamadorueda.alejandra",
         "redhat.vscode-yaml",
         "EditorConfig.EditorConfig",
-        "ms-vscode.hexeditor"
+        "ms-vscode.hexeditor",
+        "gamunu.opentofu"
       ]
     }
-  }
+  },
+
+  "onCreateCommand": "/home/dev/workspace/.devcontainer/create.sh"
 }

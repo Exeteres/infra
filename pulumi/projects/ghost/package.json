@@ -1,0 +1,7 @@
+{
+  "name": "@projects/ghost",
+  "private": true,
+  "dependencies": {
+    "@infra/ghost": "workspace:*"
+  }
+}

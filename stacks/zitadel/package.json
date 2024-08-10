@@ -1,7 +1,0 @@
-{
-  "name": "@stacks/zitadel",
-  "private": true,
-  "dependencies": {
-    "@infra/zitadel": "workspace:*"
-  }
-}

@@ -1,7 +1,31 @@
 version: 3
 
 includes:
-  nixos: nixos/Taskfile.yml
-  functions: functions/Taskfile.yml
-  packages: packages/Taskfile.yml
-  stacks: stacks/Taskfile.yml
+  tofu:
+    taskfile: tofu/Taskfile.yml
+    dir: tofu
+
+  nixos:
+    taskfile: nixos/Taskfile.yml
+    dir: nixos
+
+  projects:
+    taskfile: pulumi/projects/Taskfile.yml
+    dir: pulumi/projects
+
+  pulumi:
+    taskfile: pulumi/Taskfile.yml
+    dir: pulumi
+
+tasks:
+  etebase:manage:
+    desc: Manage Etebase via Django CLI
+    cmd: |
+      pod=$(kubectl get pods -l app.kubernetes.io/name=etebase -o jsonpath="{.items[0].metadata.name}" -n etebase)
+      kubectl exec -n etebase -c etebase -it $pod -- /etebase/manage.py {{.CLI_ARGS}}
+
+  create-dashboard-token:*:
+    vars:
+      CONTEXT: "{{index .MATCH 0}}"
+    desc: Create a token for the Kubernetes dashboard
+    cmd: kubectl -n kubernetes-dashboard create token dashboard-account --duration=100000h --context={{.CONTEXT}}

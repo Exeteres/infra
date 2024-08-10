@@ -1,0 +1,7 @@
+{
+  "name": "@projects/zitadel",
+  "private": true,
+  "dependencies": {
+    "@infra/zitadel": "workspace:*"
+  }
+}

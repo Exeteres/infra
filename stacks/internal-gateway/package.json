@@ -1,7 +1,0 @@
-{
-  "name": "@stacks/knative-dns",
-  "private": true,
-  "dependencies": {
-    "@infra/cloudflare": "workspace:*"
-  }
-}

@@ -25,7 +25,7 @@ version: "3.9"
 
 services:
   main:
-    image: ghcr.io/exeteres/devcontainer/base:latest
+    image: ghcr.io/exeteres/devcontainer/base
     volumes:
       - ..:/home/dev/workspace:cached
     command: sleep infinity
@@ -48,7 +48,7 @@ You can also add some credentials mounts like `~/.kube` or `~/.pulumi` to authen
   </tr>
 
   <tr>
-    <td><code>ghcr.io/exeteres/devcontainer/base:latest</code></td>
+    <td><code>ghcr.io/exeteres/devcontainer/base</code></td>
     <td>Base image with common tools I use. <br>It is based on <b>Ubuntu 24.04</b> and includes: <ul>
       <li>Docker in Docker</li>
       <li>Python 3</li>
@@ -57,7 +57,7 @@ You can also add some credentials mounts like `~/.kube` or `~/.pulumi` to authen
   </tr>
 
   <tr>
-    <td><code>ghcr.io/exeteres/devcontainer/go:latest</code></td>
+    <td><code>ghcr.io/exeteres/devcontainer/go</code></td>
     <td>Image with Go installed. <br>It additionally includes: <ul>
       <li>Go</li>
       <li>protoc</li>
@@ -66,7 +66,7 @@ You can also add some credentials mounts like `~/.kube` or `~/.pulumi` to authen
   </tr>
 
   <tr>
-    <td><code>ghcr.io/exeteres/devcontainer/node:latest</code></td>
+    <td><code>ghcr.io/exeteres/devcontainer/node</code></td>
     <td>Image with Node.js installed. <br>It additionally includes: <ul>
       <li>Node.js</li>
       <li>corepack</li>
@@ -75,14 +75,14 @@ You can also add some credentials mounts like `~/.kube` or `~/.pulumi` to authen
   </td>
 
   <tr>
-    <td><code>ghcr.io/exeteres/devcontainer/dotnet:latest</code></td>
+    <td><code>ghcr.io/exeteres/devcontainer/dotnet</code></td>
     <td>Image with .NET SDK installed. <br>It additionally includes: <ul>
       <li>.NET SDK</li>
     </ul>
   </td>
 
   <tr>
-    <td><code>ghcr.io/exeteres/devcontainer/devops:latest</code></td>
+    <td><code>ghcr.io/exeteres/devcontainer/devops</code></td>
     <td>Image with all the tools I use for DevOps. <br>It additionally includes: <ul>
       <li>kubectl</li>
       <li>helm</li>

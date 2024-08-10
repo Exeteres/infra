@@ -3,26 +3,52 @@ version: "3"
 tasks:
   rebuild:*:
     desc: Rebuild the NixOS configuration on the target host
+    label: rebuild {{.SERVER_NAME}}
     vars:
-      HOST: "{{index .MATCH 0}}"
+      SERVER_NAME: "{{index .MATCH 0}}"
+      SERVER_IP:
+        sh: tofu -chdir=../tofu output -json public_ips | jq -r ".[\"{{.SERVER_NAME}}\"]"
+      SERVER_PORT:
+        sh: tofu -chdir=../tofu output -raw ssh_port
+      SERVER_USER:
+        sh: tofu -chdir=../tofu output -raw ssh_user
     cmds:
       - task: prepare
-      - nixos-rebuild switch --flake . --target-host {{.HOST}} --use-remote-sudo
+      - echo -e "Host {{.SERVER_NAME}}\nHostName {{.SERVER_IP}}\nUser {{.SERVER_USER}}\nPort {{.SERVER_PORT}}" > ~/.ssh/config
+      - nixos-rebuild switch --flake . --target-host {{.SERVER_NAME}} --use-remote-sudo
+      - rm ~/.ssh/config
       - task: cleanup
     ignore_error: true
 
   rebuild:
-    desc: Rebuild the NixOS configuration on the local host
+    desc: Rebuild the NixOS configuration on the localhost
     cmds:
       - task: prepare
       - sudo nixos-rebuild switch --flake .
       - task: cleanup
     ignore_error: true
 
+  ssh:*:
+    desc: SSH into the server
+    vars:
+      SERVER_NAME: "{{index .MATCH 0}}"
+      SERVER_IP:
+        sh: tofu -chdir=../tofu output -json public_ips | jq -r ".[\"{{.SERVER_NAME}}\"]"
+      SERVER_PORT:
+        sh: tofu -chdir=../tofu output -raw ssh_port
+      SERVER_USER:
+        sh: tofu -chdir=../tofu output -raw ssh_user
+    cmd: ssh -p {{.SERVER_PORT}} {{.SERVER_USER}}@{{.SERVER_IP}} {{.CLI_ARGS}}
+    interactive: true
+
   prepare:
+    desc: Prepare the flake for deployment
     cmd: git add . --force
+    internal: true
 
   cleanup:
+    desc: Clean up the flake after deployment
     cmds:
-      - git rm -r --cached .
+      - git rm -r --cached . > /dev/null
       - git add .
+    internal: true

@@ -1,0 +1,40 @@
+version: "3"
+
+includes:
+  nixos:
+    taskfile: ../nixos/Taskfile.yml
+    dir: ../nixos
+    internal: true
+
+tasks:
+  plan:
+    desc: Generate and show an execution plan
+    cmds:
+      - task: nixos:prepare
+      - tofu plan -var-file=.tfvars -out=tfplan
+      - task: nixos:cleanup
+    ignore_error: true
+
+  import:
+    desc: Import the existing resources into the state file
+    cmds:
+      - task: nixos:prepare
+      - tofu import -var-file=.tfvars {{.CLI_ARGS}}
+      - task: nixos:cleanup
+    ignore_error: true
+
+  refresh:
+    desc: Refresh the state file
+    cmds:
+      - task: nixos:prepare
+      - tofu refresh -var-file=.tfvars
+      - task: nixos:cleanup
+    ignore_error: true
+
+  apply:
+    desc: Apply the generated plan
+    cmds:
+      - task: nixos:prepare
+      - tofu apply tfplan
+      - task: nixos:cleanup
+    ignore_error: true

@@ -1,7 +1,0 @@
-{
-  "name": "@stacks/kubernetes-dashboard",
-  "private": true,
-  "dependencies": {
-    "@infra/kubernetes-dashboard": "workspace:*"
-  }
-}

@@ -1,0 +1,7 @@
+{
+  "name": "@projects/postgresql",
+  "private": true,
+  "dependencies": {
+    "@infra/postgresql": "workspace:*"
+  }
+}
