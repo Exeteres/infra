@@ -59,7 +59,6 @@ You can also add some credentials mounts like `~/.kube` or `~/.pulumi` to authen
   <tr>
     <td><code>ghcr.io/exeteres/devcontainer/go</code></td>
     <td>Image with Go installed. <br>It additionally includes: <ul>
-      <li>Go</li>
       <li>protoc</li>
     </ul>
     </td>
@@ -67,19 +66,13 @@ You can also add some credentials mounts like `~/.kube` or `~/.pulumi` to authen
 
   <tr>
     <td><code>ghcr.io/exeteres/devcontainer/node</code></td>
-    <td>Image with Node.js installed. <br>It additionally includes: <ul>
-      <li>Node.js</li>
-      <li>corepack</li>
-      <li>protoc</li>
-    </ul>
-  </td>
+    <td>Image with Node.js installed.</td>
+  </tr>
 
   <tr>
     <td><code>ghcr.io/exeteres/devcontainer/dotnet</code></td>
-    <td>Image with .NET SDK installed. <br>It additionally includes: <ul>
-      <li>.NET SDK</li>
-    </ul>
-  </td>
+    <td>Image with .NET SDK installed.</td>
+  </tr>
 
   <tr>
     <td><code>ghcr.io/exeteres/devcontainer/devops</code></td>
@@ -90,4 +83,6 @@ You can also add some credentials mounts like `~/.kube` or `~/.pulumi` to authen
       <li>opentofu</li>
       <li>nix + additional packages</li>
     </ul>
+    </td>
+  </tr>
 </table>
