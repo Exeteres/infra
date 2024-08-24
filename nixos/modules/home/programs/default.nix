@@ -1,11 +1,9 @@
 {
   imports = [
-    ./firefox
     ./flatpak.nix
-
-    ./other/devtools.nix
-    ./other/essentials.nix
-    ./other/privacy.nix
+    ./devtools.nix
+    ./essentials.nix
+    ./privacy.nix
   ];
 
   programs.home-manager.enable = true;

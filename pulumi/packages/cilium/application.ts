@@ -1,11 +1,11 @@
-import { command, merge, pulumi } from "@infra/core"
+import { command, Input, merge } from "@infra/core"
 import { k8s } from "@infra/k8s"
 
 export interface ApplicationOptions extends Omit<k8s.ReleaseApplicationOptions, "namespace"> {
   /**
    * The IP address of the Kubernetes API server.
    */
-  k8sServiceHost: pulumi.Input<string>
+  k8sServiceHost: Input<string>
 
   /**
    * The name of the Kubernetes context to use.
@@ -13,7 +13,7 @@ export interface ApplicationOptions extends Omit<k8s.ReleaseApplicationOptions, 
   k8sContext: string
 }
 
-export interface Application {}
+export interface Application extends k8s.ReleaseApplication {}
 
 export function createApplication(options: ApplicationOptions): Application {
   const namespace = k8s.raw.core.v1.Namespace.get("kube-system", "kube-system")
@@ -50,7 +50,7 @@ export function createApplication(options: ApplicationOptions): Application {
   })
 
   command.createCommand({
-    name: "restart-pods",
+    name: "recreate-pods",
     parent: namespace,
     dependsOn: release,
 

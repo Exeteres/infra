@@ -1,6 +1,6 @@
 import { k8s } from "@infra/k8s"
 import { raw } from "./imports"
-import { normalizeInputArrayAndMap, pulumi } from "@infra/core"
+import { normalizeInputsAndMap, pulumi } from "@infra/core"
 
 export interface FunctionOptions extends k8s.CommonOptions {
   /**
@@ -46,7 +46,7 @@ export function createFunction(options: FunctionOptions) {
                 image: options.image,
                 ports: [{ containerPort: 8080 }],
                 env: k8s.mapEnvironment(options.environment),
-                envFrom: normalizeInputArrayAndMap(
+                envFrom: normalizeInputsAndMap(
                   options.environmentSource,
                   options.environmentSources,
                   k8s.mapEnvironmentSource,

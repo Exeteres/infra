@@ -6,6 +6,7 @@ import { gw } from "@infra/gateway"
 import { cloudflare } from "@infra/cloudflare"
 import { singleton } from "./utils"
 import { resolveStack } from "./stack"
+import { Input } from "@infra/core"
 
 interface ExposedService {
   dnsRecord: cloudflare.raw.Record
@@ -25,32 +26,108 @@ export const getPublicGatewayService = singleton(() => {
   return k8s.import(publicGatewayStack, k8s.raw.core.v1.Service, "serviceId")
 })
 
-export function exposePublicService(namespace: k8s.raw.core.v1.Namespace, domain: string): ExposedService {
-  const certificate = createWebCertificate(namespace, domain)
+interface ExposeHttpServiceOptions {
+  /**
+   * The namespace to create a gateway in.
+   */
+  namespace: k8s.raw.core.v1.Namespace
+
+  /**
+   * The domain to expose the service on.
+   */
+  domain: string
+
+  /**
+   * The path prefix to use for the service.
+   * If not provided, the service will be exposed at the root of the domain.
+   */
+  pathPrefix?: string
+
+  /**
+   * The extra options to use for the gateway.
+   */
+  gateway?: Partial<gw.Options>
+
+  /**
+   * The extra options to use for the listener.
+   */
+  listener?: Partial<gw.raw.types.input.gateway.v1.GatewaySpecListenersArgs>
+}
+
+export function exposePublicHttpService(options: ExposeHttpServiceOptions): ExposedService {
+  const dnsRecord = createPublicDnsRecord(options.domain)
+  const service = getPublicGatewayService()
+
+  return exposeHttpService("public", dnsRecord, service, options)
+}
+
+export function exposeInternalHttpService(options: ExposeHttpServiceOptions): ExposedService {
+  const dnsRecord = createInternalDnsRecord(options.domain)
+  const service = getInternalGatewayService()
+
+  return exposeHttpService("internal", dnsRecord, service, options)
+}
+
+function exposeHttpService(
+  className: string,
+  dnsRecord: cloudflare.raw.Record,
+  service: Input<k8s.raw.core.v1.Service>,
+  options: ExposeHttpServiceOptions,
+): ExposedService {
+  const certificate = createWebCertificate(options.namespace, options.domain)
 
   return {
-    dnsRecord: createPublicDnsRecord(namespace, domain),
+    dnsRecord,
     certificate,
     gateway: {
-      domain,
-      className: "public",
-      service: getPublicGatewayService(),
-      certificate,
+      pathPrefix: options.pathPrefix,
+      gateway: createHttpGateway(certificate, className, options),
+      service,
     },
   }
 }
 
-export function exposeInternalService(namespace: k8s.raw.core.v1.Namespace, domain: string): ExposedService {
-  const certificate = createWebCertificate(namespace, domain)
+function createHttpGateway(
+  certificate: certManager.CertificateBundle,
+  className: string,
+  options: ExposeHttpServiceOptions,
+) {
+  return gw.createGateway({
+    name: options.domain,
+    namespace: options.namespace,
+    gatewayClassName: className,
 
-  return {
-    dnsRecord: createInternalDnsRecord(namespace, domain),
-    certificate,
-    gateway: {
-      domain,
-      className: "internal",
-      service: getInternalGatewayService(),
-      certificate,
-    },
-  }
+    listeners: [
+      {
+        name: "http",
+        port: 8000,
+        protocol: "HTTP",
+        hostname: options.domain,
+
+        httpRoute: {
+          name: "http-to-https",
+          rule: {
+            filter: {
+              type: "RequestRedirect",
+              requestRedirect: {
+                scheme: "https",
+                statusCode: 301,
+              },
+            },
+          },
+        },
+      },
+
+      {
+        name: "https",
+        port: 8443,
+        protocol: "HTTPS",
+        certificate: certificate,
+        hostname: options.domain,
+        ...options.listener,
+      },
+    ],
+
+    ...options.gateway,
+  })
 }

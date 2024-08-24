@@ -1,4 +1,4 @@
-import { pulumi } from "@infra/core"
+import { Input } from "@infra/core"
 import { CommonOptions, mapPulumiOptions } from "./options"
 import { raw } from "./imports"
 
@@ -6,27 +6,27 @@ export interface HelmOptions extends CommonOptions {
   /**
    * The URL of the Helm repository.
    */
-  repo: pulumi.Input<string>
+  repo: Input<string>
 
   /**
    * The name of the Helm chart in the repository.
    */
-  chart: pulumi.Input<string>
+  chart: Input<string>
 
   /**
    * The version of the Helm chart.
    */
-  version: pulumi.Input<string>
+  version: Input<string>
 
   /**
    * The values to pass to the Helm chart.
    */
-  values?: pulumi.Input<Record<string, unknown>>
+  values?: Input<Record<string, unknown>>
 
   /**
    * Whether to skip waiting for the Helm chart to be ready.
    */
-  skipAwait?: pulumi.Input<boolean>
+  skipAwait?: Input<boolean>
 }
 
 /**

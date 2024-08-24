@@ -2,7 +2,7 @@ import { pulumi } from "@infra/core"
 import { k8s } from "@infra/k8s"
 import { tailscale } from "@infra/tailscale"
 import { traefik } from "@infra/traefik"
-import { getSharedStack } from "@projects/common"
+import { getSharedEnvironment } from "@projects/common"
 
 const namespace = k8s.createNamespace({ name: "internal-gateway" })
 
@@ -61,8 +61,7 @@ const service = release.status.status.apply(() => k8s.raw.core.v1.Service.get("t
 
 export const gatewayIp = service.spec.clusterIP
 
-const sharedStack = getSharedStack()
-const serviceCidr = sharedStack.requireOutput("serviceCidr")
+const { serviceCidr } = getSharedEnvironment()
 
 const { container, serviceAccount } = tailscale.createContainer({
   namespace,

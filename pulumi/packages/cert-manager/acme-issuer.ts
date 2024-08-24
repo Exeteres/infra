@@ -1,29 +1,29 @@
-import { normalizeInputArray, pulumi } from "@infra/core"
+import { Input, normalizeInputs } from "@infra/core"
 import { raw } from "./imports"
 import { k8s } from "@infra/k8s"
 
-type AcmeIssuerOptions = k8s.ScopedOptions & {
+export type AcmeIssuerOptions = k8s.ScopedOptions & {
   /**
    * The email address to use for the ACME account.
    */
-  email: pulumi.Input<string>
+  email: Input<string>
 
   /**
    * The ACME server URL.
    * @example https://acme-staging-v02.api.letsencrypt.org/directory
    * @example https://acme-v02.api.letsencrypt.org/directory
    */
-  server: pulumi.Input<string>
+  server: Input<string>
 
   /**
    * The solver configuration for the ACME issuer.
    */
-  solver?: pulumi.Input<raw.types.input.certmanager.v1.ClusterIssuerSpecAcmeSolversArgs>
+  solver?: Input<raw.types.input.certmanager.v1.ClusterIssuerSpecAcmeSolversArgs>
 
   /**
    * The solver configurations for the ACME issuer.
    */
-  solvers?: pulumi.Input<raw.types.input.certmanager.v1.ClusterIssuerSpecAcmeSolversArgs[]>
+  solvers?: Input<raw.types.input.certmanager.v1.ClusterIssuerSpecAcmeSolversArgs[]>
 }
 
 export function createAcmeIssuer(options: AcmeIssuerOptions) {
@@ -40,7 +40,7 @@ export function createAcmeIssuer(options: AcmeIssuerOptions) {
           server: options.server,
           email: options.email,
 
-          solvers: normalizeInputArray(options.solver, options.solvers),
+          solvers: normalizeInputs(options.solver, options.solvers),
 
           privateKeySecretRef: {
             name: secretName,

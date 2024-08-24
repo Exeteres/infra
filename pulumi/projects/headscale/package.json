@@ -1,7 +1,0 @@
-{
-  "name": "@projects/headscale",
-  "private": true,
-  "dependencies": {
-    "@infra/headscale": "workspace:*"
-  }
-}

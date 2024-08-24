@@ -103,15 +103,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@infra/attic@workspace:*, @infra/attic@workspace:packages/attic":
-  version: 0.0.0-use.local
-  resolution: "@infra/attic@workspace:packages/attic"
-  dependencies:
-    "@infra/k8s": "workspace:*"
-    "@infra/postgresql": "workspace:*"
-  languageName: unknown
-  linkType: soft
-
 "@infra/cert-manager@workspace:*, @infra/cert-manager@workspace:packages/cert-manager":
   version: 0.0.0-use.local
   resolution: "@infra/cert-manager@workspace:packages/cert-manager"
@@ -147,21 +138,14 @@ __metadata:
     "@pulumi/pulumi": "npm:^3.119.0"
     "@pulumi/random": "npm:^4.16.2"
     fnts: "npm:^3.0.1"
+    fp-ts: "npm:^2.16.9"
     ts-deepmerge: "npm:^7.0.0"
   languageName: unknown
   linkType: soft
 
-"@infra/etebase@workspace:*, @infra/etebase@workspace:packages/etebase":
+"@infra/etebase@workspace:*, @infra/etebase@workspace:apps/etebase":
   version: 0.0.0-use.local
-  resolution: "@infra/etebase@workspace:packages/etebase"
-  dependencies:
-    "@infra/k8s": "workspace:*"
-  languageName: unknown
-  linkType: soft
-
-"@infra/factorio@workspace:*, @infra/factorio@workspace:packages/factorio":
-  version: 0.0.0-use.local
-  resolution: "@infra/factorio@workspace:packages/factorio"
+  resolution: "@infra/etebase@workspace:apps/etebase"
   dependencies:
     "@infra/k8s": "workspace:*"
   languageName: unknown
@@ -177,19 +161,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@infra/ghost@workspace:*, @infra/ghost@workspace:packages/ghost":
+"@infra/ghost@workspace:*, @infra/ghost@workspace:apps/ghost":
   version: 0.0.0-use.local
-  resolution: "@infra/ghost@workspace:packages/ghost"
+  resolution: "@infra/ghost@workspace:apps/ghost"
   dependencies:
     "@infra/gateway": "workspace:*"
-    "@infra/k8s": "workspace:*"
-  languageName: unknown
-  linkType: soft
-
-"@infra/headscale@workspace:*, @infra/headscale@workspace:packages/headscale":
-  version: 0.0.0-use.local
-  resolution: "@infra/headscale@workspace:packages/headscale"
-  dependencies:
     "@infra/k8s": "workspace:*"
   languageName: unknown
   linkType: soft
@@ -211,19 +187,10 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@infra/kubernetes-dashboard@workspace:*, @infra/kubernetes-dashboard@workspace:packages/kubernetes-dashboard":
+"@infra/kubernetes-dashboard@workspace:*, @infra/kubernetes-dashboard@workspace:apps/kubernetes-dashboard":
   version: 0.0.0-use.local
-  resolution: "@infra/kubernetes-dashboard@workspace:packages/kubernetes-dashboard"
+  resolution: "@infra/kubernetes-dashboard@workspace:apps/kubernetes-dashboard"
   dependencies:
-    "@infra/k8s": "workspace:*"
-  languageName: unknown
-  linkType: soft
-
-"@infra/mailu@workspace:*, @infra/mailu@workspace:packages/mailu":
-  version: 0.0.0-use.local
-  resolution: "@infra/mailu@workspace:packages/mailu"
-  dependencies:
-    "@infra/cert-manager": "workspace:*"
     "@infra/k8s": "workspace:*"
   languageName: unknown
   linkType: soft
@@ -246,20 +213,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@infra/netbird@workspace:packages/netbird":
+"@infra/plane@workspace:*, @infra/plane@workspace:apps/plane":
   version: 0.0.0-use.local
-  resolution: "@infra/netbird@workspace:packages/netbird"
-  dependencies:
-    "@infra/cert-manager": "workspace:*"
-    "@infra/k8s": "workspace:*"
-    "@infra/postgresql": "workspace:*"
-    "@infra/traefik": "workspace:*"
-  languageName: unknown
-  linkType: soft
-
-"@infra/plane@workspace:*, @infra/plane@workspace:packages/plane":
-  version: 0.0.0-use.local
-  resolution: "@infra/plane@workspace:packages/plane"
+  resolution: "@infra/plane@workspace:apps/plane"
   dependencies:
     "@infra/cilium": "workspace:*"
     "@infra/gateway": "workspace:*"
@@ -292,23 +248,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@infra/standardnotes@workspace:*, @infra/standardnotes@workspace:packages/standardnotes":
-  version: 0.0.0-use.local
-  resolution: "@infra/standardnotes@workspace:packages/standardnotes"
-  dependencies:
-    "@infra/k8s": "workspace:*"
-    "@infra/restic": "workspace:*"
-  languageName: unknown
-  linkType: soft
-
-"@infra/syncthing@workspace:*, @infra/syncthing@workspace:packages/syncthing":
-  version: 0.0.0-use.local
-  resolution: "@infra/syncthing@workspace:packages/syncthing"
-  dependencies:
-    "@infra/k8s": "workspace:*"
-  languageName: unknown
-  linkType: soft
-
 "@infra/tailscale@workspace:*, @infra/tailscale@workspace:packages/tailscale":
   version: 0.0.0-use.local
   resolution: "@infra/tailscale@workspace:packages/tailscale"
@@ -325,30 +264,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@infra/vaultwarden@workspace:*, @infra/vaultwarden@workspace:packages/vaultwarden":
+"@infra/vaultwarden@workspace:*, @infra/vaultwarden@workspace:apps/vaultwarden":
   version: 0.0.0-use.local
-  resolution: "@infra/vaultwarden@workspace:packages/vaultwarden"
+  resolution: "@infra/vaultwarden@workspace:apps/vaultwarden"
   dependencies:
     "@infra/k8s": "workspace:*"
   languageName: unknown
   linkType: soft
 
-"@infra/vpn@workspace:*, @infra/vpn@workspace:packages/vpn":
+"@infra/vpn@workspace:*, @infra/vpn@workspace:apps/vpn":
   version: 0.0.0-use.local
-  resolution: "@infra/vpn@workspace:packages/vpn"
+  resolution: "@infra/vpn@workspace:apps/vpn"
   dependencies:
     "@infra/k8s": "workspace:*"
-  languageName: unknown
-  linkType: soft
-
-"@infra/zitadel@workspace:*, @infra/zitadel@workspace:packages/zitadel":
-  version: 0.0.0-use.local
-  resolution: "@infra/zitadel@workspace:packages/zitadel"
-  dependencies:
-    "@infra/cert-manager": "workspace:*"
-    "@infra/k8s": "workspace:*"
-    "@infra/postgresql": "workspace:*"
-    "@infra/traefik": "workspace:*"
   languageName: unknown
   linkType: soft
 
@@ -767,16 +695,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@projects/attic@workspace:projects/attic":
-  version: 0.0.0-use.local
-  resolution: "@projects/attic@workspace:projects/attic"
-  dependencies:
-    "@infra/attic": "workspace:*"
-    "@infra/cert-manager": "workspace:*"
-    "@infra/cloudflare": "workspace:*"
-  languageName: unknown
-  linkType: soft
-
 "@projects/cert-manager@workspace:projects/cert-manager":
   version: 0.0.0-use.local
   resolution: "@projects/cert-manager@workspace:projects/cert-manager"
@@ -811,14 +729,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@projects/factorio@workspace:projects/factorio":
-  version: 0.0.0-use.local
-  resolution: "@projects/factorio@workspace:projects/factorio"
-  dependencies:
-    "@infra/factorio": "workspace:*"
-  languageName: unknown
-  linkType: soft
-
 "@projects/functions@workspace:projects/functions":
   version: 0.0.0-use.local
   resolution: "@projects/functions@workspace:projects/functions"
@@ -827,11 +737,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@projects/ghost-ru@workspace:projects/ghost-ru":
+"@projects/ghost-gateway@workspace:projects/ghost-gateway":
   version: 0.0.0-use.local
-  resolution: "@projects/ghost-ru@workspace:projects/ghost-ru"
-  dependencies:
-    "@infra/ghost": "workspace:*"
+  resolution: "@projects/ghost-gateway@workspace:projects/ghost-gateway"
   languageName: unknown
   linkType: soft
 
@@ -840,14 +748,6 @@ __metadata:
   resolution: "@projects/ghost@workspace:projects/ghost"
   dependencies:
     "@infra/ghost": "workspace:*"
-  languageName: unknown
-  linkType: soft
-
-"@projects/headscale@workspace:projects/headscale":
-  version: 0.0.0-use.local
-  resolution: "@projects/headscale@workspace:projects/headscale"
-  dependencies:
-    "@infra/headscale": "workspace:*"
   languageName: unknown
   linkType: soft
 
@@ -872,14 +772,6 @@ __metadata:
   resolution: "@projects/kubernetes-dashboard@workspace:projects/kubernetes-dashboard"
   dependencies:
     "@infra/kubernetes-dashboard": "workspace:*"
-  languageName: unknown
-  linkType: soft
-
-"@projects/mailu@workspace:projects/mailu":
-  version: 0.0.0-use.local
-  resolution: "@projects/mailu@workspace:projects/mailu"
-  dependencies:
-    "@infra/mailu": "workspace:*"
   languageName: unknown
   linkType: soft
 
@@ -933,24 +825,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@projects/standardnotes@workspace:projects/standardnotes":
-  version: 0.0.0-use.local
-  resolution: "@projects/standardnotes@workspace:projects/standardnotes"
-  dependencies:
-    "@infra/standardnotes": "workspace:*"
-    "@infra/tailscale": "workspace:*"
-  languageName: unknown
-  linkType: soft
-
-"@projects/syncthing@workspace:projects/syncthing":
-  version: 0.0.0-use.local
-  resolution: "@projects/syncthing@workspace:projects/syncthing"
-  dependencies:
-    "@infra/syncthing": "workspace:*"
-    "@infra/tailscale": "workspace:*"
-  languageName: unknown
-  linkType: soft
-
 "@projects/vaultwarden@workspace:projects/vaultwarden":
   version: 0.0.0-use.local
   resolution: "@projects/vaultwarden@workspace:projects/vaultwarden"
@@ -976,14 +850,6 @@ __metadata:
     "@infra/k8s": "workspace:*"
     "@infra/tailscale": "workspace:*"
     "@infra/vpn": "workspace:*"
-  languageName: unknown
-  linkType: soft
-
-"@projects/zitadel@workspace:projects/zitadel":
-  version: 0.0.0-use.local
-  resolution: "@projects/zitadel@workspace:projects/zitadel"
-  dependencies:
-    "@infra/zitadel": "workspace:*"
   languageName: unknown
   linkType: soft
 
@@ -2304,6 +2170,13 @@ __metadata:
     combined-stream: "npm:^1.0.8"
     mime-types: "npm:^2.1.12"
   checksum: 10c0/cb6f3ac49180be03ff07ba3ff125f9eba2ff0b277fb33c7fc47569fc5e616882c5b1c69b9904c4c4187e97dd0419dd03b134174756f296dec62041e6527e2c6e
+  languageName: node
+  linkType: hard
+
+"fp-ts@npm:^2.16.9":
+  version: 2.16.9
+  resolution: "fp-ts@npm:2.16.9"
+  checksum: 10c0/704fcc2e792bd17cb653e7b62b5d9d905c04327776df8bf2a1f67e1c6823b06c7c36036345279ac04f0b6b7214ad01f91f109f548e144c9f866a491392fbfbcc
   languageName: node
   linkType: hard
 

@@ -30,7 +30,7 @@ export interface ContainerSpecOptions {
   /**
    * The routes to advertise.
    */
-  advertiseRoutes?: InputArray<string[]>
+  advertiseRoutes?: InputArray<string>
 
   /**
    * The JSON-serialized content of the auth secret (the content of the `data`).
@@ -43,7 +43,7 @@ export interface Container {
   /**
    * The container spec to be used in a pod.
    */
-  container: k8s.ContainerOptions
+  container: k8s.Container
 
   /**
    * The created service account which has access to the secret.

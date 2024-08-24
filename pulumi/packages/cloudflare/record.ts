@@ -1,4 +1,4 @@
-import { pulumi, resource } from "@infra/core"
+import { Input, resource } from "@infra/core"
 import { CommonOptions } from "./options"
 import { raw } from "./imports"
 
@@ -8,32 +8,32 @@ export interface RecordOptions extends CommonOptions {
    * If not provided, the "name" will be used.
    * Note that in DNS, multiple records can have the same name (and even the same type).
    */
-  recordName?: pulumi.Input<string>
+  recordName?: Input<string>
 
   /**
    * The type of DNS record.
    */
-  type: pulumi.Input<string>
+  type: Input<string>
 
   /**
    * The value of the DNS record.
    */
-  value: pulumi.Input<string>
+  value: Input<string>
 
   /**
    * The TTL of the DNS record.
    */
-  ttl?: pulumi.Input<number>
+  ttl?: Input<number>
 
   /**
    * The priority of the DNS record.
    */
-  priority?: pulumi.Input<number>
+  priority?: Input<number>
 
   /**
    * Whether the DNS record is proxied through Cloudflare.
    */
-  proxied?: pulumi.Input<boolean>
+  proxied?: Input<boolean>
 }
 
 /**

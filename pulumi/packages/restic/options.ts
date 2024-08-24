@@ -1,12 +1,10 @@
-import { k8s } from "@infra/k8s"
-import { Repository } from "./repository"
-import { ScriptBundle } from "./bundle"
+import { scripting } from "@infra/scripting"
 
 export interface BackupOptions {
   /**
-   * The repository to use for the backup and restore operations.
+   * The environment to use for the backup and restore operations.
    */
-  repository: Repository
+  environment: scripting.Environment
 
   /**
    * The host name of the machine to backup.

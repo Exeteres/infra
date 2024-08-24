@@ -1,8 +1,0 @@
-{
-  "name": "@infra/mailu",
-  "private": true,
-  "dependencies": {
-    "@infra/cert-manager": "workspace:*",
-    "@infra/k8s": "workspace:*"
-  }
-}

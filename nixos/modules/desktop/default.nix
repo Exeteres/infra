@@ -1,8 +1,9 @@
-{
+{pkgs, ...}: {
   imports = [
     ./gnome
     ./firewall
     ./other
+    ../../users/exeteres/desktop.nix
   ];
 
   # Enable networking
@@ -21,6 +22,19 @@
       ];
     };
   };
+
+  boot.kernelPackages = pkgs.linuxPackages_zen;
+
+  services.tailscale = {
+    enable = true;
+    useRoutingFeatures = "client";
+  };
+
+  sops.age.sshKeyPaths = ["/etc/ssh/ssh_host_ed25519_key"];
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
+  boot.loader.efi.efiSysMountPoint = "/boot";
+  boot.supportedFilesystems = ["ntfs"];
 
   # Integrate home-manager
   home-manager.useGlobalPkgs = true;

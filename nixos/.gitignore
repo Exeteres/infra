@@ -1,5 +1,5 @@
 secrets
-users
 hosts
 .sops.yaml
 timezone.nix
+private.nix

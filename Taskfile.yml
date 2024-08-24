@@ -10,11 +10,19 @@ includes:
     dir: nixos
 
   projects:
-    taskfile: pulumi/projects/Taskfile.yml
+    taskfile: pulumi/tasks/Taskfile.projects.yml
     dir: pulumi/projects
 
-  pulumi:
-    taskfile: pulumi/Taskfile.yml
+  base:
+    taskfile: pulumi/tasks/Taskfile.base.yml
+    dir: pulumi
+
+  backup:
+    taskfile: pulumi/tasks/Taskfile.backup.yml
+    dir: pulumi
+
+  migrate:
+    taskfile: pulumi/tasks/Taskfile.migrate.yml
     dir: pulumi
 
 tasks:

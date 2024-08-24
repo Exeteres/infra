@@ -1,7 +1,0 @@
-{
-  "name": "@infra/headscale",
-  "private": true,
-  "dependencies": {
-    "@infra/k8s": "workspace:*"
-  }
-}

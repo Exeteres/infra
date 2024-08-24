@@ -1,8 +1,0 @@
-{
-  "name": "@infra/attic",
-  "private": true,
-  "dependencies": {
-    "@infra/k8s": "workspace:*",
-    "@infra/postgresql": "workspace:*"
-  }
-}

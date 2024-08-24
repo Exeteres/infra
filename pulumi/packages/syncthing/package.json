@@ -1,7 +1,0 @@
-{
-  "name": "@infra/syncthing",
-  "private": true,
-  "dependencies": {
-    "@infra/k8s": "workspace:*"
-  }
-}

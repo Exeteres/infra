@@ -26,7 +26,7 @@ export function createCommand(options: CommandOptions) {
     options.name,
     {
       create: normalizeCommand(options.create),
-      delete: mapOptional(normalizeCommand, options.delete),
+      delete: mapOptional(options.delete, normalizeCommand),
       triggers: options.triggers,
     },
     mapPulumiOptions(options),

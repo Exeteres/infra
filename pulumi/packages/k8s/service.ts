@@ -1,6 +1,6 @@
 import { CommonOptions, mapMetadata, mapPulumiOptions } from "./options"
 import { raw } from "./imports"
-import { pulumi } from "@infra/core"
+import { Input, Output, pulumi } from "@infra/core"
 
 export interface ServiceOptions extends CommonOptions, raw.types.input.core.v1.ServiceSpec {}
 
@@ -47,5 +47,24 @@ export function getRequiredServiceExternalIP(service: raw.core.v1.Service): pulu
     }
 
     return ip
+  })
+}
+
+/**
+ * Get the port of a Service by name.
+ * Throws an error if the Service does not have a port with the given name.
+ *
+ * @param service The Service to get the port of.
+ * @param name The name of the port to get.
+ * @returns The port of the Service.
+ */
+export function getRequiredServicePortByName(service: raw.core.v1.Service, name: string): pulumi.Output<number> {
+  return service.spec.ports.apply(ports => {
+    const port = ports.find(p => p.name === name)
+    if (!port) {
+      throw new Error(`Service does not have a port with name ${name}`)
+    }
+
+    return port.port
   })
 }

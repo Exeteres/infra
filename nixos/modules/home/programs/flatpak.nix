@@ -8,6 +8,7 @@
     "com.mongodb.Compass"
     "org.gnome.dspy"
     "org.chromium.Chromium"
+    "io.dbeaver.DBeaverCommunity"
 
     # Graphics
     "org.gimp.GIMP"
@@ -16,6 +17,7 @@
     # Essentials
     "org.qbittorrent.qBittorrent"
     "org.libreoffice.LibreOffice"
+    "org.mozilla.firefox"
 
     # Cryptocurrency
     "org.electrum.electrum"

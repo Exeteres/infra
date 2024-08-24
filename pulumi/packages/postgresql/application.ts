@@ -1,21 +1,19 @@
-import { merge, pulumi, random, trimIndentation } from "@infra/core"
+import { merge, pulumi } from "@infra/core"
 import { k8s } from "@infra/k8s"
 import { restic } from "@infra/restic"
+import { createScriptingEnvironment } from "./scripting"
 import { scripting } from "@infra/scripting"
-import { scriptEnvironment } from "./scripting"
 
 export interface ApplicationOptions extends k8s.ReleaseApplicationOptions {
   /**
    * The options for the backup.
-   * If not specified, backups will be disabled.
    */
-  backup?: restic.BackupOptions
+  backup: restic.BackupOptions
 
   /**
    * The password for the postgres user.
-   * If not specified, a random password will be generated.
    */
-  rootPassword?: pulumi.Input<string>
+  rootPassword: pulumi.Input<string>
 }
 
 export interface Application extends k8s.ReleaseApplication {
@@ -38,7 +36,7 @@ export interface Application extends k8s.ReleaseApplication {
    * The hostname of the PostgreSQL database in the Kubernetes cluster.
    * For example, `postgresql.postgresql.svc`.
    */
-  host: pulumi.Output<string>
+  host: string
 }
 
 /**
@@ -48,104 +46,61 @@ export interface Application extends k8s.ReleaseApplication {
  * @returns The PostgreSQL database release and certificate.
  */
 export function createApplication(options: ApplicationOptions): Application {
-  const name = options.name ?? "postgresql"
-  const fullName = k8s.getPrefixedName(name, options.prefix)
-  const namespace = options.namespace ?? k8s.createNamespace({ name: fullName })
+  const name = "postgresql"
+  const host = "postgresql.postgresql.svc"
+  const namespace = options.namespace ?? k8s.createNamespace({ name })
 
   const rootPasswordSecret = k8s.createSecret({
-    name: k8s.getPrefixedName("root-password", fullName),
+    name: "root-password",
     namespace,
 
     realName: "root-password",
 
     key: "postgres-password",
-    value:
-      options.rootPassword ??
-      random.createPassword({
-        name: k8s.getPrefixedName("root-password", fullName),
-        parent: namespace,
-        length: 16,
-      }).result,
+    value: options.rootPassword,
   })
 
   const dataVolumeClaim = k8s.createPersistentVolumeClaim({
-    name: k8s.getPrefixedName("data", fullName),
+    name: "data",
     namespace,
 
     capacity: "1Gi",
   })
 
-  const initContainers: k8s.raw.types.input.core.v1.Container[] = []
-  const sidecarContainers: k8s.raw.types.input.core.v1.Container[] = []
-  const extraVolumes: k8s.raw.types.input.core.v1.Volume[] = []
+  const bundle = scripting.createBundle({
+    name: "backup",
+    namespace,
 
-  if (options.backup) {
-    const bundle = restic.createScriptBundle({
-      name: k8s.getPrefixedName("backup", fullName),
-      namespace,
-
-      repository: options.backup.repository,
-
-      environment: scripting.mergeEnvironments(scriptEnvironment, {
-        distro: "alpine",
-
-        scripts: {
-          "lock.sh": trimIndentation(`
-            #!/bin/sh
-            set -e
-        
-            echo "| Locking tables..."
-            psql -h postgres -U postgres -c "SELECT pg_start_backup('label', true);"
-            echo "| Tables locked"
-          `),
-
-          "unlock.sh": trimIndentation(`
-            #!/bin/sh
-            set -e
-        
-            echo "| Unlocking tables..."
-            psql -h postgres -U postgres -c "SELECT pg_stop_backup();"
-            echo "| Tables unlocked"
-          `),
-        },
-
+    environment: createScriptingEnvironment({
+      rootPasswordSecret,
+      environment: scripting.mergeEnvironments(options.backup.environment, {
         environment: {
-          PGPASSWORD: {
-            secretKeyRef: {
-              name: rootPasswordSecret.metadata.name,
-              key: "postgres-password",
-            },
-          },
+          DATABASE_HOST: host,
         },
       }),
-    })
+    }),
+  })
 
-    restic.createBackupCronJob({
-      name: fullName,
-      namespace,
+  restic.createBackupJob({
+    name: "backup",
+    namespace,
+    bundle,
+    options: options.backup,
+  })
 
-      options: options.backup,
-      bundle,
-      volumeClaim: dataVolumeClaim,
-    })
-
-    const { volumes, initContainer, sidecarContainer } = restic.createExtraContainers({
-      name: fullName,
-      namespace,
-
-      options: options.backup,
-      bundle,
-      volume: "data",
-    })
-
-    initContainers.push(initContainer)
-    sidecarContainers.push(sidecarContainer)
-    extraVolumes.push(...volumes)
-  }
+  const restoreJob = restic.createRestoreJob({
+    name: "restore",
+    namespace,
+    bundle,
+    options: options.backup,
+    volumeClaim: dataVolumeClaim,
+    subPath: "data",
+  })
 
   const release = k8s.createHelmRelease({
-    name: fullName,
+    name,
     namespace,
+    dependsOn: restoreJob,
 
     repo: "https://charts.bitnami.com/bitnami",
     chart: "postgresql",
@@ -162,19 +117,14 @@ export function createApplication(options: ApplicationOptions): Application {
         },
 
         primary: {
-          nodeSelector: options.nodeSelector,
-
           persistence: {
             existingClaim: dataVolumeClaim.metadata.name,
           },
 
-          initContainers,
-          sidecars: sidecarContainers,
-          extraVolumes,
-
           pgHbaConfiguration: [
             //
-            "host all all 0.0.0.0/0 scram-sha-256",
+            "host all         all 0.0.0.0/0 scram-sha-256",
+            "host replication all 0.0.0.0/0 scram-sha-256",
           ].join("\n"),
         },
 
@@ -187,16 +137,13 @@ export function createApplication(options: ApplicationOptions): Application {
   })
 
   return {
-    name,
-    fullName,
-    prefix: options.prefix,
     namespace,
     release,
 
     rootPasswordSecret,
     dataVolumeClaim,
 
-    host: pulumi.interpolate`${release.status.name}.postgresql.svc`,
+    host,
     service: release.status.name.apply(releaseName => {
       return k8s.raw.core.v1.Service.get(releaseName, `${releaseName}/postgresql`, { parent: namespace })
     }),

@@ -1,8 +1,0 @@
-{
-  "name": "@infra/standardnotes",
-  "private": true,
-  "dependencies": {
-    "@infra/k8s": "workspace:*",
-    "@infra/restic": "workspace:*"
-  }
-}

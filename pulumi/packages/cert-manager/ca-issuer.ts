@@ -1,13 +1,13 @@
 import { k8s } from "@infra/k8s"
 import { Issuer } from "./certificate"
 import { raw } from "./imports"
-import { pulumi } from "@infra/core"
+import { Input, output } from "@infra/core"
 
-type CaIssuerOptions = k8s.ScopedOptions & {
+export type CaIssuerOptions = k8s.ScopedOptions & {
   /**
    * The issuer which will be used to create the certificate for the CA itself.
    */
-  bootstrapIssuer: pulumi.Input<Issuer>
+  bootstrapIssuer: Input<Issuer>
 }
 
 export function createCaIssuer(options: CaIssuerOptions) {
@@ -27,9 +27,9 @@ export function createCaIssuer(options: CaIssuerOptions) {
           algorithm: "ECDSA",
           size: 256,
         },
-        issuerRef: pulumi.output(options.bootstrapIssuer).apply(issuer => ({
-          name: issuer.metadata.apply(m => m!.name) as pulumi.Input<string>,
-          kind: issuer.kind as pulumi.Input<string>,
+        issuerRef: output(options.bootstrapIssuer).apply(issuer => ({
+          name: issuer.metadata.apply(m => m!.name) as Input<string>,
+          kind: issuer.kind as Input<string>,
           group: "cert-manager.io",
         })),
       },

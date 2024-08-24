@@ -57,7 +57,7 @@ export type ScopedOptions = Omit<CommonOptions, "namespace"> &
 export function mapMetadata<TOptions extends Partial<CommonOptions>>(
   options: TOptions,
   extra?: pulumi.Input<raw.types.input.meta.v1.ObjectMeta>,
-): pulumi.Input<raw.types.input.meta.v1.ObjectMeta> {
+): pulumi.Output<raw.types.input.meta.v1.ObjectMeta> {
   return pulumi.all([options.labels, options.annotations, extra]).apply(([labels, annotations, extra]) => {
     return {
       name: options.realName ?? options.name,
@@ -96,16 +96,14 @@ export function mapPulumiOptions(
   }
 }
 
-export type LabelSelector = raw.types.input.meta.v1.LabelSelector | pulumi.Input<Record<string, pulumi.Input<string>>>
+export type LabelSelector = raw.types.input.meta.v1.LabelSelector | Record<string, pulumi.Input<string>>
 
-export function mapLabelSelector(selector: LabelSelector): pulumi.Output<raw.types.input.meta.v1.LabelSelector> {
-  return pulumi.output(selector).apply(selector => {
-    if ("matchLabels" in selector || "matchExpressions" in selector) {
-      return selector
-    }
+export function mapLabelSelector(selector: LabelSelector): raw.types.input.meta.v1.LabelSelector {
+  if ("matchLabels" in selector || "matchExpressions" in selector) {
+    return selector
+  }
 
-    return {
-      matchLabels: selector,
-    } as raw.types.input.meta.v1.LabelSelector
-  })
+  return {
+    matchLabels: selector,
+  } as raw.types.input.meta.v1.LabelSelector
 }

@@ -1,0 +1,98 @@
+version: "3"
+
+includes:
+  projects:
+    taskfile: Taskfile.projects.yml
+    dir: ../projects
+    internal: true
+
+  backup:
+    taskfile: Taskfile.backup.yml
+    dir: ..
+    internal: true
+
+tasks:
+  all:*:*:
+    vars:
+      SOURCE: "{{index .MATCH 0}}"
+      TARGET: "{{index .MATCH 1}}"
+    desc: Migrate all projects from "{{.SOURCE}}" to "{{.TARGET}}"
+    cmds:
+      # 1. Migrate VPN stuff
+      - task: vpn:{{.SOURCE}}:{{.TARGET}}
+
+      # 2. Up databases on the target
+      - task: backup-and-up-databases:{{.SOURCE}}:{{.TARGET}}
+
+      # 3. Migrate apps
+      - task: apps:{{.SOURCE}}:{{.TARGET}}
+
+      # 4. Down databases on the source
+      - task: down-databases:{{.SOURCE}}
+
+  vpn:*:*:
+    vars:
+      SOURCE: "{{index .MATCH 0}}"
+      TARGET: "{{index .MATCH 1}}"
+    desc: Migrate VPN exit nodes and static listeners from "{{.SOURCE}}" to "{{.TARGET}}"
+    deps:
+      - task: projects:down-first:migrate:{{.SOURCE}}:{{.TARGET}}:vpn
+      - task: projects:migrate:{{.SOURCE}}:{{.TARGET}}:vpn-static
+
+  backup-and-up:*:*:*:
+    vars:
+      SOURCE: "{{index .MATCH 0}}"
+      TARGET: "{{index .MATCH 1}}"
+      PROJECT: "{{index .MATCH 2}}"
+    desc: Backup data from "{{.SOURCE}}" and up the project on "{{.TARGET}}"
+    cmds:
+      - task: backup:project:{{.SOURCE}}:{{.PROJECT}}
+      - task: projects:non-interactive:up:{{.TARGET}}:{{.PROJECT}}
+
+  backup-and-up-databases:*:*:
+    vars:
+      SOURCE: "{{index .MATCH 0}}"
+      TARGET: "{{index .MATCH 1}}"
+    desc: Backup databases from "{{.SOURCE}}" and up them on "{{.TARGET}}"
+    deps:
+      - task: backup-and-up:{{.SOURCE}}:{{.TARGET}}:postgresql
+      - task: backup-and-up:{{.SOURCE}}:{{.TARGET}}:mariadb
+      - task: backup-and-up:{{.SOURCE}}:{{.TARGET}}:minio
+
+  down-databases:*:
+    vars:
+      TARGET: "{{index .MATCH 0}}"
+    desc: Down databases on "{{.TARGET}}"
+    deps:
+      - task: projects:non-interactive:down:{{.TARGET}}:postgresql
+      - task: projects:non-interactive:down:{{.TARGET}}:mariadb
+      - task: projects:non-interactive:down:{{.TARGET}}:minio
+
+  apps:*:*:
+    vars:
+      SOURCE: "{{index .MATCH 0}}"
+      TARGET: "{{index .MATCH 1}}"
+    desc: Migrate apps from "{{.SOURCE}}" to "{{.TARGET}}"
+    deps:
+      - task: projects:migrate:{{.SOURCE}}:{{.TARGET}}:vaultwarden
+      - task: projects:migrate:{{.SOURCE}}:{{.TARGET}}:plane
+      - task: projects:migrate:{{.SOURCE}}:{{.TARGET}}:etebase
+
+  refresh:*:
+    vars:
+      STACK: "{{index .MATCH 0}}"
+    desc: Refresh all projects in {{.STACK}}
+    deps:
+      - task: projects:non-interactive:refresh:{{.STACK}}:cert-manager
+      - task: projects:non-interactive:refresh:{{.STACK}}:cilium
+      - task: projects:non-interactive:refresh:{{.STACK}}:public-gateway
+      - task: projects:non-interactive:refresh:{{.STACK}}:internal-gateway
+      - task: projects:non-interactive:refresh:{{.STACK}}:kubernetes-dashboard
+      # - task: projects:non-interactive:refresh:{{.STACK}}:etebase
+      # - task: projects:non-interactive:refresh:{{.STACK}}:mariadb
+      # - task: projects:non-interactive:refresh:{{.STACK}}:minio
+      # - task: projects:non-interactive:refresh:{{.STACK}}:plane
+      # - task: projects:non-interactive:refresh:{{.STACK}}:postgresql
+      # - task: projects:non-interactive:refresh:{{.STACK}}:vpn
+      # - task: projects:non-interactive:refresh:{{.STACK}}:vpn-static
+    ignore_error: true

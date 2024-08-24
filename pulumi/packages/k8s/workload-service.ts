@@ -1,10 +1,10 @@
-import { normalizeInputArrayAndMap, pulumi } from "@infra/core"
+import { normalizeInputsAndMap, PartialKeys, pulumi } from "@infra/core"
 import { raw } from "./imports"
 import { mapMetadata, mapPulumiOptions } from "./options"
 import { ServiceOptions } from "./service"
 import { WorkloadKind, WorkloadOptions, WorkloadResources, createWorkload } from "./workload"
 
-export interface WorkloadServiceOptions extends WorkloadOptions {
+export type WorkloadServiceOptions<TWorkloadKind extends WorkloadKind> = WorkloadOptions<TWorkloadKind> & {
   /**
    * The configuration of the port that the service exposes.
    */
@@ -18,12 +18,10 @@ export interface WorkloadServiceOptions extends WorkloadOptions {
   /**
    * The options to configure the service.
    */
-  service?: Omit<ServiceOptions, "name" | "namespace">
+  service?: PartialKeys<Omit<ServiceOptions, "namespace">, "name">
 }
 
 export type ServicePort = raw.types.input.core.v1.ServicePort | number
-
-export type TypedWorkloadServiceOptions<TWorkloadKind> = Omit<WorkloadServiceOptions, "kind"> & { kind: TWorkloadKind }
 
 export interface WorkloadService<TWorkloadKind extends WorkloadKind> {
   /**
@@ -44,26 +42,34 @@ export interface WorkloadService<TWorkloadKind extends WorkloadKind> {
  * @param options The options to configure the workload and service.
  * @returns The workload and service resources.
  */
-export function createWorkloadService<T extends WorkloadKind>(
-  options: TypedWorkloadServiceOptions<T>,
-): WorkloadService<T> {
-  const labels = {
-    "app.kubernetes.io/name": options.name,
-    ...options.labels,
-  }
+export function createWorkloadService<TWorkloadKind extends WorkloadKind>(
+  options: WorkloadServiceOptions<TWorkloadKind>,
+): WorkloadService<TWorkloadKind> {
+  const serviceName = options.service?.name ?? options.name
 
-  const workload = createWorkload({
-    ...options,
-    labels: options.labels,
-  })
+  const workload =
+    options.kind === "StatefulSet"
+      ? createWorkload<"StatefulSet">({
+          ...options,
+          kind: "StatefulSet",
+          serviceName,
+        })
+      : createWorkload({
+          ...options,
+          serviceName,
+        })
 
   const service = new raw.core.v1.Service(
     options.name,
     {
-      metadata: mapMetadata({ ...options, ...options.service }),
+      metadata: mapMetadata({
+        ...options.service,
+        namespace: options.namespace,
+        name: serviceName,
+      }),
       spec: {
-        selector: labels,
-        ports: normalizeInputArrayAndMap(options.port, options.ports, mapPort),
+        selector: workload.spec.selector.matchLabels,
+        ports: normalizeInputsAndMap(options.port, options.ports, mapPort),
         type: options.service?.type,
         loadBalancerClass: options.service?.loadBalancerClass,
       },
@@ -71,7 +77,10 @@ export function createWorkloadService<T extends WorkloadKind>(
     mapPulumiOptions(options),
   )
 
-  return { workload, service }
+  return {
+    workload: workload as WorkloadResources[TWorkloadKind],
+    service,
+  }
 }
 
 function mapPort(port: ServicePort): raw.types.input.core.v1.ServicePort {
@@ -79,5 +88,13 @@ function mapPort(port: ServicePort): raw.types.input.core.v1.ServicePort {
     return { port }
   } else {
     return port
+  }
+}
+
+function mapContainerPort(port: ServicePort): raw.types.input.core.v1.ContainerPort {
+  if (typeof port === "number") {
+    return { containerPort: port }
+  } else {
+    return { containerPort: port.port }
   }
 }

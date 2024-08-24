@@ -1,12 +1,32 @@
 import { trimIndentation } from "@infra/core"
+import { k8s } from "@infra/k8s"
 import { scripting } from "@infra/scripting"
 
-/**
- * The default script environment for PostgreSQL.
- * Does not include the root password secret, so it must be provided when using this environment.
- */
-export const scriptEnvironment: scripting.ScriptEnvironment = {
-  distro: "alpine",
+export interface ScriptingEnvironmentOptions {
+  /**
+   * The secret containing the root password for the PostgreSQL database.
+   * Must contain a key named `postgres-password`.
+   */
+  rootPasswordSecret: k8s.raw.core.v1.Secret
+
+  /**
+   * The extra environment to use when running the scripts.
+   */
+  environment?: scripting.Environment
+}
+
+export function createScriptingEnvironment(options: ScriptingEnvironmentOptions): Required<scripting.Environment> {
+  return scripting.mergeEnvironments(staticEnvironment, options.environment, {
+    environment: {
+      PGPASSWORD: {
+        secret: options.rootPasswordSecret,
+        key: "postgres-password",
+      },
+    },
+  })
+}
+
+const staticEnvironment: scripting.Environment = {
   packages: ["postgresql-client"],
 
   scripts: {
@@ -40,6 +60,15 @@ export const scriptEnvironment: scripting.ScriptEnvironment = {
       EOF
 
       echo "Database initialization complete"
+    `),
+
+    "online-backup.sh": trimIndentation(`
+      #!/bin/sh
+      set -e
+
+      echo "| Starting online backup using pg_basebackup..."
+      pg_basebackup -h $DATABASE_HOST -U postgres -D /data --checkpoint=fast --wal-method=stream
+      echo "| Online backup completed"
     `),
   },
 }

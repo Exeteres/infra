@@ -1,0 +1,41 @@
+version: "3"
+
+includes:
+  projects:
+    taskfile: ./Taskfile.projects.yml
+    dir: ../projects
+    internal: true
+
+tasks:
+  up:*:
+    vars:
+      SERVER: "{{index .MATCH 0}}"
+    desc: Up the base infrastructure
+    cmds:
+      - task: projects:non-interactive:up:{{.SERVER}}:shared
+      - task: projects:non-interactive:up:{{.SERVER}}:cilium
+      - task: _up:gateway:{{.SERVER}}
+      - task: projects:non-interactive:up:{{.SERVER}}:kubernetes-dashboard
+
+  _up:gateway:*:
+    desc: Up the gateways and cert-manager
+    vars:
+      SERVER: "{{index .MATCH 0}}"
+    deps:
+      - task: projects:non-interactive:up:{{.SERVER}}:cert-manager
+      - task: projects:non-interactive:up:{{.SERVER}}:internal-gateway
+      - task: projects:non-interactive:up:{{.SERVER}}:public-gateway
+    internal: true
+
+  down:*:
+    vars:
+      SERVER: "{{index .MATCH 0}}"
+    desc: Destroy the base infrastructure
+    deps:
+      - task: projects:non-interactive:down:{{.SERVER}}:kubernetes-dashboard
+      - task: projects:non-interactive:down:{{.SERVER}}:public-gateway
+      - task: projects:non-interactive:down:{{.SERVER}}:internal-gateway
+      - task: projects:non-interactive:down:{{.SERVER}}:cert-manager
+      - task: projects:non-interactive:down:{{.SERVER}}:cilium
+      - task: projects:non-interactive:down:{{.SERVER}}:shared
+    ignore_error: true

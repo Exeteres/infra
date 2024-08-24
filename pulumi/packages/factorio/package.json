@@ -1,7 +1,0 @@
-{
-  "name": "@infra/factorio",
-  "private": true,
-  "dependencies": {
-    "@infra/k8s": "workspace:*"
-  }
-}

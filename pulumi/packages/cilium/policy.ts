@@ -6,8 +6,8 @@ import {
   mapObjectKeys,
   mapOptionalInput,
   mergeInputArrays,
-  normalizeInputArray,
-  normalizeInputArrayAndMap,
+  normalizeInputs,
+  normalizeInputsAndMap,
   pulumi,
   undefinedIfEmpty,
 } from "@infra/core"
@@ -189,36 +189,36 @@ export function createPolicy(options: PolicyOptions): Policy {
       metadata: k8s.mapMetadata(options),
       spec: {
         description: options.description,
-        endpointSelector: mapOptionalInput(k8s.mapLabelSelector, options.endpointSelector, {}),
+        endpointSelector: mapOptionalInput(options.endpointSelector, k8s.mapLabelSelector, {}),
         egress: undefinedIfEmpty(
-          normalizeInputArrayAndMap(options.egress, options.egresses, egress => ({
-            toFQDNs: undefinedIfEmpty(normalizeInputArrayAndMap(egress.toFQDN, egress.toFQDNs, mapFQDNSelector)),
+          normalizeInputsAndMap(options.egress, options.egresses, egress => ({
+            toFQDNs: undefinedIfEmpty(normalizeInputsAndMap(egress.toFQDN, egress.toFQDNs, mapFQDNSelector)),
             toEndpoints: undefinedIfEmpty(
               mergeInputArrays(
-                normalizeInputArrayAndMap(egress.toEndpoint, egress.toEndpoints, k8s.mapLabelSelector),
-                normalizeInputArrayAndMap(egress.toService, egress.toServices, mapServiceSelector),
+                normalizeInputsAndMap(egress.toEndpoint, egress.toEndpoints, k8s.mapLabelSelector),
+                normalizeInputsAndMap(egress.toService, egress.toServices, mapServiceSelector),
               ),
             ),
             // toServices: undefinedIfEmpty(
-            //   normalizeInputArrayAndMap(egress.toService, egress.toServices, mapServiceSelector),
+            //   normalizeInputsAndMap(egress.toService, egress.toServices, mapServiceSelector),
             // ),
-            toEntities: undefinedIfEmpty(normalizeInputArray(egress.toEntity, egress.toEntities)),
-            toPorts: undefinedIfEmpty(normalizeInputArrayAndMap(egress.toPort, egress.toPorts, mapPortSelector)),
+            toEntities: undefinedIfEmpty(normalizeInputs(egress.toEntity, egress.toEntities)),
+            toPorts: undefinedIfEmpty(normalizeInputsAndMap(egress.toPort, egress.toPorts, mapPortSelector)),
           })),
         ),
         ingress: undefinedIfEmpty(
-          normalizeInputArrayAndMap(options.ingress, options.ingresses, ingress => ({
+          normalizeInputsAndMap(options.ingress, options.ingresses, ingress => ({
             fromEndpoints: undefinedIfEmpty(
               mergeInputArrays(
-                normalizeInputArrayAndMap(ingress.fromEndpoint, ingress.fromEndpoints, k8s.mapLabelSelector),
-                normalizeInputArrayAndMap(ingress.fromService, ingress.fromServices, mapServiceSelector),
+                normalizeInputsAndMap(ingress.fromEndpoint, ingress.fromEndpoints, k8s.mapLabelSelector),
+                normalizeInputsAndMap(ingress.fromService, ingress.fromServices, mapServiceSelector),
               ),
             ),
             // fromServices: undefinedIfEmpty(
-            //   normalizeInputArrayAndMap(ingress.fromService, ingress.fromServices, mapServiceSelector),
+            //   normalizeInputsAndMap(ingress.fromService, ingress.fromServices, mapServiceSelector),
             // ),
-            fromEntities: undefinedIfEmpty(normalizeInputArray(ingress.fromEntity, ingress.fromEntities)),
-            toPorts: undefinedIfEmpty(normalizeInputArrayAndMap(ingress.toPort, ingress.toPorts, mapPortSelector)),
+            fromEntities: undefinedIfEmpty(normalizeInputs(ingress.fromEntity, ingress.fromEntities)),
+            toPorts: undefinedIfEmpty(normalizeInputsAndMap(ingress.toPort, ingress.toPorts, mapPortSelector)),
           })),
         ),
       },
@@ -258,12 +258,13 @@ export function mapServiceSelector(service: k8s.raw.core.v1.Service) {
   //   },
   // }
 
-  return k8s.mapLabelSelector(
-    pulumi.all([service.spec.selector, service.metadata.namespace]).apply(([selector, namespace]) => ({
+  return pulumi
+    .all([service.spec.selector, service.metadata.namespace])
+    .apply(([selector, namespace]) => ({
       ...mapObjectKeys(key => `k8s:${key}`, selector),
       "k8s:io.kubernetes.pod.namespace": namespace,
-    })),
-  )
+    }))
+    .apply(k8s.mapLabelSelector)
 }
 
 export function mapFQDNSelector(fqdn: string) {

@@ -1,8 +1,0 @@
-{
-  "name": "@scripting/plane",
-  "private": true,
-  "dependencies": {
-    "@scripting/core": "workspace:*",
-    "node-fetch-native": "^1.6.4"
-  }
-}

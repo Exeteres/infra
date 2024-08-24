@@ -2,36 +2,38 @@ import { restic } from "@infra/restic"
 import { k8s } from "@infra/k8s"
 import { pulumi } from "@infra/core"
 import { getSharedEnvironment } from "./stack"
+import { memoize } from "./utils"
 
 interface BackupRepository {
-  repository: restic.Repository
   backup: restic.BackupOptions
 }
 
-export function createBackupRepository(
-  name: string,
-  namespace: k8s.raw.core.v1.Namespace,
-  backupPassword: pulumi.Input<string>,
-): BackupRepository {
+export const getRcloneEnvironment = memoize((namespace: k8s.raw.core.v1.Namespace) => {
   const { rcloneConfig } = getSharedEnvironment()
 
-  const repository = restic.createRepository({
+  return restic.createRcloneEnvironment({
+    name: "rclone",
+    namespace,
+    rcloneConfig,
+  })
+})
+
+export function createBackupBundle(name: string, namespace: k8s.raw.core.v1.Namespace): BackupRepository {
+  const { backupPassword, backupRoot } = getSharedEnvironment()
+
+  const environment = restic.createScriptingEnvironment({
     name,
     namespace,
 
-    remotePath: `rclone:backup:${name}`,
+    remotePath: pulumi.interpolate`${backupRoot}/${name}`,
     password: backupPassword,
 
-    environment: restic.createRcloneEnvironment({
-      namespace,
-      rcloneConfig,
-    }),
+    environment: getRcloneEnvironment(namespace),
   })
 
   return {
-    repository,
     backup: {
-      repository,
+      environment,
       hostname: name,
     },
   }

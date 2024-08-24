@@ -1,6 +1,6 @@
 import { raw } from "./imports"
 import { CommonOptions, mapMetadata, mapPulumiOptions } from "./options"
-import { pulumi } from "@infra/core"
+import { Input } from "@infra/core"
 
 type ConfigMapOptions = CommonOptions &
   (
@@ -14,13 +14,13 @@ type ConfigMapOptions = CommonOptions &
         /**
          * The value of the secret.
          */
-        value: pulumi.Input<string>
+        value: Input<string>
       }
     | {
         /**
          * The arbitrary data of the secret which can be used instead of `key` and `value`.
          */
-        data: Record<string, pulumi.Input<string>>
+        data: Record<string, Input<string>>
       }
   )
 

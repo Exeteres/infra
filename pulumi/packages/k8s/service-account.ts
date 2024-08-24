@@ -1,4 +1,4 @@
-import { normalizeInputArray, pulumi } from "@infra/core"
+import { normalizeInputs, pulumi } from "@infra/core"
 import { CommonOptions, mapMetadata, mapPulumiOptions } from "./options"
 import { raw } from "./imports"
 import { createRoleBinding } from "./role-binding"
@@ -44,7 +44,7 @@ export function createServiceAccount(options: ServiceAccountOptions): ServiceAcc
     mapPulumiOptions(options),
   )
 
-  const bindings = pulumi.output(normalizeInputArray(options.role, options.roles)).apply(roles => {
+  const bindings = pulumi.output(normalizeInputs(options.role, options.roles)).apply(roles => {
     return roles.map(role => {
       return role.metadata.name.apply(name => {
         return createRoleBinding({

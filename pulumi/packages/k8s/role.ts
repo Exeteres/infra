@@ -1,4 +1,4 @@
-import { normalizeInputArray, pulumi } from "@infra/core"
+import { normalizeInputs, pulumi } from "@infra/core"
 import { raw } from "./imports"
 import { RoleBinding, RoleBindingSubjct, createRoleBinding } from "./role-binding"
 import { ScopedOptions, mapMetadata, mapPulumiOptions } from "./options"
@@ -50,7 +50,7 @@ export function createRole(options: RoleOptions): RoleBundle {
     options.name,
     {
       metadata: mapMetadata(options),
-      rules: normalizeInputArray(options.rule, options.rules),
+      rules: normalizeInputs(options.rule, options.rules),
     },
     mapPulumiOptions(options),
   )

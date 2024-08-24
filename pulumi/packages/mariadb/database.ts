@@ -1,4 +1,4 @@
-import { pulumi, random } from "@infra/core"
+import { pulumi } from "@infra/core"
 import { k8s } from "@infra/k8s"
 import { scripting } from "@infra/scripting"
 
@@ -28,15 +28,8 @@ export interface DatabaseOptions extends k8s.CommonOptions {
 
   /**
    * The password to use for the database.
-   * If not provided, a random password will be generated.
    */
-  password?: pulumi.Input<string>
-
-  /**
-   * The secret containing the root password.
-   * Must have a key named `mariadb-root-password`.
-   */
-  rootPasswordSecret: k8s.raw.core.v1.Secret
+  password: pulumi.Input<string>
 
   /**
    * The scripting bundle to use for the init container.
@@ -78,21 +71,13 @@ export interface Database {
 /**
  * Creates all the resources needed to create a database:
  * - a secret containing the database credentials;
- * - an init container that will create the database and user;
- * - the extra volumes used by the init container.
+ * - a setup that will create the database and user.
  *
  * @param options The options for creating the database.
  * @returns The database resources.
  */
 export function createDatabase(options: DatabaseOptions): Database {
-  const databasePassword = options.password
-    ? pulumi.output(options.password)
-    : random.createPassword({
-        name: `${options.name}-password`,
-        parent: options.namespace,
-        length: 16,
-      }).result
-
+  const databasePassword = pulumi.output(options.password)
   const normalizedName = pulumi.output(options.name).apply(name => name.replace(/-/g, "_"))
 
   const service = pulumi.output(options.service)
@@ -112,78 +97,43 @@ export function createDatabase(options: DatabaseOptions): Database {
   }
 
   const secret = k8s.createSecret({
-    name: `${options.name}-mariadb-credentials`,
+    name: `mariadb-credentials-${options.name}`,
     namespace: options.namespace,
 
     data: credentials,
   })
 
-  const { container, volumes } = scripting.createContainerSpec({
+  const container = scripting.createContainer({
     name: "init-database",
-    namespace: options.namespace,
 
     bundle: options.bundle,
-    main: "/scripts/init-database.sh",
+    main: "init-database.sh",
+
+    environment: {
+      DATABASE_HOST: {
+        secret,
+        key: "host",
+      },
+      DATABASE_NAME: {
+        secret,
+        key: "database",
+      },
+      DATABASE_USER: {
+        secret,
+        key: "username",
+      },
+      DATABASE_PASSWORD: {
+        secret,
+        key: "password",
+      },
+    },
   })
 
-  const setupJob = k8s.createWorkload({
-    name: `${options.name}-init-database`,
+  const setupJob = k8s.createJob({
+    name: `init-database-${options.name}`,
     namespace: options.namespace,
 
-    kind: "Job",
-    container: {
-      ...container,
-
-      env: [
-        {
-          name: "DATABASE_HOST",
-          valueFrom: {
-            secretKeyRef: {
-              name: secret.metadata.name,
-              key: "host",
-            },
-          },
-        },
-        {
-          name: "DATABASE_NAME",
-          valueFrom: {
-            secretKeyRef: {
-              name: secret.metadata.name,
-              key: "database",
-            },
-          },
-        },
-        {
-          name: "DATABASE_USER",
-          valueFrom: {
-            secretKeyRef: {
-              name: secret.metadata.name,
-              key: "username",
-            },
-          },
-        },
-        {
-          name: "DATABASE_PASSWORD",
-          valueFrom: {
-            secretKeyRef: {
-              name: secret.metadata.name,
-              key: "password",
-            },
-          },
-        },
-        {
-          name: "MARIADB_ROOT_PASSWORD",
-          valueFrom: {
-            secretKeyRef: {
-              name: options.rootPasswordSecret.metadata.name,
-              key: "mariadb-root-password",
-            },
-          },
-        },
-      ],
-    },
-
-    volumes,
+    container,
   })
 
   return {

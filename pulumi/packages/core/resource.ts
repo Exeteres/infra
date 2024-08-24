@@ -1,4 +1,4 @@
-import { CustomResourceOptions } from "@pulumi/pulumi"
+import { CustomResourceOptions, Input } from "@pulumi/pulumi"
 import { pulumi } from "./imports"
 
 export interface CommonOptions {
@@ -21,7 +21,7 @@ export interface CommonOptions {
   /**
    * The dependencies of the resource.
    */
-  dependsOn?: pulumi.Input<pulumi.Input<pulumi.Resource>[]> | pulumi.Input<pulumi.Resource>
+  dependsOn?: Input<Input<pulumi.Resource>[]> | Input<pulumi.Resource>
 
   /**
    * The Pulumi resource options.

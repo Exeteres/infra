@@ -12,6 +12,7 @@ in {
     just-perfection
     clipboard-indicator
     quick-settings-tweaker
+    x11-gestures
   ];
 
   dconf.settings = {
@@ -26,6 +27,7 @@ in {
         "clipboard-indicator@tudmotu.com"
         "tailscale@joaophi.github.com"
         "quick-settings-tweaks@qwreey"
+        "x11gestures@joseexposito.github.io"
       ];
     };
 

@@ -22,15 +22,12 @@ export interface Application extends k8s.ReleaseApplication {}
  * @returns The release.
  */
 export function createApplication(options: ApplicationOptions): Application {
-  const name = options.name ?? "tailscale"
+  const name = "tailscale"
   const namespace = options.namespace ?? k8s.createNamespace({ name })
-  const fullName = k8s.getPrefixedName(name, options.prefix)
 
   const secret = k8s.createSecret({
-    name: k8s.getPrefixedName("operator-oauth", fullName),
+    name: "operator-oauth",
     namespace,
-
-    realName: "operator-oauth",
 
     data: {
       client_id: options.clientId,
@@ -39,7 +36,7 @@ export function createApplication(options: ApplicationOptions): Application {
   })
 
   const release = k8s.createHelmRelease({
-    name: fullName,
+    name,
     namespace,
 
     dependsOn: [secret],
@@ -50,10 +47,7 @@ export function createApplication(options: ApplicationOptions): Application {
   })
 
   return {
-    name,
     namespace,
-    prefix: options.prefix,
-    fullName,
     release,
   }
 }

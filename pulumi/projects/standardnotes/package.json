@@ -1,8 +1,0 @@
-{
-  "name": "@projects/standardnotes",
-  "private": true,
-  "dependencies": {
-    "@infra/standardnotes": "workspace:*",
-    "@infra/tailscale": "workspace:*"
-  }
-}

@@ -1,30 +1,18 @@
 import { k8s } from "@infra/k8s"
-import { ScriptDistro } from "./environment"
 import { Bundle } from "./bundle"
+import { mergeInputArrays, mergeInputObjects } from "@infra/core"
 
-export interface ContainerOptions extends k8s.CommonOptions {
+export interface ContainerOptions extends k8s.Container {
   /**
    * The script bundle to use.
    */
   bundle: Bundle
 
   /**
-   * The path to the main script file.
+   * The name of the main script to run.
    * The script must be available in the bundle.
    */
   main: string
-}
-
-export interface ContainerSpec {
-  /**
-   * The spec of the script container.
-   */
-  container: k8s.raw.types.input.core.v1.Container
-
-  /**
-   * The spec of volumes which should be included in the pod.
-   */
-  volumes: k8s.raw.types.input.core.v1.Volume[]
 }
 
 /**
@@ -34,44 +22,15 @@ export interface ContainerSpec {
  * @param options The options to create the container spec.
  * @returns The container spec.
  */
-export function createContainerSpec(options: ContainerOptions): ContainerSpec {
+export function createContainer(options: ContainerOptions): k8s.Container {
   return {
-    container: {
-      name: options.name,
-      image: getDistroImage(options.bundle.environment.distro),
-      command: ["/scripts/entrypoint.sh", options.main],
+    image: "alpine:3.20",
+    command: ["/scripts/entrypoint.sh", `/scripts/${options.main}`],
 
-      volumeMounts: [
-        {
-          name: options.bundle.configMap.metadata.name,
-          mountPath: "/scripts",
-        },
-        ...(options.bundle.environment.volumeMounts ?? []),
-      ],
+    ...options,
 
-      env: k8s.mapEnvironment(options.bundle.environment.environment),
-    },
-
-    volumes: [
-      ...(options.bundle.environment.volumes?.map(k8s.mapWorkloadVolume) ?? []),
-      {
-        name: options.bundle.configMap.metadata.name,
-        configMap: {
-          name: options.bundle.configMap.metadata.name,
-          defaultMode: 0o550,
-        },
-      },
-    ],
-  }
-}
-
-function getDistroImage(distro: ScriptDistro) {
-  switch (distro) {
-    case "alpine":
-      return "alpine:3.20"
-    case "ubuntu":
-      return "ubuntu:24.04"
-    default:
-      throw new Error(`Unsupported distro: ${distro}`)
+    volumeMounts: mergeInputArrays(options.bundle.volumeMounts, options.volumeMounts),
+    volumes: mergeInputArrays(options.bundle.volumes, options.volumes),
+    environment: mergeInputObjects(options.bundle.environment, options.environment),
   }
 }

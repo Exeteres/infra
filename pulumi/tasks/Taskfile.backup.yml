@@ -1,0 +1,19 @@
+version: "3"
+
+tasks:
+  all:*:
+    vars:
+      STACK: "{{index .MATCH 0}}"
+    desc: Run all backup jobs in {{.STACK}} and wait for them to finish
+    label: backup {{.STACK}}
+    cmds:
+      - ./scripts/run-backup-jobs.sh {{.STACK}}
+
+  project:*:*:
+    vars:
+      STACK: "{{index .MATCH 0}}"
+      PROJECT: "{{index .MATCH 1}}"
+    label: backup {{.PROJECT}} in {{.STACK}}
+    desc: Run all backup jobs in {{.STACK}} for {{.PROJECT}} and wait for them to finish
+    cmds:
+      - ./scripts/run-backup-jobs.sh {{.STACK}} {{.PROJECT}}

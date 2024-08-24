@@ -1,14 +1,6 @@
 import { k8s } from "@infra/k8s"
 
-export type ScriptDistro = "alpine" | "ubuntu"
-
-export interface ScriptEnvironment {
-  /**
-   * The distribution of the environment.
-   * For now, only "alpine" and "ubuntu" are supported.
-   */
-  distro: ScriptDistro
-
+export interface Environment {
   /**
    * The pre-install scripts that should be run before installing packages.
    * Typically, these scripts are used to install additional repositories.
@@ -43,7 +35,7 @@ export interface ScriptEnvironment {
   /**
    * The volume mounts that should be defined in the environment.
    */
-  volumeMounts?: k8s.raw.types.input.core.v1.VolumeMount[]
+  volumeMounts?: k8s.ContainerVolumeMount[]
 
   /**
    * The environment variables that should be defined in the environment.
@@ -54,19 +46,14 @@ export interface ScriptEnvironment {
 /**
  * Merges multiple environments into a single environment.
  */
-export function mergeEnvironments(...environments: (ScriptEnvironment | undefined | null)[]): ScriptEnvironment {
-  const resolvedEnvironments = environments.filter(env => env != null) as ScriptEnvironment[]
+export function mergeEnvironments(...environments: (Environment | undefined | null)[]): Required<Environment> {
+  const resolvedEnvironments = environments.filter(env => env != null) as Environment[]
 
   if (!resolvedEnvironments.length) {
     throw new Error("At least one environment must be provided")
   }
 
-  if (resolvedEnvironments.length === 1) {
-    return resolvedEnvironments[0]
-  }
-
-  const merged: Required<ScriptEnvironment> = {
-    distro: resolvedEnvironments[0].distro,
+  const merged: Required<Environment> = {
     preInstallScripts: {},
     packages: [],
     setupScripts: {},
@@ -78,10 +65,6 @@ export function mergeEnvironments(...environments: (ScriptEnvironment | undefine
   }
 
   for (const env of resolvedEnvironments) {
-    if (env.distro !== merged.distro) {
-      throw new Error("All environments must have the same distribution")
-    }
-
     Object.assign(merged.preInstallScripts, env.preInstallScripts)
     merged.packages.push(...(env.packages ?? []))
     Object.assign(merged.setupScripts, env.setupScripts)

@@ -1,6 +1,5 @@
 import { getSharedEnvironment, resolveStack } from "./stack"
 import { cloudflare } from "@infra/cloudflare"
-import { k8s } from "@infra/k8s"
 import { singleton } from "./utils"
 
 export const getCloudflareProvider = singleton(() => {
@@ -9,37 +8,34 @@ export const getCloudflareProvider = singleton(() => {
   return new cloudflare.raw.Provider("cloudflare", { apiToken: cloudflareApiToken })
 })
 
-export function createDnsRecord(
-  namespace: k8s.raw.core.v1.Namespace,
-  options: Omit<cloudflare.RecordOptions, "parent" | "zoneId" | "provider">,
-) {
+export function createDnsRecord(options: Omit<cloudflare.RecordOptions, "zoneId" | "provider">) {
   const { cloudflareZoneId } = getSharedEnvironment()
   const provider = getCloudflareProvider()
 
   return cloudflare.createRecord({
     zoneId: cloudflareZoneId,
 
-    parent: namespace,
     provider: provider,
     ...options,
   })
 }
 
-export function createPublicDnsRecord(namespace: k8s.raw.core.v1.Namespace, domain: string) {
+export function createPublicDnsRecord(domain: string) {
   const { publicIp } = getSharedEnvironment()
 
-  return createDnsRecord(namespace, {
+  return createDnsRecord({
     name: domain,
     type: "A",
     value: publicIp,
+    proxied: true,
   })
 }
 
-export function createInternalDnsRecord(namespace: k8s.raw.core.v1.Namespace, domain: string) {
+export function createInternalDnsRecord(domain: string) {
   const internalGatewayStack = resolveStack("internal-gateway")
   const gatewayIp = internalGatewayStack.requireOutput("gatewayIp")
 
-  return createDnsRecord(namespace, {
+  return createDnsRecord({
     name: domain,
     type: "A",
     value: gatewayIp,

@@ -1,6 +1,6 @@
 import { createSecret } from "./secret"
 import { CommonOptions, mapPulumiOptions } from "./options"
-import { pulumi, random } from "@infra/core"
+import { Input, random } from "@infra/core"
 
 interface PasswordSecretOptions extends CommonOptions {
   /**
@@ -17,7 +17,7 @@ interface PasswordSecretOptions extends CommonOptions {
    * The predefined value of the secret.
    * If provided, the secret will be created with this value and no random value will be generated.
    */
-  existingValue?: pulumi.Input<string>
+  existingValue?: Input<string>
 }
 
 interface RandomSecretOptions extends PasswordSecretOptions {

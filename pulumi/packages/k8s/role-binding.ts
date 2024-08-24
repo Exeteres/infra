@@ -1,4 +1,4 @@
-import { normalizeInputArrayAndMap, pulumi } from "@infra/core"
+import { mapInputs, normalizeInputs, pulumi } from "@infra/core"
 import { raw } from "./imports"
 import { ScopedOptions, mapMetadata, mapPulumiOptions } from "./options"
 import type { Role } from "./role"
@@ -41,7 +41,7 @@ export function createRoleBinding(options: RoleBindingOptions): RoleBinding {
         kind: pulumi.output(options.role).apply(role => role.kind),
         name: pulumi.output(options.role).apply(role => role.metadata.name),
       },
-      subjects: normalizeInputArrayAndMap(options.subject, options.subjects, mapSubject),
+      subjects: mapInputs(normalizeInputs(options.subject, options.subjects), mapSubject),
     },
     mapPulumiOptions(options),
   )

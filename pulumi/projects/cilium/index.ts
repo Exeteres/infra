@@ -2,9 +2,10 @@ import { cilium } from "@infra/cilium"
 import { pulumi } from "@infra/core"
 import { getSharedEnvironment } from "@projects/common"
 
-const { publicIp } = getSharedEnvironment()
+const { internalIp } = getSharedEnvironment()
 
 cilium.createApplication({
-  k8sServiceHost: publicIp,
+  // k8sServiceHost: pulumi.interpolate`${pulumi.getStack()}.${tailnetName}`,
+  k8sServiceHost: internalIp,
   k8sContext: pulumi.getStack(),
 })

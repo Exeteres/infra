@@ -1,11 +1,12 @@
-import { merge, pulumi, random } from "@infra/core"
-import { gw } from "../gateway"
+import { merge, pulumi } from "@infra/core"
+import { gw } from "@infra/gateway"
 import { k8s } from "@infra/k8s"
 import { restic } from "@infra/restic"
+import { scripting } from "@infra/scripting"
 
 export interface ApplicationOptions extends k8s.ReleaseApplicationOptions, gw.GatewayApplicationOptions {
-  backup?: restic.BackupOptions
-  rootPassword?: pulumi.Input<string>
+  backup: restic.BackupOptions
+  rootPassword: pulumi.Input<string>
   consoleGateway?: gw.ApplicationGatewayOptions
 }
 
@@ -49,74 +50,47 @@ export interface S3Credentials {
   bucket: pulumi.Input<string>
 }
 
-export function createApplication(options: ApplicationOptions = {}): Application {
-  const name = options.name ?? "minio"
-  const fullName = k8s.getPrefixedName(name, options.prefix)
-  const namespace = options.namespace ?? k8s.createNamespace({ name: fullName })
+export function createApplication(options: ApplicationOptions): Application {
+  const name = "minio"
+  const namespace = options.namespace ?? k8s.createNamespace({ name })
 
   const rootPasswordSecret = k8s.createSecret({
-    name: k8s.getPrefixedName("root-password", fullName),
+    name: "root-password",
     namespace,
 
     realName: "root-password",
 
     data: {
       username: "admin",
-      password:
-        options.rootPassword ??
-        random.createPassword({
-          name: k8s.getPrefixedName("root-password", fullName),
-          parent: namespace,
-          length: 16,
-        }).result,
+      password: options.rootPassword,
     },
   })
 
   const dataVolumeClaim = k8s.createPersistentVolumeClaim({
-    name: k8s.getPrefixedName("data", fullName),
+    name: "data",
     namespace,
 
     capacity: "1Gi",
   })
 
-  const initContainers: k8s.raw.types.input.core.v1.Container[] = []
-  const sidecarContainers: k8s.raw.types.input.core.v1.Container[] = []
-  const extraVolumes: k8s.raw.types.input.core.v1.Volume[] = []
+  const bundle = scripting.createBundle({
+    name: "backup",
+    namespace,
 
-  if (options.backup) {
-    const bundle = restic.createScriptBundle({
-      name: k8s.getPrefixedName("backup", fullName),
-      namespace,
+    environment: options.backup.environment,
+  })
 
-      repository: options.backup.repository,
-    })
-
-    restic.createBackupCronJob({
-      name: fullName,
-      namespace,
-
-      options: options.backup,
-      bundle,
-      volumeClaim: dataVolumeClaim,
-    })
-
-    const { volumes, initContainer, sidecarContainer } = restic.createExtraContainers({
-      name: fullName,
-      namespace,
-
-      options: options.backup,
-      bundle,
-      volume: "data",
-    })
-
-    initContainers.push(initContainer)
-    sidecarContainers.push(sidecarContainer)
-    extraVolumes.push(...volumes)
-  }
+  const { restoreJob } = restic.createJobPair({
+    namespace,
+    bundle,
+    options: options.backup,
+    volumeClaim: dataVolumeClaim,
+  })
 
   const release = k8s.createHelmRelease({
-    name: fullName,
+    name,
     namespace,
+    dependsOn: restoreJob,
 
     repo: "https://charts.bitnami.com/bitnami",
     chart: "minio",
@@ -131,26 +105,19 @@ export function createApplication(options: ApplicationOptions = {}): Application
           rootUserSecretKey: "username",
           rootPasswordSecretKey: "password",
         },
-        nodeSelector: options.nodeSelector,
         persistence: {
           existingClaim: dataVolumeClaim.metadata.name,
         },
-        initContainers,
-        sidecars: sidecarContainers,
-        extraVolumes,
       },
       options.release?.values ?? {},
     ),
   })
 
-  const gateway = gw.createApplicationGateway(options.gateway, {
-    name: fullName,
-    namespace,
-
+  const gateway = gw.createApplicationRoutes(namespace, options.gateway, {
     httpRoute: {
-      name: fullName,
+      name,
       rule: {
-        backendRef: {
+        backend: {
           name: release.name,
           port: 9000,
         },
@@ -158,14 +125,11 @@ export function createApplication(options: ApplicationOptions = {}): Application
     },
   })
 
-  const consoleGateway = gw.createApplicationGateway(options.consoleGateway, {
-    name: k8s.getPrefixedName("console", fullName),
-    namespace,
-
+  const consoleGateway = gw.createApplicationRoutes(namespace, options.consoleGateway, {
     httpRoute: {
-      name: k8s.getPrefixedName("console", fullName),
+      name: "console",
       rule: {
-        backendRef: {
+        backend: {
           name: release.name,
           port: 9001,
         },
@@ -174,10 +138,7 @@ export function createApplication(options: ApplicationOptions = {}): Application
   })
 
   return {
-    name,
-    fullName,
     namespace,
-    prefix: options.prefix,
 
     rootPasswordSecret,
     release,

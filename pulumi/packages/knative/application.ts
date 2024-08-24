@@ -23,7 +23,7 @@ export function createApplication(options: ApplicationOptions): Application {
   const kourierNamespace = options.kourierNamespace ?? k8s.createNamespace({ name: "kourier-system" })
 
   const installServingCrds = command.createCommand({
-    name: k8s.getPrefixedName("install-serving-crds", name),
+    name: "install-serving-crds",
     parent: servingNamespace,
     dependsOn: servingNamespace,
 
@@ -33,7 +33,7 @@ export function createApplication(options: ApplicationOptions): Application {
   })
 
   const installServingCore = command.createCommand({
-    name: k8s.getPrefixedName("install-serving-core", name),
+    name: "install-serving-core",
     parent: servingNamespace,
     dependsOn: installServingCrds,
 
@@ -43,7 +43,7 @@ export function createApplication(options: ApplicationOptions): Application {
   })
 
   const installKourier = command.createCommand({
-    name: k8s.getPrefixedName("install-kourier", name),
+    name: "install-kourier",
     parent: kourierNamespace,
 
     create: "kubectl apply -f https://github.com/knative/net-kourier/releases/download/knative-v1.14.0/kourier.yaml",
@@ -55,7 +55,7 @@ export function createApplication(options: ApplicationOptions): Application {
   // We do this because we are already using an LB for 80/443 and we don't want to create another one
   // Instead, we will use the existing gateway to route traffic to the Kourier service
   const patchKourier = command.createCommand({
-    name: k8s.getPrefixedName("patch-kourier", name),
+    name: "patch-kourier",
     parent: servingNamespace,
     dependsOn: installKourier,
 
@@ -63,7 +63,7 @@ export function createApplication(options: ApplicationOptions): Application {
   })
 
   const enableKourier = command.createCommand({
-    name: k8s.getPrefixedName("enable-kourier", name),
+    name: "enable-kourier",
     dependsOn: [patchKourier, installServingCore],
     parent: servingNamespace,
 
@@ -75,7 +75,7 @@ export function createApplication(options: ApplicationOptions): Application {
     })}'`,
   })
 
-  const setDomain = command.createCommand({
+  command.createCommand({
     name: k8s.getPrefixedName("set-domain", name),
     parent: servingNamespace,
     dependsOn: enableKourier,
@@ -83,15 +83,11 @@ export function createApplication(options: ApplicationOptions): Application {
     create: pulumi.interpolate`kubectl patch configmap/config-domain -n knative-serving --type merge -p '{"data":{"${options.domain}":""}}'`,
   })
 
-  const gateway = gw.createApplicationGateway(options.gateway, {
-    name,
-    namespace: kourierNamespace,
-    dependsOn: setDomain,
-
+  const gateway = gw.createApplicationRoutes(kourierNamespace, options.gateway, {
     httpRoute: {
       name,
       rule: {
-        backendRef: {
+        backend: {
           name: "kourier",
           port: 80,
         },

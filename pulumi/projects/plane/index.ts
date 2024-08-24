@@ -1,7 +1,7 @@
 import { pulumi } from "@infra/core"
 import { k8s } from "@infra/k8s"
 import { plane } from "@infra/plane"
-import { createPostgresqlDatabase, exposeInternalService } from "@projects/common"
+import { createPostgresqlDatabase, exposeInternalHttpService } from "@projects/common"
 
 const namespace = k8s.createNamespace({ name: "plane" })
 
@@ -13,9 +13,9 @@ const s3SecretKey = config.requireSecret("s3SecretKey")
 const s3Region = config.require("s3Region")
 const s3Bucket = config.require("s3Bucket")
 const s3Endpoint = config.require("s3Endpoint")
-const secretKey = config.getSecret("secretKey")
+const secretKey = config.requireSecret("secretKey")
 
-const { gateway } = exposeInternalService(namespace, domain)
+const { gateway } = exposeInternalHttpService({ namespace, domain })
 const { credentials } = createPostgresqlDatabase("plane", namespace, databasePassword)
 
 plane.createApplication({

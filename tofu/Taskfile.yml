@@ -7,34 +7,49 @@ includes:
     internal: true
 
 tasks:
-  plan:
+  plan:*:
     desc: Generate and show an execution plan
+    vars:
+      INSTANCE: "{{index .MATCH 0}}"
     cmds:
       - task: nixos:prepare
-      - tofu plan -var-file=.tfvars -out=tfplan
-      - task: nixos:cleanup
-    ignore_error: true
+      - defer: { task: nixos:cleanup }
+      - tofu plan -var-file=.tfvars -out=tfplan {{.CLI_ARGS}}
+    dir: "instances/{{.INSTANCE}}"
 
-  import:
+  import:*:
     desc: Import the existing resources into the state file
+    vars:
+      INSTANCE: "{{index .MATCH 0}}"
     cmds:
       - task: nixos:prepare
+      - defer: { task: nixos:cleanup }
       - tofu import -var-file=.tfvars {{.CLI_ARGS}}
-      - task: nixos:cleanup
-    ignore_error: true
+    dir: "instances/{{.INSTANCE}}"
 
-  refresh:
+  refresh:*:
     desc: Refresh the state file
+    vars:
+      INSTANCE: "{{index .MATCH 0}}"
     cmds:
       - task: nixos:prepare
+      - defer: { task: nixos:cleanup }
       - tofu refresh -var-file=.tfvars
-      - task: nixos:cleanup
-    ignore_error: true
+    dir: "instances/{{.INSTANCE}}"
 
-  apply:
+  apply:*:
     desc: Apply the generated plan
+    vars:
+      INSTANCE: "{{index .MATCH 0}}"
     cmds:
       - task: nixos:prepare
+      - defer: { task: nixos:cleanup }
       - tofu apply tfplan
-      - task: nixos:cleanup
-    ignore_error: true
+    dir: "instances/{{.INSTANCE}}"
+
+  init:*:
+    desc: Initialize the Terraform workspace
+    vars:
+      INSTANCE: "{{index .MATCH 0}}"
+    cmd: tofu init
+    dir: "instances/{{.INSTANCE}}"

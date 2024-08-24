@@ -7,11 +7,11 @@ tasks:
     vars:
       SERVER_NAME: "{{index .MATCH 0}}"
       SERVER_IP:
-        sh: tofu -chdir=../tofu output -json public_ips | jq -r ".[\"{{.SERVER_NAME}}\"]"
+        sh: tofu -chdir=../tofu/instances/{{.SERVER_NAME}} output -json public_ip
       SERVER_PORT:
-        sh: tofu -chdir=../tofu output -raw ssh_port
+        sh: tofu -chdir=../tofu/instances/{{.SERVER_NAME}} output -raw ssh_port
       SERVER_USER:
-        sh: tofu -chdir=../tofu output -raw ssh_user
+        sh: tofu -chdir=../tofu/instances/{{.SERVER_NAME}} output -raw ssh_user
     cmds:
       - task: prepare
       - echo -e "Host {{.SERVER_NAME}}\nHostName {{.SERVER_IP}}\nUser {{.SERVER_USER}}\nPort {{.SERVER_PORT}}" > ~/.ssh/config
@@ -33,11 +33,11 @@ tasks:
     vars:
       SERVER_NAME: "{{index .MATCH 0}}"
       SERVER_IP:
-        sh: tofu -chdir=../tofu output -json public_ips | jq -r ".[\"{{.SERVER_NAME}}\"]"
+        sh: tofu -chdir=../tofu/instances/{{.SERVER_NAME}} output -json public_ip
       SERVER_PORT:
-        sh: tofu -chdir=../tofu output -raw ssh_port
+        sh: tofu -chdir=../tofu/instances/{{.SERVER_NAME}} output -raw ssh_port
       SERVER_USER:
-        sh: tofu -chdir=../tofu output -raw ssh_user
+        sh: tofu -chdir=../tofu/instances/{{.SERVER_NAME}} output -raw ssh_user
     cmd: ssh -p {{.SERVER_PORT}} {{.SERVER_USER}}@{{.SERVER_IP}} {{.CLI_ARGS}}
     interactive: true
 

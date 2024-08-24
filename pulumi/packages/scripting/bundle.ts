@@ -1,17 +1,17 @@
 import { k8s } from "@infra/k8s"
-import { ScriptEnvironment, mergeEnvironments } from "./environment"
+import { Environment, mergeEnvironments } from "./environment"
 import { trimIndentation } from "@infra/core"
 
 export interface BundleOptions extends k8s.CommonOptions {
   /**
-   * The script environment to use.
+   * The environment to bundle the scripts from.
    */
-  environment: ScriptEnvironment
+  environment?: Environment
 
   /**
-   * Extra scripts to include in the bundle.
+   * The environments to bundle the scripts from.
    */
-  scripts?: Record<string, string>
+  environments?: Environment[]
 }
 
 export interface Bundle {
@@ -21,23 +21,34 @@ export interface Bundle {
   configMap: k8s.raw.core.v1.ConfigMap
 
   /**
-   * The environment used by the scripts.
+   * The volumes that should be included in the workload.
    */
-  environment: ScriptEnvironment
+  volumes: k8s.WorkloadVolume[]
+
+  /**
+   * The volume mounts that should be defined in the container.
+   */
+  volumeMounts: k8s.ContainerVolumeMount[]
+
+  /**
+   * The environment variables that should be defined in the container.
+   */
+  environment: k8s.ContainerEnvironment
 }
 
 /**
- * Creates a config map with the given scripts and environment.
+ * Bundles all the scripts from the given environment into a config map.
+ *
+ * @param options The bundle options.
+ * @returns The bundle containing the config map and the environment.
  */
 export function createBundle(options: BundleOptions): Bundle {
   const scriptData: Record<string, string> = {}
   const actions: string[] = []
 
-  const environment = options.scripts
-    ? mergeEnvironments(options.environment, { distro: options.environment.distro, scripts: options.scripts })
-    : options.environment
+  const environment = mergeEnvironments(options.environment, ...(options.environments ?? []))
 
-  if (environment.preInstallScripts && Object.keys(environment.preInstallScripts).length > 0) {
+  if (Object.keys(environment.preInstallScripts).length > 0) {
     for (const key in environment.preInstallScripts) {
       scriptData[`pre-install-${key}`] = environment.preInstallScripts[key]
 
@@ -49,8 +60,13 @@ export function createBundle(options: BundleOptions): Bundle {
     }
   }
 
-  if (environment.packages && environment.packages.length > 0) {
-    scriptData["install-packages.sh"] = getInstallPackagesScript(environment)
+  if (environment.packages.length > 0) {
+    scriptData["install-packages.sh"] = trimIndentation(`
+      #!/bin/sh
+      set -e
+  
+      apk add --no-cache ${environment.packages.join(" ")} 
+    `)
 
     actions.push(`
       echo "+ Installing packages..."
@@ -59,7 +75,7 @@ export function createBundle(options: BundleOptions): Bundle {
     `)
   }
 
-  if (environment.setupScripts && Object.keys(environment.setupScripts).length > 0) {
+  if (Object.keys(environment.setupScripts).length > 0) {
     for (const key in environment.setupScripts) {
       scriptData[`setup-${key}`] = environment.setupScripts[key]
 
@@ -71,7 +87,7 @@ export function createBundle(options: BundleOptions): Bundle {
     }
   }
 
-  if (environment.cleanupScripts && Object.keys(environment.cleanupScripts).length > 0) {
+  if (Object.keys(environment.cleanupScripts).length > 0) {
     const cleanupActions: string[] = []
 
     for (const key in environment.cleanupScripts) {
@@ -86,7 +102,7 @@ export function createBundle(options: BundleOptions): Bundle {
 
     actions.push(`
       function cleanup() {
-        ${cleanupActions.join("\n\n")}
+      ${cleanupActions.map(s => s.trim()).join("\n\n")}
       }
 
       trap cleanup EXIT
@@ -107,7 +123,7 @@ export function createBundle(options: BundleOptions): Bundle {
       exit 1
     fi
 
-    ${actions.join("\n\n")}
+  ${actions.map(s => s.trim()).join("\n\n")}
 
     echo "+ Running main script..."
     \$@
@@ -123,32 +139,26 @@ export function createBundle(options: BundleOptions): Bundle {
 
   return {
     configMap,
-    environment,
-  }
-}
+    environment: environment.environment,
 
-function getInstallPackagesScript(environment: ScriptEnvironment) {
-  if (!environment.packages) {
-    return ""
-  }
+    volumes: [
+      ...environment.volumes,
+      {
+        name: configMap.metadata.name,
 
-  switch (environment.distro) {
-    case "alpine":
-      return trimIndentation(`
-          #!/bin/sh
-          set -e
-  
-          apk add --no-cache ${environment.packages?.join(" ")}
-        `)
-    case "ubuntu":
-      return trimIndentation(`
-          #!/bin/sh
-          set -e
-  
-          apt-get update
-          apt-get install -y ${environment.packages?.join(" ")}
-        `)
-    default:
-      throw new Error(`Unsupported distro: ${environment.distro}`)
+        configMap: {
+          name: configMap.metadata.name,
+          defaultMode: 0o550, // read and execute permissions
+        },
+      },
+    ],
+
+    volumeMounts: [
+      ...environment.volumeMounts,
+      {
+        volume: configMap,
+        mountPath: "/scripts",
+      },
+    ],
   }
 }

@@ -11,12 +11,11 @@ export interface Application extends k8s.ReleaseApplication {}
  * @returns The release.
  */
 export function createApplication(options: ApplicationOptions = {}): Application {
-  const name = options.name ?? "cert-manager"
-  const fullName = k8s.getPrefixedName(name, options.prefix)
-  const namespace = options.namespace ?? k8s.createNamespace({ name: fullName })
+  const name = "cert-manager"
+  const namespace = options.namespace ?? k8s.createNamespace({ name })
 
   const release = k8s.createHelmRelease({
-    name: fullName,
+    name,
     namespace,
 
     chart: "cert-manager",
@@ -34,9 +33,6 @@ export function createApplication(options: ApplicationOptions = {}): Application
   })
 
   return {
-    name,
-    prefix: options.prefix,
-    fullName,
     namespace,
     release,
   }

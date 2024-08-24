@@ -25,7 +25,7 @@
   outputs = {self, ...} @ inputs: let
     lib = (import ./lib) inputs;
 
-    mkHostSystem = lib.exeteres.mkSystemFactory {
+    mkSystem = lib.exeteres.mkSystemFactory {
       extraModules = with inputs; [
         sops-nix.nixosModules.sops
         home-manager.nixosModules.home-manager
@@ -34,11 +34,15 @@
     };
   in {
     nixosConfigurations = {
-      desktop = mkHostSystem ./hosts/desktop/configuration.nix;
-      laptop = mkHostSystem ./hosts/laptop/configuration.nix;
+      desktop = mkSystem ./instances/desktop/configuration.nix;
+      laptop = mkSystem ./instances/laptop/configuration.nix;
 
-      server-a = mkHostSystem ./hosts/server-a/configuration.nix;
-      server-b = mkHostSystem ./hosts/server-b/configuration.nix;
+      local-a = mkSystem ./instances/local-a/configuration.nix;
+      local-b = mkSystem ./instances/local-b/configuration.nix;
+
+      cloud-a = mkSystem ./instances/cloud-a/configuration.nix;
+      cloud-b = mkSystem ./instances/cloud-b/configuration.nix;
+      cloud-c = mkSystem ./instances/cloud-c/configuration.nix;
     };
   };
 }

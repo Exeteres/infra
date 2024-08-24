@@ -17,3 +17,14 @@ export function memoize<T, U>(fn: (arg: T) => U): (arg: T) => U {
     return cache.get(arg)!
   }
 }
+
+export function memoize2<T, U, V>(fn: (arg1: T, arg2: U) => V): (arg1: T, arg2: U) => V {
+  const cache = new Map<string, V>()
+  return (arg1: T, arg2: U) => {
+    const key = `${arg1}:${arg2}`
+    if (!cache.has(key)) {
+      cache.set(key, fn(arg1, arg2))
+    }
+    return cache.get(key)!
+  }
+}
