@@ -1,5 +1,5 @@
 locals {
-  name = "cloud-c"
+  name = "cloud-b"
 }
 
 module "server" {

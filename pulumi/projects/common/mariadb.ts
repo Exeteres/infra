@@ -1,6 +1,6 @@
 import { pulumi } from "@infra/core"
 import { singleton } from "./utils"
-import { resolveStack } from "./stack"
+import { getStack } from "./stack"
 import { k8s } from "@infra/k8s"
 import { mariadb } from "@infra/mariadb"
 import { scripting } from "@infra/scripting"
@@ -12,7 +12,7 @@ interface MariadbEnvironment {
 }
 
 export const getMariadbEnvironment = singleton((): MariadbEnvironment => {
-  const stack = resolveStack("mariadb")
+  const stack = getStack("mariadb")
 
   return {
     service: k8s.import(stack, k8s.raw.core.v1.Service, "serviceId"),

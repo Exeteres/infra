@@ -1,10 +1,10 @@
 import { certManager } from "@infra/cert-manager"
-import { resolveStack } from "./stack"
+import { getStack } from "./stack"
 import { k8s } from "@infra/k8s"
 import { singleton } from "./utils"
 
 export const getPublicIssuer = singleton(() => {
-  const certManagerStack = resolveStack("cert-manager")
+  const certManagerStack = getStack("cert-manager")
 
   return k8s.import(certManagerStack, certManager.raw.certmanager.v1.ClusterIssuer, "publicIssuer")
 })

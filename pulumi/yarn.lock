@@ -179,7 +179,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@infra/knative@workspace:*, @infra/knative@workspace:packages/knative":
+"@infra/knative@workspace:packages/knative":
   version: 0.0.0-use.local
   resolution: "@infra/knative@workspace:packages/knative"
   dependencies:
@@ -244,6 +244,15 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@infra/scripting@workspace:packages/scripting"
   dependencies:
+    "@infra/k8s": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@infra/syncthing@workspace:*, @infra/syncthing@workspace:apps/syncthing":
+  version: 0.0.0-use.local
+  resolution: "@infra/syncthing@workspace:apps/syncthing"
+  dependencies:
+    "@infra/gateway": "workspace:*"
     "@infra/k8s": "workspace:*"
   languageName: unknown
   linkType: soft
@@ -729,14 +738,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@projects/functions@workspace:projects/functions":
-  version: 0.0.0-use.local
-  resolution: "@projects/functions@workspace:projects/functions"
-  dependencies:
-    "@infra/knative": "workspace:*"
-  languageName: unknown
-  linkType: soft
-
 "@projects/ghost-gateway@workspace:projects/ghost-gateway":
   version: 0.0.0-use.local
   resolution: "@projects/ghost-gateway@workspace:projects/ghost-gateway"
@@ -756,14 +757,6 @@ __metadata:
   resolution: "@projects/knative-dns@workspace:projects/internal-gateway"
   dependencies:
     "@infra/cloudflare": "workspace:*"
-  languageName: unknown
-  linkType: soft
-
-"@projects/knative@workspace:projects/knative":
-  version: 0.0.0-use.local
-  resolution: "@projects/knative@workspace:projects/knative"
-  dependencies:
-    "@infra/knative": "workspace:*"
   languageName: unknown
   linkType: soft
 
@@ -1231,6 +1224,15 @@ __metadata:
   checksum: 10c0/33b6fb1d0834ec8dd7689ddc0e2781c2bfd8b9c4e4bacbcb14111e0ae00621f2c264b8a7d36541799d74888b5dccdf422a891a5cb5a709ace26325eedc81e22e
   languageName: node
   linkType: hard
+
+"@stacks/syncthing@workspace:projects/syncthing":
+  version: 0.0.0-use.local
+  resolution: "@stacks/syncthing@workspace:projects/syncthing"
+  dependencies:
+    "@infra/syncthing": "workspace:*"
+    "@infra/tailscale": "workspace:*"
+  languageName: unknown
+  linkType: soft
 
 "@szmarczak/http-timer@npm:^4.0.5":
   version: 4.0.6

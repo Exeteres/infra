@@ -1,7 +1,7 @@
 import { k8s } from "@infra/k8s"
 import { scripting } from "@infra/scripting"
 import { BackupOptions, defaultSchedule } from "./options"
-import { appendToInputArray, Input } from "@infra/core"
+import { appendToInputArray, Input, InputArray, output } from "@infra/core"
 
 export interface JobOptions extends k8s.CommonOptions {
   /**
@@ -28,6 +28,11 @@ export interface JobOptions extends k8s.CommonOptions {
    * The extra options for container.
    */
   container?: k8s.Container
+
+  /**
+   * Extra options to pass to the restic backup command.
+   */
+  backupOptions?: InputArray<string>
 }
 
 export function createRestoreJob(options: JobOptions) {
@@ -64,6 +69,8 @@ function createContainer(main: string, options: JobOptions): Input<k8s.Container
     environment: {
       ...options.container?.environment,
       RESTIC_HOSTNAME: options.options.hostname,
+
+      EXTRA_BACKUP_OPTIONS: output(options.backupOptions).apply(options => options?.join(" ")),
     },
 
     volumeMounts: appendToInputArray(

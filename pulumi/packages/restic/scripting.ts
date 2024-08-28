@@ -82,7 +82,7 @@ const staticEnvironment: scripting.Environment = {
 
       # Backup the volume
       echo "| Backing up /data"
-      restic backup -H "$RESTIC_HOSTNAME" /data
+      restic backup -H "$RESTIC_HOSTNAME" /data $EXTRA_BACKUP_OPTIONS
 
       # Forget old snapshots
       echo "| Forgetting old snapshots"

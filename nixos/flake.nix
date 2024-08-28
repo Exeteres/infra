@@ -42,7 +42,6 @@
 
       cloud-a = mkSystem ./instances/cloud-a/configuration.nix;
       cloud-b = mkSystem ./instances/cloud-b/configuration.nix;
-      cloud-c = mkSystem ./instances/cloud-c/configuration.nix;
     };
   };
 }

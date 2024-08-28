@@ -1,4 +1,4 @@
-import { getSharedEnvironment, resolveStack } from "./stack"
+import { getSharedEnvironment, getStack } from "./stack"
 import { cloudflare } from "@infra/cloudflare"
 import { singleton } from "./utils"
 
@@ -32,7 +32,7 @@ export function createPublicDnsRecord(domain: string) {
 }
 
 export function createInternalDnsRecord(domain: string) {
-  const internalGatewayStack = resolveStack("internal-gateway")
+  const internalGatewayStack = getStack("internal-gateway")
   const gatewayIp = internalGatewayStack.requireOutput("gatewayIp")
 
   return createDnsRecord({

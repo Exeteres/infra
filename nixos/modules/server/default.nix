@@ -15,7 +15,6 @@
 
   exeteres.services.kubernetes = {
     enable = true;
-    tailnetName = "ocicat-in.ts.net";
     secretFile = ../../secrets/server.yaml;
   };
 

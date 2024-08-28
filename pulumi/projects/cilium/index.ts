@@ -5,7 +5,6 @@ import { getSharedEnvironment } from "@projects/common"
 const { internalIp } = getSharedEnvironment()
 
 cilium.createApplication({
-  // k8sServiceHost: pulumi.interpolate`${pulumi.getStack()}.${tailnetName}`,
   k8sServiceHost: internalIp,
   k8sContext: pulumi.getStack(),
 })

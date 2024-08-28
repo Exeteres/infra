@@ -3,7 +3,7 @@ import { singleton } from "./utils"
 
 const stackRefMap = new Map<string, pulumi.StackReference>()
 
-export function resolveStack(stackName: string): pulumi.StackReference {
+export function getStack(stackName: string): pulumi.StackReference {
   let stackRef = stackRefMap.get(stackName)
 
   if (!stackRef) {
@@ -21,7 +21,7 @@ export const getEnvironmentName = singleton(() => {
   return environment ?? pulumi.getStack()
 })
 
-export const getSharedStack = singleton(() => resolveStack("shared"))
+export const getSharedStack = singleton(() => getStack("shared"))
 
 interface SharedEnvironment {
   domain: pulumi.Output<string>

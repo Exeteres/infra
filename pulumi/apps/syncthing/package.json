@@ -1,0 +1,8 @@
+{
+  "name": "@infra/syncthing",
+  "private": true,
+  "dependencies": {
+    "@infra/gateway": "workspace:*",
+    "@infra/k8s": "workspace:*"
+  }
+}

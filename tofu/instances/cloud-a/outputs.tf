@@ -8,7 +8,6 @@ output "internal_ip" {
   value       = module.server.internal_ip
 }
 
-
 output "ssh_port" {
   description = "The SSH port of the server"
   value       = var.ssh_port

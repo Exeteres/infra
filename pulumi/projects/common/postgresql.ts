@@ -1,6 +1,6 @@
 import { pulumi } from "@infra/core"
 import { singleton } from "./utils"
-import { resolveStack } from "./stack"
+import { getStack } from "./stack"
 import { k8s } from "@infra/k8s"
 import { postgresql } from "@infra/postgresql"
 import { scripting } from "@infra/scripting"
@@ -12,7 +12,7 @@ interface PostgresqlEnvironment {
 }
 
 export const getPostgresqlEnvironment = singleton((): PostgresqlEnvironment => {
-  const stack = resolveStack("postgresql")
+  const stack = getStack("postgresql")
 
   return {
     service: k8s.import(stack, k8s.raw.core.v1.Service, "serviceId"),

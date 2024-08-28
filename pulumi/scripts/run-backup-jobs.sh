@@ -50,6 +50,7 @@ for namespace in $namespaces; do
           break
         elif [[ "$failed" -gt 0 ]]; then
           echo "Job $job_name failed."
+          exit 1
           break
         else
           echo "Job $job_name is still running..."
@@ -64,5 +65,5 @@ for namespace in $namespaces; do
 done
 
 # Wait for all background jobs to finish
-wait
+wait || exit 1
 echo "All jobs completed."

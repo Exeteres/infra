@@ -19,13 +19,13 @@ output "ssh_user" {
   value       = "root"
 }
 
+output "internal_ip" {
+  description = "The internal IPv4 address of the server"
+  value       = yandex_compute_instance.primary.network_interface.0.ip_address
+}
+
 // Additional
 output "public_ip" {
   description = "The public IPv4 address of the server"
   value       = yandex_compute_instance.primary.network_interface.0.nat_ip_address
-}
-
-output "internal_ip" {
-  description = "The internal IPv4 address of the server"
-  value       = yandex_compute_instance.primary.network_interface.0.ip_address
 }
