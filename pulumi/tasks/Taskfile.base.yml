@@ -16,6 +16,7 @@ tasks:
       - task: projects:non-interactive:up:{{.SERVER}}:cilium
       - task: _up:gateway:{{.SERVER}}
       - task: projects:non-interactive:up:{{.SERVER}}:kubernetes-dashboard
+      - task: projects:non-interactive:up:{{.SERVER}}:hubble-ui
 
   _up:gateway:*:
     desc: Up the gateways and cert-manager
@@ -32,6 +33,7 @@ tasks:
       SERVER: "{{index .MATCH 0}}"
     desc: Destroy the base infrastructure
     deps:
+      - task: projects:non-interactive:down:{{.SERVER}}:hubble-ui
       - task: projects:non-interactive:down:{{.SERVER}}:kubernetes-dashboard
       - task: projects:non-interactive:down:{{.SERVER}}:public-gateway
       - task: projects:non-interactive:down:{{.SERVER}}:internal-gateway

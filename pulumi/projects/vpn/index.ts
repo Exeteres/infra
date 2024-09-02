@@ -1,3 +1,4 @@
+import { cilium } from "@infra/cilium"
 import { pulumi } from "@infra/core"
 import { k8s } from "@infra/k8s"
 import { vpn } from "@infra/vpn"
@@ -29,3 +30,5 @@ for (const location of locations) {
     authState,
   })
 }
+
+cilium.createAllowAllForNamespacePolicy({ namespace })

@@ -7,7 +7,7 @@ tasks:
       PROJECT: "{{index .MATCH 1}}"
     label: up {{.STACK}}/{{.PROJECT}}
     desc: Create or update the "{{.PROJECT}}" project in "{{.STACK}}"
-    cmd: pulumi up -s {{.STACK}} -y {{.CLI_ARGS}}
+    cmd: pulumi up -f -s {{.STACK}} -y {{.CLI_ARGS}}
     dir: "{{.PROJECT}}"
     interactive: true
 
@@ -17,7 +17,7 @@ tasks:
       PROJECT: "{{index .MATCH 1}}"
     label: down {{.STACK}}/{{.PROJECT}}
     desc: Destroy the "{{.PROJECT}}" project in "{{.STACK}}"
-    cmd: pulumi down -s {{.STACK}} -y {{.CLI_ARGS}}
+    cmd: pulumi down -f -s {{.STACK}} -y {{.CLI_ARGS}}
     dir: "{{.PROJECT}}"
     interactive: true
 

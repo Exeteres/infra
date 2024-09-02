@@ -1,3 +1,4 @@
+import { cilium } from "@infra/cilium"
 import { pulumi } from "@infra/core"
 import { k8s } from "@infra/k8s"
 import { mariadb } from "@infra/mariadb"
@@ -23,6 +24,8 @@ createDnsRecord({
   type: "A",
   value: service.spec.clusterIP,
 })
+
+cilium.createAllowFromNamespacesPolicy({ namespace })
 
 export const serviceId = k8s.export(service)
 export { rootPassword, host }

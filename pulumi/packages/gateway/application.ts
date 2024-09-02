@@ -3,7 +3,6 @@ import {
   Input,
   mapOptionalInput,
   mapOptionalInputs,
-  mergeInputArrays,
   normalizeInputs,
   output,
   pulumi,
@@ -39,12 +38,6 @@ export interface ApplicationGatewayOptions {
    * If not provided, the Gateway will route traffic to the root path.
    */
   pathPrefix?: string
-
-  /**
-   * The service that implements the gateway.
-   * Can be used to define security policies for incoming traffic.
-   */
-  service: Input<k8s.raw.core.v1.Service>
 
   /**
    * The gateway to use for the application.

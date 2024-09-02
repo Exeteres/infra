@@ -1,3 +1,4 @@
+import { cilium } from "@infra/cilium"
 import { k8s } from "@infra/k8s"
 import { traefik } from "@infra/traefik"
 
@@ -44,6 +45,8 @@ const { release } = traefik.createApplication({
     },
   },
 })
+
+cilium.createAllowApiServerPolicy({ namespace })
 
 const service = release.status.status.apply(() => k8s.raw.core.v1.Service.get("traefik", "public-gateway/traefik"))
 

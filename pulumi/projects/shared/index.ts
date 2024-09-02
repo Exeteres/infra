@@ -16,6 +16,7 @@ export const cloudflareZoneId = config.require("cloudflareZoneId")
 export const rcloneConfig = config.requireSecret("rcloneConfig")
 export const backupPassword = config.requireSecret("backupPassword")
 export const backupRoot = config.require("backupRoot")
+export const backupStorageDomains = config.requireObject<string[]>("backupStorageDomains")
 
 export const clusterCidr = config.require("clusterCidr")
 export const serviceCidr = config.require("serviceCidr")

@@ -1,3 +1,4 @@
+import { cilium } from "@infra/cilium"
 import { pulumi } from "@infra/core"
 import { k8s } from "@infra/k8s"
 import { minio } from "@infra/minio"
@@ -24,5 +25,7 @@ minio.createApplication({
   gateway,
   consoleGateway,
 })
+
+cilium.createAllowFromNamespacesPolicy({ namespace })
 
 export { rootPassword }

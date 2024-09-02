@@ -43,13 +43,12 @@ lib.exeteres.mkService config {
         extraFlags = lib.strings.concatStringsSep " " [
           "--secrets-encryption=true"
           "--kubelet-arg=allowed-unsafe-sysctls=net.ipv4.conf.all.src_valid_mark,net.ipv4.ip_forward,net.ipv6.conf.all.forwarding"
-          "--disable=traefik"
           "--flannel-backend=none"
           "--disable-network-policy"
+          "--disable=traefik"
           "--cluster-cidr=${cfg.clusterCidr}"
           "--service-cidr=${cfg.serviceCidr}"
           "--tls-san=${config.networking.hostName}.${cfg.tailnetName}"
-          # "--disable-kube-proxy"
         ];
       };
 

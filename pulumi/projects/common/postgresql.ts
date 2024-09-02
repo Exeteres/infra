@@ -4,6 +4,8 @@ import { getStack } from "./stack"
 import { k8s } from "@infra/k8s"
 import { postgresql } from "@infra/postgresql"
 import { scripting } from "@infra/scripting"
+import { cilium } from "@infra/cilium"
+import { createAllowAlpineRegistryPolicy } from "./cilium"
 
 interface PostgresqlEnvironment {
   service: pulumi.Output<k8s.raw.core.v1.Service>
@@ -43,6 +45,17 @@ export function createPostgresqlDatabase(
     namespace,
 
     environment,
+  })
+
+  createAllowAlpineRegistryPolicy(namespace)
+
+  cilium.createAllowServicePolicy({
+    name: "allow-postgresql",
+    namespace,
+
+    description: "Allow access to the PostgreSQL database",
+
+    service,
   })
 
   return postgresql.createDatabase({

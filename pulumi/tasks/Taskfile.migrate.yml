@@ -77,6 +77,17 @@ tasks:
       - task: projects:migrate:{{.SOURCE}}:{{.TARGET}}:vaultwarden
       - task: projects:migrate:{{.SOURCE}}:{{.TARGET}}:plane
       - task: projects:migrate:{{.SOURCE}}:{{.TARGET}}:etebase
+      - task: projects:migrate:{{.SOURCE}}:{{.TARGET}}:syncthing
+
+  syncthing:*:*:
+    vars:
+      SOURCE: "{{index .MATCH 0}}"
+      TARGET: "{{index .MATCH 1}}"
+    desc: Migrate Syncthing data from "{{.SOURCE}}" to "{{.TARGET}}"
+    cmds:
+      # - task: backup:project:{{.SOURCE}}:syncthing
+      - task: projects:non-interactive:down:{{.SOURCE}}:syncthing
+      - task: projects:non-interactive:up:{{.TARGET}}:syncthing
 
   refresh:*:
     vars:
@@ -88,11 +99,12 @@ tasks:
       - task: projects:non-interactive:refresh:{{.STACK}}:public-gateway
       - task: projects:non-interactive:refresh:{{.STACK}}:internal-gateway
       - task: projects:non-interactive:refresh:{{.STACK}}:kubernetes-dashboard
-      # - task: projects:non-interactive:refresh:{{.STACK}}:etebase
-      # - task: projects:non-interactive:refresh:{{.STACK}}:mariadb
-      # - task: projects:non-interactive:refresh:{{.STACK}}:minio
-      # - task: projects:non-interactive:refresh:{{.STACK}}:plane
-      # - task: projects:non-interactive:refresh:{{.STACK}}:postgresql
-      # - task: projects:non-interactive:refresh:{{.STACK}}:vpn
-      # - task: projects:non-interactive:refresh:{{.STACK}}:vpn-static
+      - task: projects:non-interactive:refresh:{{.STACK}}:etebase
+      - task: projects:non-interactive:refresh:{{.STACK}}:mariadb
+      - task: projects:non-interactive:refresh:{{.STACK}}:minio
+      - task: projects:non-interactive:refresh:{{.STACK}}:plane
+      - task: projects:non-interactive:refresh:{{.STACK}}:postgresql
+      - task: projects:non-interactive:refresh:{{.STACK}}:vpn
+      - task: projects:non-interactive:refresh:{{.STACK}}:vpn-static
+      - task: projects:non-interactive:refresh:{{.STACK}}:syncthing
     ignore_error: true

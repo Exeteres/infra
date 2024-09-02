@@ -2,11 +2,15 @@ import { certManager } from "@infra/cert-manager"
 import { pulumi } from "@infra/core"
 import { k8s } from "@infra/k8s"
 import { getSharedStack } from "@projects/common"
+import { cilium } from "@infra/cilium"
 
 const sharedStack = getSharedStack()
-const config = new pulumi.Config("cert-manager")
+const config = new pulumi.Config()
 
 const { namespace, release } = certManager.createApplication()
+
+cilium.createAllowInternetPolicy({ namespace })
+cilium.createAllowApiServerPolicy({ namespace })
 
 const apiTokenSecret = k8s.createSecret({
   name: "cloudflare-api-token",

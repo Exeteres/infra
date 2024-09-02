@@ -1,9 +1,9 @@
 version: 3
 
 includes:
-  tofu:
-    taskfile: tofu/Taskfile.yml
-    dir: tofu
+  terraform:
+    taskfile: terraform/Taskfile.yml
+    dir: terraform
 
   nixos:
     taskfile: nixos/Taskfile.yml

@@ -1,3 +1,4 @@
+import { cilium } from "@infra/cilium"
 import { pulumi } from "@infra/core"
 import { k8s } from "@infra/k8s"
 import { tailscale } from "@infra/tailscale"
@@ -56,6 +57,8 @@ const { release } = traefik.createApplication({
     },
   },
 })
+
+cilium.createAllowAllForNamespacePolicy({ namespace })
 
 const service = release.status.status.apply(() => k8s.raw.core.v1.Service.get("traefik", "internal-gateway/traefik"))
 

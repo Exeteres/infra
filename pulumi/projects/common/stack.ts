@@ -39,6 +39,7 @@ interface SharedEnvironment {
   rcloneConfig: pulumi.Output<string>
   backupPassword: pulumi.Output<string>
   backupRoot: pulumi.Output<string>
+  backupStorageDomains: pulumi.Output<string[]>
 }
 
 export const getSharedEnvironment = singleton<SharedEnvironment>(() => {
@@ -60,5 +61,6 @@ export const getSharedEnvironment = singleton<SharedEnvironment>(() => {
     rcloneConfig: stack.getOutput("rcloneConfig") as pulumi.Output<string>,
     backupPassword: stack.getOutput("backupPassword") as pulumi.Output<string>,
     backupRoot: stack.getOutput("backupRoot") as pulumi.Output<string>,
+    backupStorageDomains: stack.getOutput("backupStorageDomains") as pulumi.Output<string[]>,
   }
 })

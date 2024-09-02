@@ -1,3 +1,4 @@
+import { cilium } from "@infra/cilium"
 import { pulumi } from "@infra/core"
 import { k8s } from "@infra/k8s"
 import { syncthing } from "@infra/syncthing"
@@ -34,3 +35,5 @@ syncthing.createApplication({
     backup,
   },
 })
+
+cilium.createAllowAllForNamespacePolicy({ namespace })

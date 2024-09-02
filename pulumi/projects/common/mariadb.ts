@@ -4,6 +4,8 @@ import { getStack } from "./stack"
 import { k8s } from "@infra/k8s"
 import { mariadb } from "@infra/mariadb"
 import { scripting } from "@infra/scripting"
+import { cilium } from "@infra/cilium"
+import { createAllowAlpineRegistryPolicy } from "./cilium"
 
 interface MariadbEnvironment {
   service: pulumi.Output<k8s.raw.core.v1.Service>
@@ -43,6 +45,17 @@ export function createMariadbDatabase(
     namespace,
 
     environment,
+  })
+
+  createAllowAlpineRegistryPolicy(namespace)
+
+  cilium.createAllowServicePolicy({
+    name: "allow-mariadb",
+    namespace,
+
+    description: "Allow access to the PostgreSQL database",
+
+    service,
   })
 
   return mariadb.createDatabase({

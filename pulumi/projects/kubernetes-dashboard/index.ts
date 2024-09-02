@@ -1,3 +1,4 @@
+import { cilium } from "@infra/cilium"
 import { pulumi } from "@infra/core"
 import { k8s } from "@infra/k8s"
 import { kubernetesDashboard } from "@infra/kubernetes-dashboard"
@@ -14,6 +15,9 @@ const application = kubernetesDashboard.createApplication({
   namespace,
   gateway,
 })
+
+cilium.createAllowApiServerPolicy({ namespace })
+cilium.createAllowInsideNamespacePolicy({ namespace })
 
 kubernetesDashboard.createServiceAccount({
   name: "dashboard-account",

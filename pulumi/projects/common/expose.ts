@@ -4,9 +4,10 @@ import { createWebCertificate } from "./tls"
 import { certManager } from "@infra/cert-manager"
 import { gw } from "@infra/gateway"
 import { cloudflare } from "@infra/cloudflare"
-import { singleton } from "./utils"
+import { memoize, memoize2, singleton } from "./utils"
 import { getStack } from "./stack"
 import { Input } from "@infra/core"
+import { cilium } from "@infra/cilium"
 
 interface ExposedService {
   dnsRecord: cloudflare.raw.Record
@@ -68,6 +69,21 @@ export function exposeInternalHttpService(options: ExposeHttpServiceOptions): Ex
   return exposeHttpService("internal", dnsRecord, service, options)
 }
 
+const createAllowFromGatewayPolicy = memoize2(
+  (namespace: k8s.raw.core.v1.Namespace, service: Input<k8s.raw.core.v1.Service>) => {
+    return cilium.createPolicy({
+      name: "allow-from-gateway",
+      namespace,
+
+      description: "Allow traffic from the gateway to the service",
+
+      ingress: {
+        fromService: service,
+      },
+    })
+  },
+)
+
 function exposeHttpService(
   className: string,
   dnsRecord: cloudflare.raw.Record,
@@ -76,13 +92,14 @@ function exposeHttpService(
 ): ExposedService {
   const certificate = createWebCertificate(options.namespace, options.domain)
 
+  createAllowFromGatewayPolicy(options.namespace, service)
+
   return {
     dnsRecord,
     certificate,
     gateway: {
       pathPrefix: options.pathPrefix,
       gateway: createHttpGateway(certificate, className, options),
-      service,
     },
   }
 }

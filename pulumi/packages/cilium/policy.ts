@@ -1,18 +1,22 @@
 import { k8s } from "@infra/k8s"
 import { raw } from "./imports"
 import {
+  flattenInputs,
   Input,
   InputArray,
+  mapInputs,
   mapObjectKeys,
   mapOptionalInput,
+  mapOptionalInputs,
   mergeInputArrays,
   normalizeInputs,
   normalizeInputsAndMap,
+  PartialKeys,
   pulumi,
   undefinedIfEmpty,
 } from "@infra/core"
 
-export interface PolicyOptions extends k8s.CommonOptions {
+export interface PolicyOptions extends PartialKeys<k8s.CommonOptions, "namespace"> {
   /**
    * The description of the network policy.
    */
@@ -26,8 +30,24 @@ export interface PolicyOptions extends k8s.CommonOptions {
 
   /**
    * The selector to apply the network policy to.
+   * If not specified, the network policy applies to all endpoints in the namespace (or cluster).
    */
   endpointSelector?: Input<k8s.LabelSelector>
+
+  /**
+   * Whether to enable default deny for the network policy.
+   */
+  enableDefaultDeny?: {
+    /**
+     * Whether to enable default deny for ingress traffic.
+     */
+    ingress?: boolean
+
+    /**
+     * Whether to enable default deny for egress traffic.
+     */
+    egress?: boolean
+  }
 
   /**
    * The egress policy for the network policy.
@@ -160,9 +180,22 @@ export interface FullPortSelector {
    * The protocol in upper case (e.g. "TCP", "UDP") or "ANY".
    */
   protocol: PortProtocol
+
+  /**
+   * The rules to apply to the port.
+   */
+  rules?: Input<PortRules>
+}
+
+export interface PortRules {
+  /**
+   * DNS patterns to match.
+   */
+  dns: InputArray<DnsRule>
 }
 
 export type PortProtocol = "TCP" | "UDP" | "ANY"
+export type DnsRule = { matchName: string } | { matchPattern: string }
 
 export type PolicyEntity =
   | "host"
@@ -189,7 +222,8 @@ export function createPolicy(options: PolicyOptions): Policy {
       metadata: k8s.mapMetadata(options),
       spec: {
         description: options.description,
-        endpointSelector: mapOptionalInput(options.endpointSelector, k8s.mapLabelSelector, {}),
+        endpointSelector: mapOptionalInput(options.endpointSelector, mapEndpointSelector, {}),
+        enableDefaultDeny: options.enableDefaultDeny,
         egress: undefinedIfEmpty(
           normalizeInputsAndMap(options.egress, options.egresses, egress => ({
             toFQDNs: undefinedIfEmpty(normalizeInputsAndMap(egress.toFQDN, egress.toFQDNs, mapFQDNSelector)),
@@ -203,7 +237,12 @@ export function createPolicy(options: PolicyOptions): Policy {
             //   normalizeInputsAndMap(egress.toService, egress.toServices, mapServiceSelector),
             // ),
             toEntities: undefinedIfEmpty(normalizeInputs(egress.toEntity, egress.toEntities)),
-            toPorts: undefinedIfEmpty(normalizeInputsAndMap(egress.toPort, egress.toPorts, mapPortSelector)),
+            toPorts: undefinedIfEmpty(
+              mergeInputArrays(
+                normalizeInputsAndMap(egress.toPort, egress.toPorts, mapPortSelector),
+                normalizeInputsAndMap(egress.toService, egress.toServices, mapPortsFromService),
+              ),
+            ),
           })),
         ),
         ingress: undefinedIfEmpty(
@@ -236,6 +275,7 @@ export function mapPortSelector(selector: PortSelector) {
           protocol: selector.protocol,
         },
       ],
+      rules: selector.rules,
     }
   }
 
@@ -273,4 +313,22 @@ export function mapFQDNSelector(fqdn: string) {
   }
 
   return { matchName: fqdn }
+}
+
+function mapEndpointSelector(selector: k8s.LabelSelector) {
+  if (Object.keys(selector).length === 0) {
+    // Do not wrap empty selector with `matchLabels`, cilium expects empty object for this case
+    return {}
+  }
+
+  return k8s.mapLabelSelector(selector)
+}
+
+function mapPortsFromService(service: k8s.raw.core.v1.Service) {
+  return service.spec.ports.apply(ports => ({
+    ports: ports.map(port => ({
+      port: String(port.targetPort ?? port.port),
+      protocol: port.protocol as PortProtocol,
+    })),
+  }))
 }

@@ -3,7 +3,6 @@ import { k8s } from "@infra/k8s"
 import { gw } from "@infra/gateway"
 import { postgresql } from "@infra/postgresql"
 import { minio } from "@infra/minio"
-import { cilium } from "@infra/cilium"
 
 export interface ApplicationOptions extends k8s.ApplicationOptions, gw.GatewayApplicationOptions {
   /**
@@ -40,7 +39,7 @@ export function createApplication(options: ApplicationOptions): Application {
 
     repo: "https://helm.plane.so",
     chart: "plane-ce",
-    version: "1.0.20",
+    version: "1.0.22",
 
     values: {
       postgres: {
@@ -117,103 +116,6 @@ export function createApplication(options: ApplicationOptions): Application {
           },
         },
       ],
-    },
-  })
-
-  cilium.createPolicy({
-    name: "allow-whithin-namespace",
-    namespace,
-
-    description: "Allow Plane to communicate within the same namespace.",
-
-    ingress: {
-      fromEndpoint: {
-        "k8s:io.kubernetes.pod.namespace": namespace.metadata.name,
-      },
-    },
-
-    egress: {
-      toEndpoint: {
-        "k8s:io.kubernetes.pod.namespace": namespace.metadata.name,
-      },
-    },
-  })
-
-  cilium.createPolicy({
-    name: "allow-to-kube-dns",
-    namespace,
-
-    description: "Allow Plane to access the Kubernetes DNS service.",
-
-    egress: {
-      toEndpoint: {
-        "k8s:io.kubernetes.pod.namespace": "kube-system",
-        "k8s:k8s-app": "kube-dns",
-      },
-      toPort: {
-        port: 53,
-        protocol: "UDP",
-      },
-    },
-  })
-
-  cilium.createPolicy({
-    name: "allow-to-postgresql",
-    namespace,
-
-    description: "Allow Plane to access PostgreSQL.",
-
-    egress: {
-      toService: options.databaseCredentials.service,
-    },
-  })
-
-  if (options.gateway) {
-    cilium.createPolicy({
-      name: "allow-from-gateway",
-      namespace,
-
-      description: "Allow Plane to receive traffic from the gateway.",
-
-      ingress: {
-        fromService: options.gateway.service,
-        toPorts: [
-          {
-            port: 8000,
-            protocol: "TCP",
-          },
-          {
-            port: 3000,
-            protocol: "TCP",
-          },
-        ],
-      },
-    })
-  }
-
-  cilium.createPolicy({
-    name: "allow-to-minio",
-    namespace,
-
-    description: "Allow Plane to access Minio.",
-
-    egress: {
-      toFQDN: options.s3Credentials.host,
-    },
-  })
-
-  cilium.createPolicy({
-    name: "allow-internet-to-init-database",
-    namespace,
-
-    description: "Allow Plane jobs to access the Alpine Linux package repository.",
-
-    // endpointSelector: {
-    //   "k8s:job-name": `${fullName}-init-database`,
-    // },
-
-    egress: {
-      toEntity: "world",
     },
   })
 

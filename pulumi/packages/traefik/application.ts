@@ -1,3 +1,4 @@
+import { merge } from "@infra/core"
 import { k8s } from "@infra/k8s"
 
 export interface ApplicationOptions extends k8s.ReleaseApplicationOptions {}
@@ -17,7 +18,16 @@ export function createApplication(options: ApplicationOptions = {}): Application
 
     ...options.release,
 
-    values: options.release?.values,
+    values: merge(
+      {
+        globalArguments: [
+          // Disable telemetry
+          "--global.checknewversion=false",
+          "--global.sendanonymoususage=false",
+        ],
+      },
+      options.release?.values ?? {},
+    ),
   })
 
   return {

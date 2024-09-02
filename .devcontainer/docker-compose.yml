@@ -9,6 +9,7 @@ services:
       - ~/.pulumi:/home/dev/.pulumi
       - ~/.config/age/key:/home/dev/.config/age/key
       - ~/.ssh/id_ed25519.pub:/home/dev/.ssh/id_ed25519.pub
+      - /run/pcscd/pcscd.comm:/run/pcscd/pcscd.comm
     command: sleep infinity
 
 networks:

@@ -8,4 +8,9 @@
   sops.defaultSopsFile = ../../secrets/laptop.yaml;
 
   services.touchegg.enable = true;
+
+  services.pcscd = {
+    enable = true;
+    extraArgs = ["--disable-polkit"];
+  };
 }

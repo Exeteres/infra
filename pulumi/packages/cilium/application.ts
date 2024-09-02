@@ -1,7 +1,7 @@
 import { command, Input, merge } from "@infra/core"
 import { k8s } from "@infra/k8s"
 
-export interface ApplicationOptions extends Omit<k8s.ReleaseApplicationOptions, "namespace"> {
+export interface ApplicationOptions extends k8s.ReleaseApplicationOptions {
   /**
    * The IP address of the Kubernetes API server.
    */
@@ -16,7 +16,7 @@ export interface ApplicationOptions extends Omit<k8s.ReleaseApplicationOptions, 
 export interface Application extends k8s.ReleaseApplication {}
 
 export function createApplication(options: ApplicationOptions): Application {
-  const namespace = k8s.raw.core.v1.Namespace.get("kube-system", "kube-system")
+  const namespace = options.namespace ?? k8s.raw.core.v1.Namespace.get("kube-system", "kube-system")
 
   const release = k8s.createHelmRelease({
     name: "cilium",
@@ -24,13 +24,13 @@ export function createApplication(options: ApplicationOptions): Application {
 
     chart: "cilium",
     repo: "https://helm.cilium.io",
-    version: "1.16.0",
+    version: "1.16.1",
 
     ...options.release,
 
     values: merge(
       {
-        kubeProxyReplacement: true,
+        policyEnforcementMode: "always",
         k8sServiceHost: options.k8sServiceHost,
         k8sServicePort: 6443,
         operator: {
