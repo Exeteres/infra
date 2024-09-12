@@ -143,6 +143,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@infra/ente@workspace:apps/ente":
+  version: 0.0.0-use.local
+  resolution: "@infra/ente@workspace:apps/ente"
+  dependencies:
+    "@infra/k8s": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
 "@infra/etebase@workspace:*, @infra/etebase@workspace:apps/etebase":
   version: 0.0.0-use.local
   resolution: "@infra/etebase@workspace:apps/etebase"
@@ -245,6 +253,12 @@ __metadata:
   resolution: "@infra/scripting@workspace:packages/scripting"
   dependencies:
     "@infra/k8s": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@infra/smtp@workspace:packages/smtp":
+  version: 0.0.0-use.local
+  resolution: "@infra/smtp@workspace:packages/smtp"
   languageName: unknown
   linkType: soft
 
@@ -752,6 +766,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@projects/hubble-ui@workspace:projects/hubble-ui":
+  version: 0.0.0-use.local
+  resolution: "@projects/hubble-ui@workspace:projects/hubble-ui"
+  languageName: unknown
+  linkType: soft
+
 "@projects/knative-dns@workspace:projects/internal-gateway":
   version: 0.0.0-use.local
   resolution: "@projects/knative-dns@workspace:projects/internal-gateway"
@@ -815,6 +835,14 @@ __metadata:
   dependencies:
     "@infra/core": "workspace:*"
     "@pulumi/terraform": "npm:^5.13.4"
+  languageName: unknown
+  linkType: soft
+
+"@projects/smtp-to-telegram@workspace:projects/smtp-to-telegram":
+  version: 0.0.0-use.local
+  resolution: "@projects/smtp-to-telegram@workspace:projects/smtp-to-telegram"
+  dependencies:
+    "@infra/k8s": "workspace:*"
   languageName: unknown
   linkType: soft
 

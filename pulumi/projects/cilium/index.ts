@@ -3,7 +3,7 @@ import { pulumi } from "@infra/core"
 import { k8s } from "@infra/k8s"
 import { getSharedEnvironment } from "@projects/common"
 
-const { internalIp } = getSharedEnvironment()
+const { internalIp, sshPort } = getSharedEnvironment()
 
 const kubeSystemNamespace = k8s.raw.core.v1.Namespace.get("kube-system", "kube-system")
 
@@ -16,6 +16,63 @@ cilium.createApplication({
 cilium.createAllowAllForNamespacePolicy({
   name: "allow-all-for-kube-system",
   namespace: kubeSystemNamespace,
+})
+
+cilium.createHostPolicy({
+  name: "allow-host-ssh",
+
+  description: "Allow SSH to the server",
+
+  ingress: {
+    fromEntity: "world",
+    toPort: {
+      port: sshPort,
+      protocol: "TCP",
+    },
+  },
+})
+
+cilium.createHostPolicy({
+  name: "allow-host-tailscale",
+
+  description: "Allow Tailscale",
+
+  ingress: {
+    fromCIDR: "100.64.0.0/10",
+  },
+
+  egress: {
+    toCIDR: "100.64.0.0/10",
+  },
+})
+
+cilium.createHostPolicy({
+  name: "allow-host-internet",
+
+  description: "Allow internet access from the server",
+
+  egress: {
+    // toEntity: "world",
+    toEndpoint: {},
+  },
+
+  // ingress: {
+  //   fromEntity: "world",
+  // },
+})
+
+cilium.createHostPolicy({
+  name: "allow-host-cluster",
+
+  description: "Allow ingress and egress traffic within the cluster",
+
+  ingress: {
+    fromEntity: "cluster",
+  },
+
+  egress: {
+    toEntity: "cluster",
+  },
 })
 
 cilium.createPolicy({

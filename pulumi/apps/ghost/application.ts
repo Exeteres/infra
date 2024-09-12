@@ -5,7 +5,7 @@ import { postgresql } from "@infra/postgresql"
 import { restic } from "@infra/restic"
 import { scripting } from "@infra/scripting"
 
-export interface ApplicationOptions extends k8s.ApplicationOptions, gw.GatewayApplicationOptions {
+export interface ApplicationOptions extends k8s.ApplicationOptions, gw.RoutesApplicationOptions {
   /**
    * The fully qualified domain name.
    */
@@ -27,7 +27,7 @@ export interface ApplicationOptions extends k8s.ApplicationOptions, gw.GatewayAp
   smtpCredentials: SMTPCredentials
 }
 
-export interface Application extends gw.GatewayApplication {
+export interface Application extends gw.RoutesApplication {
   /**
    * The workload service which defines the application.
    */
@@ -151,7 +151,7 @@ export function createApplication(options: ApplicationOptions): Application {
     volume: contentVolumeClaim,
   })
 
-  const gateway = gw.createApplicationRoutes(namespace, options.gateway, {
+  const gateway = gw.createApplicationRoutes(namespace, options.routes, {
     httpRoute: {
       name,
       rule: {

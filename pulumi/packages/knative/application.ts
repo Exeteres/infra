@@ -2,7 +2,7 @@ import { command, pulumi } from "@infra/core"
 import { gw } from "../gateway"
 import { k8s } from "@infra/k8s"
 
-export interface ApplicationOptions extends gw.GatewayApplicationOptions {
+export interface ApplicationOptions extends gw.RoutesApplicationOptions {
   /**
    * The fully qualified domain name.
    */
@@ -15,7 +15,7 @@ export interface ApplicationOptions extends gw.GatewayApplicationOptions {
   kourierNamespace?: k8s.raw.core.v1.Namespace
 }
 
-export interface Application extends gw.GatewayApplication {}
+export interface Application extends gw.RoutesApplication {}
 
 export function createApplication(options: ApplicationOptions): Application {
   const name = "knative"

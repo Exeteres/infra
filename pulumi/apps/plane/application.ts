@@ -4,7 +4,7 @@ import { gw } from "@infra/gateway"
 import { postgresql } from "@infra/postgresql"
 import { minio } from "@infra/minio"
 
-export interface ApplicationOptions extends k8s.ApplicationOptions, gw.GatewayApplicationOptions {
+export interface ApplicationOptions extends k8s.ApplicationOptions, gw.RoutesApplicationOptions {
   /**
    * The database credentials.
    */
@@ -21,7 +21,7 @@ export interface ApplicationOptions extends k8s.ApplicationOptions, gw.GatewayAp
   secretKey: pulumi.Input<string>
 }
 
-export interface Application extends k8s.ReleaseApplication, gw.GatewayApplication {}
+export interface Application extends k8s.ReleaseApplication, gw.RoutesApplication {}
 
 /**
  * Creates a ready-to-use application.
@@ -76,7 +76,7 @@ export function createApplication(options: ApplicationOptions): Application {
     },
   })
 
-  const gateway = gw.createApplicationRoutes(namespace, options.gateway, {
+  const routes = gw.createApplicationRoutes(namespace, options.routes, {
     httpRoute: {
       name,
       rules: [
@@ -122,6 +122,6 @@ export function createApplication(options: ApplicationOptions): Application {
   return {
     namespace,
     release,
-    gateway,
+    routes,
   }
 }

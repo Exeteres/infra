@@ -5,7 +5,7 @@ import { postgresql } from "@infra/postgresql"
 import { restic } from "@infra/restic"
 import { scripting } from "@infra/scripting"
 
-export interface ApplicationOptions extends k8s.ApplicationOptions, gw.GatewayApplicationOptions {
+export interface ApplicationOptions extends k8s.ApplicationOptions, gw.RoutesApplicationOptions {
   /**
    * The fully qualified domain name.
    */
@@ -22,7 +22,7 @@ export interface ApplicationOptions extends k8s.ApplicationOptions, gw.GatewayAp
   backup: restic.BackupOptions
 }
 
-export interface Application extends k8s.Application, gw.GatewayApplication {
+export interface Application extends k8s.Application, gw.RoutesApplication {
   /**
    * The workload service which defines the application.
    */
@@ -103,7 +103,7 @@ export function createApplication(options: ApplicationOptions): Application {
     volume: dataVolumeClaim,
   })
 
-  const gateway = gw.createApplicationRoutes(namespace, options.gateway, {
+  const routes = gw.createApplicationRoutes(namespace, options.routes, {
     httpRoute: {
       name: "etebase",
       rule: {
@@ -115,6 +115,6 @@ export function createApplication(options: ApplicationOptions): Application {
   return {
     namespace,
     workloadService,
-    gateway,
+    routes,
   }
 }

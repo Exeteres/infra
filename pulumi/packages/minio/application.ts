@@ -4,16 +4,16 @@ import { k8s } from "@infra/k8s"
 import { restic } from "@infra/restic"
 import { scripting } from "@infra/scripting"
 
-export interface ApplicationOptions extends k8s.ReleaseApplicationOptions, gw.GatewayApplicationOptions {
+export interface ApplicationOptions extends k8s.ReleaseApplicationOptions, gw.RoutesApplicationOptions {
   backup: restic.BackupOptions
   rootPassword: pulumi.Input<string>
-  consoleGateway?: gw.ApplicationGatewayOptions
+  consoleGateway?: gw.RoutesOptions
 }
 
-export interface Application extends k8s.ReleaseApplication, gw.GatewayApplication {
+export interface Application extends k8s.ReleaseApplication, gw.RoutesApplication {
   rootPasswordSecret: k8s.raw.core.v1.Secret
   dataVolumeClaim: k8s.raw.core.v1.PersistentVolumeClaim
-  consoleGateway?: gw.Bundle
+  consoleGateway?: gw.RouteBundle
 }
 
 export interface S3Credentials {
@@ -113,7 +113,7 @@ export function createApplication(options: ApplicationOptions): Application {
     ),
   })
 
-  const gateway = gw.createApplicationRoutes(namespace, options.gateway, {
+  const gateway = gw.createApplicationRoutes(namespace, options.routes, {
     httpRoute: {
       name,
       rule: {
@@ -144,7 +144,7 @@ export function createApplication(options: ApplicationOptions): Application {
     release,
     dataVolumeClaim,
 
-    gateway,
+    routes: gateway,
     consoleGateway,
   }
 }

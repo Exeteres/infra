@@ -32,6 +32,7 @@ interface SharedEnvironment {
 
   internalIp: pulumi.Output<string>
   publicIp: pulumi.Output<string>
+  sshPort: pulumi.Output<number>
 
   cloudflareZoneId: pulumi.Output<string>
   cloudflareApiToken: pulumi.Output<string>
@@ -54,6 +55,7 @@ export const getSharedEnvironment = singleton<SharedEnvironment>(() => {
 
     internalIp: stack.getOutput("internalIp") as pulumi.Output<string>,
     publicIp: stack.getOutput("publicIp") as pulumi.Output<string>,
+    sshPort: stack.getOutput("sshPort") as pulumi.Output<number>,
 
     cloudflareZoneId: stack.getOutput("cloudflareZoneId") as pulumi.Output<string>,
     cloudflareApiToken: stack.getOutput("cloudflareApiToken") as pulumi.Output<string>,

@@ -1,7 +1,4 @@
 {
-  "name": "@projects/kubernetes-dashboard",
-  "private": true,
-  "dependencies": {
-    "@infra/kubernetes-dashboard": "workspace:*"
-  }
+  "name": "@projects/hubble-ui",
+  "private": true
 }

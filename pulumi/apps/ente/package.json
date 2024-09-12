@@ -1,0 +1,7 @@
+{
+  "name": "@infra/ente",
+  "private": true,
+  "dependencies": {
+    "@infra/k8s": "workspace:*"
+  }
+}

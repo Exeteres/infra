@@ -3,7 +3,7 @@ import { gw } from "@infra/gateway"
 import { k8s } from "@infra/k8s"
 import { mariadb } from "@infra/mariadb"
 
-export interface ApplicationOptions extends k8s.ApplicationOptions, gw.GatewayApplicationOptions {
+export interface ApplicationOptions extends k8s.ApplicationOptions, gw.RoutesApplicationOptions {
   /**
    * The fully qualified domain name.
    */
@@ -15,7 +15,7 @@ export interface ApplicationOptions extends k8s.ApplicationOptions, gw.GatewayAp
   databaseCredentials: mariadb.DatabaseCredentials
 }
 
-export interface Application extends k8s.Application, gw.GatewayApplication {
+export interface Application extends k8s.Application, gw.RoutesApplication {
   /**
    * The workload service which defines the application.
    */
@@ -54,7 +54,7 @@ export function createApplication(options: ApplicationOptions): Application {
     },
   })
 
-  const gateway = gw.createApplicationRoutes(namespace, options.gateway, {
+  const routes = gw.createApplicationRoutes(namespace, options.routes, {
     httpRoute: {
       name,
       rule: {
@@ -66,6 +66,6 @@ export function createApplication(options: ApplicationOptions): Application {
   return {
     namespace,
     workloadService,
-    gateway,
+    routes,
   }
 }

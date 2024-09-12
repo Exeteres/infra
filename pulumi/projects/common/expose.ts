@@ -4,15 +4,26 @@ import { createWebCertificate } from "./tls"
 import { certManager } from "@infra/cert-manager"
 import { gw } from "@infra/gateway"
 import { cloudflare } from "@infra/cloudflare"
-import { memoize, memoize2, singleton } from "./utils"
+import { memoize2, singleton } from "./utils"
 import { getStack } from "./stack"
 import { Input } from "@infra/core"
 import { cilium } from "@infra/cilium"
 
 interface ExposedService {
+  /**
+   * The generated DNS record for the service.
+   */
   dnsRecord: cloudflare.raw.Record
+
+  /**
+   * The generated certificate for the service.
+   */
   certificate: certManager.CertificateBundle
-  gateway: gw.ApplicationGatewayOptions
+
+  /**
+   * The generated routes for the service.
+   */
+  routes: gw.RoutesOptions
 }
 
 export const getInternalGatewayService = singleton(() => {
@@ -97,7 +108,7 @@ function exposeHttpService(
   return {
     dnsRecord,
     certificate,
-    gateway: {
+    routes: {
       pathPrefix: options.pathPrefix,
       gateway: createHttpGateway(certificate, className, options),
     },

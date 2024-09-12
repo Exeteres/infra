@@ -9,11 +9,11 @@ const namespace = k8s.createNamespace({ name: "kubernetes-dashboard" })
 const config = new pulumi.Config("kubernetes-dashboard")
 const domain = config.require("domain")
 
-const { gateway } = exposeInternalHttpService({ namespace, domain })
+const { routes } = exposeInternalHttpService({ namespace, domain })
 
 const application = kubernetesDashboard.createApplication({
   namespace,
-  gateway,
+  routes,
 })
 
 cilium.createAllowApiServerPolicy({ namespace })

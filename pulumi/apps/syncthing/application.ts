@@ -4,7 +4,7 @@ import { k8s } from "@infra/k8s"
 import { restic } from "@infra/restic"
 import { scripting } from "@infra/scripting"
 
-export interface ApplicationOptions extends k8s.ApplicationOptions, gw.GatewayApplicationOptions {
+export interface ApplicationOptions extends k8s.ApplicationOptions, gw.RoutesApplicationOptions {
   state: {
     /**
      * The options for the application state.
@@ -36,7 +36,7 @@ export interface ApplicationOptions extends k8s.ApplicationOptions, gw.GatewayAp
   serviceAccount?: k8s.raw.core.v1.ServiceAccount
 }
 
-export interface Application extends k8s.Application, gw.GatewayApplication {
+export interface Application extends k8s.Application, gw.RoutesApplication {
   /**
    * The workload service that powers the application.
    */
@@ -140,7 +140,7 @@ export function createApplication(options: ApplicationOptions): Application {
     volumes: [stateVolumeClaim, dataVolumeClaim] as any,
   })
 
-  const gateway = gw.createApplicationRoutes(namespace, options.gateway, {
+  const routes = gw.createApplicationRoutes(namespace, options.routes, {
     httpRoute: {
       name,
       rule: {
@@ -155,7 +155,7 @@ export function createApplication(options: ApplicationOptions): Application {
   return {
     namespace,
     workloadService,
-    gateway,
+    routes,
 
     state: {
       volumeClaim: stateVolumeClaim,

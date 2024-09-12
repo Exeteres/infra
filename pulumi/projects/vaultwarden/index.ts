@@ -9,13 +9,13 @@ const config = new pulumi.Config("vaultwarden")
 const domain = config.require("domain")
 const databasePassword = config.requireSecret("databasePassword")
 
-const { gateway } = exposeInternalHttpService({ namespace, domain })
+const { routes } = exposeInternalHttpService({ namespace, domain })
 const { credentials } = createMariadbDatabase("vaultwarden", namespace, databasePassword)
 
 vaultwarden.createApplication({
   namespace,
   domain,
 
-  gateway,
+  routes,
   databaseCredentials: credentials,
 })

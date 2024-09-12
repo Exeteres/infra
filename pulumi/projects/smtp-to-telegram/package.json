@@ -1,0 +1,7 @@
+{
+  "name": "@projects/smtp-to-telegram",
+  "private": true,
+  "dependencies": {
+    "@infra/k8s": "workspace:*"
+  }
+}

@@ -9,7 +9,7 @@ const config = new pulumi.Config("etebase")
 const domain = config.require("domain")
 const databasePassword = config.requireSecret("databasePassword")
 
-const { gateway } = exposeInternalHttpService({ namespace, domain })
+const { routes } = exposeInternalHttpService({ namespace, domain })
 const { credentials } = createPostgresqlDatabase("etebase", namespace, databasePassword)
 const { backup } = createBackupBundle("etebase", namespace)
 
@@ -17,7 +17,7 @@ etebase.createApplication({
   namespace,
   domain,
 
-  gateway,
+  routes,
   databaseCredentials: credentials,
   backup,
 })

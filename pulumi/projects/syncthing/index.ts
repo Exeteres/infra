@@ -13,7 +13,7 @@ const tailscaleAuthState = config.getSecret("tailscaleAuthState")
 
 const namespace = k8s.createNamespace({ name: "syncthing" })
 
-const { gateway } = exposeInternalHttpService({ namespace, domain })
+const { routes } = exposeInternalHttpService({ namespace, domain })
 const { backup } = createBackupBundle("syncthing", namespace)
 
 const { container, serviceAccount } = tailscale.createContainer({
@@ -26,7 +26,7 @@ const { container, serviceAccount } = tailscale.createContainer({
 
 syncthing.createApplication({
   namespace,
-  gateway,
+  routes,
 
   sidecarContainers: [container],
   serviceAccount,

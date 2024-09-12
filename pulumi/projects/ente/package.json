@@ -1,0 +1,7 @@
+{
+  "name": "@projects/ente",
+  "private": true,
+  "dependencies": {
+    "@infra/ente": "workspace:*"
+  }
+}

@@ -4,9 +4,9 @@ import * as path from "path"
 
 const config = new pulumi.Config()
 
-const tofuState = new tf.state.RemoteStateReference("tofu", {
+const terraformState = new tf.state.RemoteStateReference("terraform", {
   backendType: "local",
-  path: path.join(__dirname, `../../../tofu/instances/${pulumi.getStack()}/terraform.tfstate`),
+  path: path.join(__dirname, `../../../terraform/instances/${pulumi.getStack()}/terraform.tfstate`),
 })
 
 export const domain = config.require("domain")
@@ -22,5 +22,6 @@ export const clusterCidr = config.require("clusterCidr")
 export const serviceCidr = config.require("serviceCidr")
 export const tailnetName = config.require("tailnetName")
 
-export const internalIp = tofuState.getOutput("internal_ip")
-export const publicIp = tofuState.getOutput("public_ip")
+export const internalIp = terraformState.getOutput("internal_ip")
+export const publicIp = terraformState.getOutput("public_ip")
+export const sshPort = terraformState.getOutput("ssh_port")

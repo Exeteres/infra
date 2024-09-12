@@ -2,8 +2,8 @@ import { merge } from "@infra/core"
 import { gw } from "@infra/gateway"
 import { k8s } from "@infra/k8s"
 
-export interface ApplicationOptions extends k8s.ReleaseApplicationOptions, gw.GatewayApplicationOptions {}
-export interface Application extends k8s.ReleaseApplication, gw.GatewayApplication {}
+export interface ApplicationOptions extends k8s.ReleaseApplicationOptions, gw.RoutesApplicationOptions {}
+export interface Application extends k8s.ReleaseApplication, gw.RoutesApplication {}
 
 /**
  * Creates a Helm release for the Kubernetes Dashboard.
@@ -42,7 +42,7 @@ export function createApplication(options: ApplicationOptions = {}): Application
     ),
   })
 
-  const gateway = gw.createApplicationRoutes(namespace, options.gateway, {
+  const routes = gw.createApplicationRoutes(namespace, options.routes, {
     httpRoute: {
       name,
       rule: {
@@ -57,6 +57,6 @@ export function createApplication(options: ApplicationOptions = {}): Application
   return {
     namespace,
     release,
-    gateway,
+    routes,
   }
 }

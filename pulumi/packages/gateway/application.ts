@@ -8,7 +8,7 @@ import {
   pulumi,
 } from "@infra/core"
 import { k8s } from "@infra/k8s"
-import { Bundle, createRoutes, RouteContainer } from "./routes"
+import { RouteBundle, createRoutes, RouteContainer } from "./routes"
 import { raw } from "./imports"
 import {
   HttpRouteOptions,
@@ -17,22 +17,21 @@ import {
   mapHttpRouteRuleMatch,
 } from "./routes/http-route"
 
-export interface GatewayApplicationOptions {
+export interface RoutesApplicationOptions {
   /**
-   * The gateway options for the application.
-   * Will be used to create gateway routes.
+   * The routes options for the application.
    */
-  gateway?: ApplicationGatewayOptions
+  routes?: RoutesOptions
 }
 
-export interface GatewayApplication {
+export interface RoutesApplication {
   /**
-   * The gateway and routes of the application.
+   * The routes created for the application.
    */
-  gateway?: Bundle
+  routes?: RouteBundle
 }
 
-export interface ApplicationGatewayOptions {
+export interface RoutesOptions {
   /**
    * The path prefix to use.
    * If not provided, the Gateway will route traffic to the root path.
@@ -40,16 +39,16 @@ export interface ApplicationGatewayOptions {
   pathPrefix?: string
 
   /**
-   * The gateway to use for the application.
+   * The gateway to use for the routes.
    */
   gateway: Input<raw.gateway.v1.Gateway>
 }
 
 export function createApplicationRoutes(
   namespace: k8s.raw.core.v1.Namespace,
-  options: ApplicationGatewayOptions | undefined,
+  options: RoutesOptions | undefined,
   routeContainer: RouteContainer,
-): Bundle | undefined {
+): RouteBundle | undefined {
   if (!options) {
     return
   }

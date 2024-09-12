@@ -8,9 +8,9 @@ const namespace = k8s.raw.core.v1.Namespace.get("kube-system", "kube-system")
 const config = new pulumi.Config()
 const domain = config.require("domain")
 
-const { gateway } = exposeInternalHttpService({ namespace, domain })
+const { routes } = exposeInternalHttpService({ namespace, domain })
 
-gw.createApplicationRoutes(namespace, gateway, {
+gw.createApplicationRoutes(namespace, routes, {
   httpRoute: {
     name: "hubble-ui",
     rule: {

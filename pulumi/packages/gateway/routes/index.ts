@@ -34,7 +34,7 @@ export interface RouteContainerOptions extends RouteContainer {
   namespace?: k8s.raw.core.v1.Namespace
 }
 
-export interface Bundle {
+export interface RouteBundle {
   /**
    * The Gateway that the routes are attached to.
    */
@@ -46,7 +46,7 @@ export interface Bundle {
   httpRoutes: Output<raw.gateway.v1.HTTPRoute[]>
 }
 
-export function createRoutes(options: RouteContainerOptions): Bundle {
+export function createRoutes(options: RouteContainerOptions): RouteBundle {
   return {
     gateway: output(options.gateway),
 

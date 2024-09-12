@@ -1,13 +1,10 @@
 import { k8s } from "@infra/k8s"
 import { raw } from "./imports"
 import {
-  flattenInputs,
   Input,
   InputArray,
-  mapInputs,
   mapObjectKeys,
   mapOptionalInput,
-  mapOptionalInputs,
   mergeInputArrays,
   normalizeInputs,
   normalizeInputsAndMap,
@@ -33,6 +30,11 @@ export interface PolicyOptions extends PartialKeys<k8s.CommonOptions, "namespace
    * If not specified, the network policy applies to all endpoints in the namespace (or cluster).
    */
   endpointSelector?: Input<k8s.LabelSelector>
+
+  /**
+   * The selector of nodes to apply the network policy to.
+   */
+  nodeSelector?: Input<k8s.LabelSelector>
 
   /**
    * Whether to enable default deny for the network policy.
@@ -116,6 +118,16 @@ export interface EgressPolicy {
   toEntities?: InputArray<PolicyEntity>
 
   /**
+   * The CIDR to allow egress to.
+   */
+  toCIDR?: Input<string>
+
+  /**
+   * The CIDRs to allow egress to.
+   */
+  toCIDRs?: InputArray<string>
+
+  /**
    * The port selector to allow egress to.
    */
   toPort?: Input<PortSelector>
@@ -158,6 +170,16 @@ export interface IngressPolicy {
   fromEntities?: InputArray<PolicyEntity>
 
   /**
+   * The CIDR to allow ingress from.
+   */
+  fromCIDR?: Input<string>
+
+  /**
+   * The CIDRs to allow ingress from.
+   */
+  fromCIDRs?: InputArray<string>
+
+  /**
    * The port selector to allow egress to.
    */
   toPort?: Input<PortSelector>
@@ -174,12 +196,12 @@ export interface FullPortSelector {
   /**
    * The port number.
    */
-  port: number | string
+  port: Input<number | string>
 
   /**
    * The protocol in upper case (e.g. "TCP", "UDP") or "ANY".
    */
-  protocol: PortProtocol
+  protocol: Input<PortProtocol>
 
   /**
    * The rules to apply to the port.
@@ -222,7 +244,10 @@ export function createPolicy(options: PolicyOptions): Policy {
       metadata: k8s.mapMetadata(options),
       spec: {
         description: options.description,
-        endpointSelector: mapOptionalInput(options.endpointSelector, mapEndpointSelector, {}),
+        endpointSelector: mapOptionalInput(options.endpointSelector, mapEndpointSelector, {})!
+          // Disable default {} selector if nodeSelector is set
+          .apply(selector => (!!options.nodeSelector ? undefined : selector)),
+        nodeSelector: mapOptionalInput(options.nodeSelector, mapEndpointSelector),
         enableDefaultDeny: options.enableDefaultDeny,
         egress: undefinedIfEmpty(
           normalizeInputsAndMap(options.egress, options.egresses, egress => ({
@@ -237,6 +262,7 @@ export function createPolicy(options: PolicyOptions): Policy {
             //   normalizeInputsAndMap(egress.toService, egress.toServices, mapServiceSelector),
             // ),
             toEntities: undefinedIfEmpty(normalizeInputs(egress.toEntity, egress.toEntities)),
+            toCIDR: undefinedIfEmpty(normalizeInputs(egress.toCIDR, egress.toCIDRs)),
             toPorts: undefinedIfEmpty(
               mergeInputArrays(
                 normalizeInputsAndMap(egress.toPort, egress.toPorts, mapPortSelector),
@@ -257,6 +283,7 @@ export function createPolicy(options: PolicyOptions): Policy {
             //   normalizeInputsAndMap(ingress.fromService, ingress.fromServices, mapServiceSelector),
             // ),
             fromEntities: undefinedIfEmpty(normalizeInputs(ingress.fromEntity, ingress.fromEntities)),
+            fromCIDR: undefinedIfEmpty(normalizeInputs(ingress.fromCIDR, ingress.fromCIDRs)),
             toPorts: undefinedIfEmpty(normalizeInputsAndMap(ingress.toPort, ingress.toPorts, mapPortSelector)),
           })),
         ),
