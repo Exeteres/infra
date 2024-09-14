@@ -1,0 +1,7 @@
+{
+  "name": "@projects/sftpgo",
+  "private": true,
+  "dependencies": {
+    "@infra/sftpgo": "workspace:*"
+  }
+}

@@ -143,7 +143,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@infra/ente@workspace:apps/ente":
+"@infra/ente@workspace:*, @infra/ente@workspace:apps/ente":
   version: 0.0.0-use.local
   resolution: "@infra/ente@workspace:apps/ente"
   dependencies:
@@ -169,7 +169,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@infra/ghost@workspace:*, @infra/ghost@workspace:apps/ghost":
+"@infra/ghost@workspace:apps/ghost":
   version: 0.0.0-use.local
   resolution: "@infra/ghost@workspace:apps/ghost"
   dependencies:
@@ -251,6 +251,14 @@ __metadata:
 "@infra/scripting@workspace:packages/scripting":
   version: 0.0.0-use.local
   resolution: "@infra/scripting@workspace:packages/scripting"
+  dependencies:
+    "@infra/k8s": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@infra/sftpgo@workspace:*, @infra/sftpgo@workspace:apps/sftpgo":
+  version: 0.0.0-use.local
+  resolution: "@infra/sftpgo@workspace:apps/sftpgo"
   dependencies:
     "@infra/k8s": "workspace:*"
   languageName: unknown
@@ -744,25 +752,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@projects/ente@workspace:projects/ente":
+  version: 0.0.0-use.local
+  resolution: "@projects/ente@workspace:projects/ente"
+  dependencies:
+    "@infra/ente": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
 "@projects/etebase@workspace:projects/etebase":
   version: 0.0.0-use.local
   resolution: "@projects/etebase@workspace:projects/etebase"
   dependencies:
     "@infra/etebase": "workspace:*"
-  languageName: unknown
-  linkType: soft
-
-"@projects/ghost-gateway@workspace:projects/ghost-gateway":
-  version: 0.0.0-use.local
-  resolution: "@projects/ghost-gateway@workspace:projects/ghost-gateway"
-  languageName: unknown
-  linkType: soft
-
-"@projects/ghost@workspace:projects/ghost":
-  version: 0.0.0-use.local
-  resolution: "@projects/ghost@workspace:projects/ghost"
-  dependencies:
-    "@infra/ghost": "workspace:*"
   languageName: unknown
   linkType: soft
 
@@ -826,6 +828,14 @@ __metadata:
   resolution: "@projects/public-gateway@workspace:projects/public-gateway"
   dependencies:
     "@infra/traefik": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@projects/sftpgo@workspace:projects/sftpgo":
+  version: 0.0.0-use.local
+  resolution: "@projects/sftpgo@workspace:projects/sftpgo"
+  dependencies:
+    "@infra/sftpgo": "workspace:*"
   languageName: unknown
   linkType: soft
 
