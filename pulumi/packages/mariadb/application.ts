@@ -113,7 +113,7 @@ export function createApplication(options: ApplicationOptions): Application {
 
     repo: "https://charts.bitnami.com/bitnami",
     chart: "mariadb",
-    version: "19.0.4",
+    version: "19.0.5",
 
     ...options.release,
 

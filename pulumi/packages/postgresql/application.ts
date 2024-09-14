@@ -104,7 +104,7 @@ export function createApplication(options: ApplicationOptions): Application {
 
     repo: "https://charts.bitnami.com/bitnami",
     chart: "postgresql",
-    version: "15.5.17",
+    version: "15.5.31",
 
     ...options.release,
 

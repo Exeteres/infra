@@ -14,7 +14,7 @@ export function createApplication(options: ApplicationOptions = {}): Application
 
     chart: "traefik",
     repo: "https://traefik.github.io/charts",
-    version: "30.0.2",
+    version: "31.0.0",
 
     ...options.release,
 

@@ -20,7 +20,7 @@ export function createApplication(options: ApplicationOptions = {}): Application
 
     chart: "cert-manager",
     repo: "https://charts.jetstack.io",
-    version: "1.15.1",
+    version: "1.15.3",
 
     ...options.release,
 

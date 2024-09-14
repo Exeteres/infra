@@ -7,7 +7,7 @@ import { scripting } from "@infra/scripting"
 export interface ApplicationOptions extends k8s.ReleaseApplicationOptions, gw.RoutesApplicationOptions {
   backup: restic.BackupOptions
   rootPassword: pulumi.Input<string>
-  consoleGateway?: gw.RoutesOptions
+  consoleRoutes?: gw.RoutesOptions
 }
 
 export interface Application extends k8s.ReleaseApplication, gw.RoutesApplication {
@@ -94,7 +94,7 @@ export function createApplication(options: ApplicationOptions): Application {
 
     repo: "https://charts.bitnami.com/bitnami",
     chart: "minio",
-    version: "14.6.21",
+    version: "14.7.8",
 
     ...options.release,
 
@@ -125,7 +125,7 @@ export function createApplication(options: ApplicationOptions): Application {
     },
   })
 
-  const consoleGateway = gw.createApplicationRoutes(namespace, options.consoleGateway, {
+  const consoleGateway = gw.createApplicationRoutes(namespace, options.consoleRoutes, {
     httpRoute: {
       name: "console",
       rule: {

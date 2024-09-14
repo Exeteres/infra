@@ -41,7 +41,7 @@ export function createApplication(options: ApplicationOptions): Application {
     port: 80,
 
     container: {
-      image: "vaultwarden/server:1.30.5-alpine",
+      image: "vaultwarden/server:1.32.0-alpine",
 
       environment: {
         DATABASE_URL: {

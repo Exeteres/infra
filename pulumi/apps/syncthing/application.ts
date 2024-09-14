@@ -108,7 +108,7 @@ export function createApplication(options: ApplicationOptions): Application {
     dependsOn: restoreJob,
 
     container: {
-      image: "linuxserver/syncthing:1.27.8",
+      image: "linuxserver/syncthing:1.27.12",
 
       environment: {
         PUID: "1000",
