@@ -20,11 +20,11 @@
   programs.git = {
     enable = true;
 
-    userName = "Exeteres";
-    userEmail = "exeteres@proton.me";
-
     extraConfig = {
       pull.rebase = true;
+      gpg.format = "ssh";
+      user.signingkey = "~/.ssh/id_ed25519.pub";
+      commit.gpgsign = true;
     };
   };
 

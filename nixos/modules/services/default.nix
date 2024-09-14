@@ -1,5 +1,6 @@
 {
   imports = [
     ./kubernetes
+    ./vpn-bypass
   ];
 }

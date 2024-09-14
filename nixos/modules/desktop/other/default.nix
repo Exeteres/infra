@@ -4,5 +4,7 @@
     ./timezone.nix
     ./sound.nix
     ./fonts.nix
+    ./vpn-bypass.nix
+    ./private.nix
   ];
 }

@@ -6,7 +6,7 @@
   users.users.exeteres = {
     isNormalUser = true;
     uid = 1000;
-    description = "Exeteres";
+    description = "Fedor Chubukov";
 
     extraGroups = [
       "networkmanager"

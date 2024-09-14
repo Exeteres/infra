@@ -18,6 +18,11 @@
 
     home.stateVersion = "24.05";
     home.enableNixpkgsReleaseCheck = false;
+
+    programs.git = {
+      userName = "Fedor Chubukov";
+      userEmail = "exeteres@proton.me";
+    };
   };
 
   sops.secrets."ssh/private_key" = {
