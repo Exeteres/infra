@@ -12,7 +12,7 @@ export interface JobOptions extends k8s.CommonOptions {
   /**
    * The bundle to use for the backup and restore jobs.
    */
-  bundle: scripting.Bundle
+  bundle: Input<scripting.Bundle>
 
   /**
    * The volume claim to backup the volume of.

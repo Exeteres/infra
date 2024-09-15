@@ -8,15 +8,10 @@ export interface ScriptingEnvironmentOptions {
    * Must contain a key named `postgres-password`.
    */
   rootPasswordSecret: k8s.raw.core.v1.Secret
-
-  /**
-   * The extra environment to use when running the scripts.
-   */
-  environment?: scripting.Environment
 }
 
 export function createScriptingEnvironment(options: ScriptingEnvironmentOptions): Required<scripting.Environment> {
-  return scripting.mergeEnvironments(staticEnvironment, options.environment, {
+  return scripting.mergeEnvironments(staticEnvironment, {
     environment: {
       PGPASSWORD: {
         secret: options.rootPasswordSecret,

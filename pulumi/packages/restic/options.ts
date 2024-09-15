@@ -1,10 +1,11 @@
+import { Input } from "@infra/core"
 import { scripting } from "@infra/scripting"
 
 export interface BackupOptions {
   /**
    * The environment to use for the backup and restore operations.
    */
-  environment: scripting.Environment
+  environment: Input<scripting.Environment>
 
   /**
    * The host name of the machine to backup.

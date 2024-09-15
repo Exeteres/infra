@@ -71,14 +71,15 @@ export function createApplication(options: ApplicationOptions): Application {
     name: "backup",
     namespace,
 
-    environment: createScriptingEnvironment({
-      rootPasswordSecret,
-      environment: scripting.mergeEnvironments(options.backup.environment, {
+    environments: [
+      createScriptingEnvironment({ rootPasswordSecret }),
+      options.backup.environment,
+      {
         environment: {
           DATABASE_HOST: host,
         },
-      }),
-    }),
+      },
+    ],
   })
 
   restic.createBackupJob({

@@ -1,4 +1,4 @@
-import { pulumi } from "@infra/core"
+import { Input, pulumi } from "@infra/core"
 import { k8s } from "@infra/k8s"
 import { scripting } from "@infra/scripting"
 
@@ -34,7 +34,7 @@ export interface DatabaseOptions extends k8s.CommonOptions {
   /**
    * The scripting bundle to use for the init container.
    */
-  bundle: scripting.Bundle
+  bundle: Input<scripting.Bundle>
 }
 
 export interface DatabaseCredentials {

@@ -11,100 +11,107 @@ includes:
     dir: ..
     internal: true
 
+vars:
+  DATABASES:
+    - postgresql
+    - mariadb
+    - minio
+  STATEFUL_APPS:
+    - syncthing
+    - n8n
+    - sftpgo
+    - etebase
+  STATELESS_APPS:
+    - vaultwarden
+    - plane
+    - ente
+    - smtp-to-telegram
+    - vpn
+    - vpn-static
+
 tasks:
   all:*:*:
     vars:
       SOURCE: "{{index .MATCH 0}}"
       TARGET: "{{index .MATCH 1}}"
-    desc: Migrate all projects from "{{.SOURCE}}" to "{{.TARGET}}"
+    desc: Migrate all projects from one cluster to another
     cmds:
-      # 1. Migrate VPN stuff
-      - task: vpn:{{.SOURCE}}:{{.TARGET}}
-
-      # 2. Up databases on the target
+      # 1. Up databases on the target
       - task: backup-and-up-databases:{{.SOURCE}}:{{.TARGET}}
 
-      # 3. Migrate apps
+      # 2. Migrate apps
       - task: apps:{{.SOURCE}}:{{.TARGET}}
 
-      # 4. Down databases on the source
+      # 3. Down databases on the source
       - task: down-databases:{{.SOURCE}}
 
-  vpn:*:*:
+  # === APP MIGRATION ===
+  stateful-app:*:*:*:
     vars:
       SOURCE: "{{index .MATCH 0}}"
       TARGET: "{{index .MATCH 1}}"
-    desc: Migrate VPN exit nodes and static listeners from "{{.SOURCE}}" to "{{.TARGET}}"
-    deps:
-      - task: projects:down-first:migrate:{{.SOURCE}}:{{.TARGET}}:vpn
-      - task: projects:migrate:{{.SOURCE}}:{{.TARGET}}:vpn-static
-
-  backup-and-up:*:*:*:
-    vars:
-      SOURCE: "{{index .MATCH 0}}"
-      TARGET: "{{index .MATCH 1}}"
-      PROJECT: "{{index .MATCH 2}}"
-    desc: Backup data from "{{.SOURCE}}" and up the project on "{{.TARGET}}"
+      APP: "{{index .MATCH 2}}"
+    desc: Migrate stateful app from one cluster to another
     cmds:
-      - task: backup:project:{{.SOURCE}}:{{.PROJECT}}
-      - task: projects:non-interactive:up:{{.TARGET}}:{{.PROJECT}}
+      # 1. Backup the app on the source
+      - task: backup:project:{{.SOURCE}}:{{.APP}}
 
-  backup-and-up-databases:*:*:
+      # 2. Down the app on the source
+      - task: projects:ni:down:{{.SOURCE}}:{{.APP}}
+
+      # 3. Up the app on the target
+      - task: projects:ni:up:{{.TARGET}}:{{.APP}}
+    ignore_error: true
+
+  stateless-app:*:*:*:
     vars:
       SOURCE: "{{index .MATCH 0}}"
       TARGET: "{{index .MATCH 1}}"
-    desc: Backup databases from "{{.SOURCE}}" and up them on "{{.TARGET}}"
-    deps:
-      - task: backup-and-up:{{.SOURCE}}:{{.TARGET}}:postgresql
-      - task: backup-and-up:{{.SOURCE}}:{{.TARGET}}:mariadb
-      - task: backup-and-up:{{.SOURCE}}:{{.TARGET}}:minio
+      APP: "{{index .MATCH 2}}"
+    desc: Migrate stateless app from one cluster to another
+    cmds:
+      # 1. Down the app on the source
+      - task: projects:ni:down:{{.SOURCE}}:{{.APP}}
 
-  down-databases:*:
-    vars:
-      TARGET: "{{index .MATCH 0}}"
-    desc: Down databases on "{{.TARGET}}"
-    deps:
-      - task: projects:non-interactive:down:{{.TARGET}}:postgresql
-      - task: projects:non-interactive:down:{{.TARGET}}:mariadb
-      - task: projects:non-interactive:down:{{.TARGET}}:minio
+      # 2. Up the app on the target
+      - task: projects:ni:up:{{.TARGET}}:{{.APP}}
+    ignore_error: true
 
   apps:*:*:
     vars:
       SOURCE: "{{index .MATCH 0}}"
       TARGET: "{{index .MATCH 1}}"
-    desc: Migrate apps from "{{.SOURCE}}" to "{{.TARGET}}"
+    desc: Migrate apps from one cluster to another
     deps:
-      - task: projects:migrate:{{.SOURCE}}:{{.TARGET}}:vaultwarden
-      - task: projects:migrate:{{.SOURCE}}:{{.TARGET}}:plane
-      - task: projects:migrate:{{.SOURCE}}:{{.TARGET}}:etebase
-      - task: projects:migrate:{{.SOURCE}}:{{.TARGET}}:syncthing
+      - for: { var: STATEFUL_APPS }
+        task: stateful-app:{{.SOURCE}}:{{.TARGET}}:{{.ITEM}}
+      - for: { var: STATELESS_APPS }
+        task: stateless-app:{{.SOURCE}}:{{.TARGET}}:{{.ITEM}}
 
-  syncthing:*:*:
+  # === DATABASE MIGRATION ===
+  backup-and-up-project:*:*:*:
     vars:
       SOURCE: "{{index .MATCH 0}}"
       TARGET: "{{index .MATCH 1}}"
-    desc: Migrate Syncthing data from "{{.SOURCE}}" to "{{.TARGET}}"
+      PROJECT: "{{index .MATCH 2}}"
+    desc: Backup project on the source cluster and up it on the target one
     cmds:
-      # - task: backup:project:{{.SOURCE}}:syncthing
-      - task: projects:non-interactive:down:{{.SOURCE}}:syncthing
-      - task: projects:non-interactive:up:{{.TARGET}}:syncthing
+      - task: backup:project:{{.SOURCE}}:{{.PROJECT}}
+      - task: projects:ni:up:{{.TARGET}}:{{.PROJECT}}
 
-  refresh:*:
+  backup-and-up-databases:*:*:
     vars:
-      STACK: "{{index .MATCH 0}}"
-    desc: Refresh all projects in {{.STACK}}
+      SOURCE: "{{index .MATCH 0}}"
+      TARGET: "{{index .MATCH 1}}"
+    desc: Backup databases on the source cluster and up them on the target one
     deps:
-      - task: projects:non-interactive:refresh:{{.STACK}}:cert-manager
-      - task: projects:non-interactive:refresh:{{.STACK}}:cilium
-      - task: projects:non-interactive:refresh:{{.STACK}}:public-gateway
-      - task: projects:non-interactive:refresh:{{.STACK}}:internal-gateway
-      - task: projects:non-interactive:refresh:{{.STACK}}:kubernetes-dashboard
-      - task: projects:non-interactive:refresh:{{.STACK}}:etebase
-      - task: projects:non-interactive:refresh:{{.STACK}}:mariadb
-      - task: projects:non-interactive:refresh:{{.STACK}}:minio
-      - task: projects:non-interactive:refresh:{{.STACK}}:plane
-      - task: projects:non-interactive:refresh:{{.STACK}}:postgresql
-      - task: projects:non-interactive:refresh:{{.STACK}}:vpn
-      - task: projects:non-interactive:refresh:{{.STACK}}:vpn-static
-      - task: projects:non-interactive:refresh:{{.STACK}}:syncthing
-    ignore_error: true
+      - for: { var: DATABASES }
+        task: backup-and-up-project:{{.SOURCE}}:{{.TARGET}}:{{.ITEM}}
+
+  down-databases:*:
+    vars:
+      TARGET: "{{index .MATCH 0}}"
+    desc: Down databases on the target cluster
+    deps:
+      - for: { var: DATABASES }
+        task: projects:ni:down:{{.TARGET}}:{{.ITEM}}

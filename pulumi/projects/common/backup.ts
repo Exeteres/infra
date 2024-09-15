@@ -2,7 +2,7 @@ import { restic } from "@infra/restic"
 import { k8s } from "@infra/k8s"
 import { pulumi } from "@infra/core"
 import { getSharedEnvironment } from "./stack"
-import { memoize } from "./utils"
+import { memoizeForNamespace } from "./utils"
 import { cilium } from "@infra/cilium"
 import { createAllowAlpineRegistryPolicy } from "./cilium"
 
@@ -10,7 +10,7 @@ interface BackupRepository {
   backup: restic.BackupOptions
 }
 
-export const getRcloneEnvironment = memoize((namespace: k8s.raw.core.v1.Namespace) => {
+export const getRcloneEnvironment = memoizeForNamespace((namespace: k8s.raw.core.v1.Namespace) => {
   const { rcloneConfig } = getSharedEnvironment()
 
   return restic.createRcloneEnvironment({

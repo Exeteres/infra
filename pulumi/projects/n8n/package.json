@@ -1,0 +1,7 @@
+{
+  "name": "@projects/n8n",
+  "private": true,
+  "dependencies": {
+    "@infra/n8n": "workspace:*"
+  }
+}

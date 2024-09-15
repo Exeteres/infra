@@ -1,12 +1,12 @@
 import { k8s } from "@infra/k8s"
 import { Bundle } from "./bundle"
-import { mergeInputArrays, mergeInputObjects } from "@infra/core"
+import { Input, mergeInputArrays, mergeInputObjects, output } from "@infra/core"
 
 export interface ContainerOptions extends k8s.Container {
   /**
    * The script bundle to use.
    */
-  bundle: Bundle
+  bundle: Input<Bundle>
 
   /**
    * The name of the main script to run.
@@ -23,14 +23,16 @@ export interface ContainerOptions extends k8s.Container {
  * @returns The container spec.
  */
 export function createContainer(options: ContainerOptions): k8s.Container {
+  const bundle = output(options.bundle)
+
   return {
     image: "alpine:3.20",
     command: ["/scripts/entrypoint.sh", `/scripts/${options.main}`],
 
     ...options,
 
-    volumeMounts: mergeInputArrays(options.bundle.volumeMounts, options.volumeMounts),
-    volumes: mergeInputArrays(options.bundle.volumes, options.volumes),
-    environment: mergeInputObjects(options.bundle.environment, options.environment),
+    volumeMounts: mergeInputArrays(bundle.volumeMounts, options.volumeMounts),
+    volumes: mergeInputArrays(bundle.volumes, options.volumes),
+    environment: mergeInputObjects(bundle.environment, options.environment),
   }
 }

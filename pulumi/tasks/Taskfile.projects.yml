@@ -1,12 +1,21 @@
 version: "3"
 
 tasks:
+  cmd:*:*:*:
+    vars:
+      STACK: "{{index .MATCH 0}}"
+      PROJECT: "{{index .MATCH 1}}"
+      CMD: "{{index .MATCH 2}}"
+    label: "{{.STACK}}/{{.PROJECT}}: {{.CMD}}"
+    desc: Run the pulumi command for the project in the stack
+    cmd: pulumi {{.CMD}} -s {{.STACK}} {{.CLI_ARGS}}
+
   up:*:*:
     vars:
       STACK: "{{index .MATCH 0}}"
       PROJECT: "{{index .MATCH 1}}"
     label: up {{.STACK}}/{{.PROJECT}}
-    desc: Create or update the "{{.PROJECT}}" project in "{{.STACK}}"
+    desc: Create or update the project in the stack
     cmd: pulumi up -f -s {{.STACK}} -y {{.CLI_ARGS}}
     dir: "{{.PROJECT}}"
     interactive: true
@@ -16,7 +25,7 @@ tasks:
       STACK: "{{index .MATCH 0}}"
       PROJECT: "{{index .MATCH 1}}"
     label: down {{.STACK}}/{{.PROJECT}}
-    desc: Destroy the "{{.PROJECT}}" project in "{{.STACK}}"
+    desc: Destroy the project in the stack
     cmd: pulumi down -f -s {{.STACK}} -y {{.CLI_ARGS}}
     dir: "{{.PROJECT}}"
     interactive: true
@@ -26,7 +35,7 @@ tasks:
       STACK: "{{index .MATCH 0}}"
       PROJECT: "{{index .MATCH 1}}"
     label: refresh {{.STACK}}/{{.PROJECT}}
-    desc: Refresh the "{{.PROJECT}}" project in "{{.STACK}}"
+    desc: Refresh the state of the project in the stack
     cmd: pulumi refresh -s {{.STACK}} -y {{.CLI_ARGS}}
     dir: "{{.PROJECT}}"
     interactive: true
@@ -36,98 +45,46 @@ tasks:
       STACK: "{{index .MATCH 0}}"
       PROJECT: "{{index .MATCH 1}}"
     label: preview {{.STACK}}/{{.PROJECT}}
-    desc: Preview the changes for the "{{.PROJECT}}" project in "{{.STACK}}"
+    desc: Preview the changes for the project in the stack
     cmd: pulumi preview -s {{.STACK}} {{.CLI_ARGS}}
     dir: "{{.PROJECT}}"
     interactive: true
-
-  non-interactive:up:*:*:
-    vars:
-      STACK: "{{index .MATCH 0}}"
-      PROJECT: "{{index .MATCH 1}}"
-    label: up {{.STACK}}/{{.PROJECT}}
-    desc: Create or update the "{{.PROJECT}}" project in "{{.STACK}}" [non-interactive]
-    cmd: pulumi up -s {{.STACK}} -y --non-interactive {{.CLI_ARGS}}
-    dir: "{{.PROJECT}}"
-
-  non-interactive:down:*:*:
-    vars:
-      STACK: "{{index .MATCH 0}}"
-      PROJECT: "{{index .MATCH 1}}"
-    label: down {{.STACK}}/{{.PROJECT}}
-    desc: Destroy the "{{.PROJECT}}" project in "{{.STACK}}" [non-interactive]
-    cmd: pulumi down -s {{.STACK}} -y --non-interactive {{.CLI_ARGS}}
-    dir: "{{.PROJECT}}"
-
-  non-interactive:refresh:*:*:
-    vars:
-      STACK: "{{index .MATCH 0}}"
-      PROJECT: "{{index .MATCH 1}}"
-    label: refresh {{.STACK}}/{{.PROJECT}}
-    desc: Refresh the "{{.PROJECT}}" project in "{{.STACK}}" [non-interactive]
-    cmd: pulumi refresh -s {{.STACK}} -y --non-interactive {{.CLI_ARGS}}
-    dir: "{{.PROJECT}}"
 
   recreate:*:*:
     vars:
       STACK: "{{index .MATCH 0}}"
       PROJECT: "{{index .MATCH 1}}"
     label: recreate {{.STACK}}/{{.PROJECT}}
-    desc: Recreate the "{{.PROJECT}}" project in "{{.STACK}}"
+    desc: Recreate the project in the stack
     cmds:
       - task: down:{{.STACK}}:{{.PROJECT}}
       - task: up:{{.STACK}}:{{.PROJECT}}
     ignore_error: true
     interactive: true
 
-  init:*:*:
+  ni:up:*:*:
     vars:
       STACK: "{{index .MATCH 0}}"
       PROJECT: "{{index .MATCH 1}}"
-    label: init {{.STACK}}/{{.PROJECT}}
-    desc: Initialize the new stack "{{.STACK}}" for the "{{.PROJECT}}" project
-    cmd: pulumi stack init {{.STACK}} {{.CLI_ARGS}}
+    label: up {{.STACK}}/{{.PROJECT}}
+    desc: Create or update the project in the stack [non-interactive]
+    cmd: pulumi up -s {{.STACK}} -y --non-interactive {{.CLI_ARGS}}
     dir: "{{.PROJECT}}"
 
-  config:*:*:
+  ni:down:*:*:
     vars:
       STACK: "{{index .MATCH 0}}"
       PROJECT: "{{index .MATCH 1}}"
-    label: config {{.STACK}}/{{.PROJECT}}
-    desc: Manage the config for the "{{.PROJECT}}" project in "{{.STACK}}"
-    cmd: pulumi config {{.CLI_ARGS}} -s {{.STACK}} {{.CLI_ARGS}}
+    label: down {{.STACK}}/{{.PROJECT}}
+    desc: Destroy the project in the stack [non-interactive]
+    cmd: pulumi down -s {{.STACK}} -y --non-interactive {{.CLI_ARGS}}
     dir: "{{.PROJECT}}"
 
-  sync-config:*:*:*:
+  ni:refresh:*:*:
     vars:
-      SOURCE: "{{index .MATCH 0}}"
-      TARGET: "{{index .MATCH 1}}"
-      PROJECT: "{{index .MATCH 2}}"
-    label: sync-config {{.PROJECT}} | {{.SOURCE}} -> {{.TARGET}}
-    desc: Replace the config of "{{.PROJECT}}" in "{{.TARGET}}" with the config in "{{.SOURCE}}"
-    cmd: ../../scripts/sync-stack-config.sh {{.SOURCE}} {{.TARGET}}
+      STACK: "{{index .MATCH 0}}"
+      PROJECT: "{{index .MATCH 1}}"
+    label: refresh {{.STACK}}/{{.PROJECT}}
+    desc: Refresh the state of the project in the stack [non-interactive]
+    cmd: pulumi refresh -s {{.STACK}} -y --non-interactive {{.CLI_ARGS}}
     dir: "{{.PROJECT}}"
-
-  migrate:*:*:*:
-    vars:
-      SOURCE: "{{index .MATCH 0}}"
-      TARGET: "{{index .MATCH 1}}"
-      PROJECT: "{{index .MATCH 2}}"
-    label: migrate {{.PROJECT}} | {{.SOURCE}} -> {{.TARGET}}
-    desc: Migrate the "{{.PROJECT}}" project from "{{.SOURCE}}" to "{{.TARGET}}"
-    deps:
-      - task: non-interactive:up:{{.TARGET}}:{{.PROJECT}}
-      - task: non-interactive:down:{{.SOURCE}}:{{.PROJECT}}
-    ignore_error: true
-
-  down-first:migrate:*:*:*:
-    vars:
-      SOURCE: "{{index .MATCH 0}}"
-      TARGET: "{{index .MATCH 1}}"
-      PROJECT: "{{index .MATCH 2}}"
-    label: migrate {{.PROJECT}} | {{.SOURCE}} -> {{.TARGET}}
-    desc: Migrate the "{{.PROJECT}}" project from "{{.SOURCE}}" to "{{.TARGET}}" (down first)
-    cmds:
-      - task: non-interactive:down:{{.SOURCE}}:{{.PROJECT}}
-      - task: non-interactive:up:{{.TARGET}}:{{.PROJECT}}
-    ignore_error: true

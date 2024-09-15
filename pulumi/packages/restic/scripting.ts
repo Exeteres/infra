@@ -1,4 +1,4 @@
-import { pulumi, trimIndentation } from "@infra/core"
+import { Input, output, Output, pulumi, trimIndentation } from "@infra/core"
 import { k8s } from "@infra/k8s"
 import { scripting } from "@infra/scripting"
 
@@ -6,20 +6,22 @@ export interface ScriptingEnvironmentOptions extends k8s.CommonOptions {
   /**
    * The password to encrypt the repository with.
    */
-  password: pulumi.Input<string>
+  password: Input<string>
 
   /**
    * The fully qualified path to the repository (in restic format).
    */
-  remotePath: pulumi.Input<string>
+  remotePath: Input<string>
 
   /**
    * The extra environment to use when running the scripts.
    */
-  environment?: scripting.Environment
+  environment?: Input<scripting.Environment>
 }
 
-export function createScriptingEnvironment(options: ScriptingEnvironmentOptions): Required<scripting.Environment> {
+export function createScriptingEnvironment(
+  options: ScriptingEnvironmentOptions,
+): Output<Required<scripting.Environment>> {
   const secret = k8s.createSecret({
     name: options.name,
     namespace: options.namespace,
@@ -31,21 +33,23 @@ export function createScriptingEnvironment(options: ScriptingEnvironmentOptions)
     },
   })
 
-  return scripting.mergeEnvironments(staticEnvironment, options.environment, {
-    environment: {
-      RESTIC_REPOSITORY: options.remotePath,
-      RESTIC_PASSWORD_FILE: "/restic-secrets/password",
-    },
-
-    volumes: [secret],
-
-    volumeMounts: [
-      {
-        volume: secret,
-        mountPath: "/restic-secrets",
+  return output(options.environment).apply(environment =>
+    scripting.mergeEnvironments(staticEnvironment, environment, {
+      environment: {
+        RESTIC_REPOSITORY: options.remotePath,
+        RESTIC_PASSWORD_FILE: "/restic-secrets/password",
       },
-    ],
-  })
+
+      volumes: [secret],
+
+      volumeMounts: [
+        {
+          volume: secret,
+          mountPath: "/restic-secrets",
+        },
+      ],
+    }),
+  )
 }
 
 const staticEnvironment: scripting.Environment = {

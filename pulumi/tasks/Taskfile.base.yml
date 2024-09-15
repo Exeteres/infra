@@ -12,20 +12,20 @@ tasks:
       SERVER: "{{index .MATCH 0}}"
     desc: Up the base infrastructure
     cmds:
-      - task: projects:non-interactive:up:{{.SERVER}}:shared
-      - task: projects:non-interactive:up:{{.SERVER}}:cilium
+      - task: projects:ni:up:{{.SERVER}}:shared
+      - task: projects:ni:up:{{.SERVER}}:cilium
       - task: _up:gateway:{{.SERVER}}
-      - task: projects:non-interactive:up:{{.SERVER}}:kubernetes-dashboard
-      - task: projects:non-interactive:up:{{.SERVER}}:hubble-ui
+      - task: projects:ni:up:{{.SERVER}}:kubernetes-dashboard
+      - task: projects:ni:up:{{.SERVER}}:hubble-ui
 
   _up:gateway:*:
     desc: Up the gateways and cert-manager
     vars:
       SERVER: "{{index .MATCH 0}}"
     deps:
-      - task: projects:non-interactive:up:{{.SERVER}}:cert-manager
-      - task: projects:non-interactive:up:{{.SERVER}}:internal-gateway
-      - task: projects:non-interactive:up:{{.SERVER}}:public-gateway
+      - task: projects:ni:up:{{.SERVER}}:cert-manager
+      - task: projects:ni:up:{{.SERVER}}:internal-gateway
+      - task: projects:ni:up:{{.SERVER}}:public-gateway
     internal: true
 
   down:*:
@@ -33,11 +33,24 @@ tasks:
       SERVER: "{{index .MATCH 0}}"
     desc: Destroy the base infrastructure
     deps:
-      - task: projects:non-interactive:down:{{.SERVER}}:hubble-ui
-      - task: projects:non-interactive:down:{{.SERVER}}:kubernetes-dashboard
-      - task: projects:non-interactive:down:{{.SERVER}}:public-gateway
-      - task: projects:non-interactive:down:{{.SERVER}}:internal-gateway
-      - task: projects:non-interactive:down:{{.SERVER}}:cert-manager
-      - task: projects:non-interactive:down:{{.SERVER}}:cilium
-      - task: projects:non-interactive:down:{{.SERVER}}:shared
+      - task: projects:ni:down:{{.SERVER}}:hubble-ui
+      - task: projects:ni:down:{{.SERVER}}:kubernetes-dashboard
+      - task: projects:ni:down:{{.SERVER}}:public-gateway
+      - task: projects:ni:down:{{.SERVER}}:internal-gateway
+      - task: projects:ni:down:{{.SERVER}}:cert-manager
+      - task: projects:ni:down:{{.SERVER}}:cilium
+      - task: projects:ni:down:{{.SERVER}}:shared
+    ignore_error: true
+
+  refresh:*:
+    vars:
+      SERVER: "{{index .MATCH 0}}"
+    deps:
+      - task: projects:ni:refresh:{{.SERVER}}:hubble-ui
+      - task: projects:ni:refresh:{{.SERVER}}:kubernetes-dashboard
+      - task: projects:ni:refresh:{{.SERVER}}:public-gateway
+      - task: projects:ni:refresh:{{.SERVER}}:internal-gateway
+      - task: projects:ni:refresh:{{.SERVER}}:cert-manager
+      - task: projects:ni:refresh:{{.SERVER}}:cilium
+      - task: projects:ni:refresh:{{.SERVER}}:shared
     ignore_error: true

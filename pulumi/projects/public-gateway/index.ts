@@ -51,3 +51,16 @@ cilium.createAllowApiServerPolicy({ namespace })
 const service = release.status.status.apply(() => k8s.raw.core.v1.Service.get("traefik", "public-gateway/traefik"))
 
 export const serviceId = k8s.export(service)
+
+cilium.createPolicy({
+  name: "allow-from-world",
+  namespace,
+
+  description: "Allow incoming traffic from the world",
+
+  ingress: {
+    fromEntity: "world",
+  },
+})
+
+cilium.createAllowToNamespacesPolicy({ namespace })

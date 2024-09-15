@@ -53,3 +53,25 @@ tasks:
       INSTANCE: "{{index .MATCH 0}}"
     cmd: tofu init
     dir: "instances/{{.INSTANCE}}"
+
+  plan-and-apply:*:
+    desc: Generate and apply an execution plan
+    vars:
+      INSTANCE: "{{index .MATCH 0}}"
+    cmds:
+      - task: nixos:prepare
+      - defer: { task: nixos:cleanup }
+      - tofu plan -var-file=.tfvars -out=tfplan
+      - tofu apply tfplan
+    dir: "instances/{{.INSTANCE}}"
+
+  destroy-and-apply:*:
+    desc: Destroy and apply the resources
+    prompt: Are you sure you want to destroy resources?
+    vars:
+      INSTANCE: "{{index .MATCH 0}}"
+    cmds:
+      - task: nixos:prepare
+      - defer: { task: nixos:cleanup }
+      - tofu destroy -var-file=.tfvars -auto-approve
+    dir: "instances/{{.INSTANCE}}"

@@ -33,9 +33,6 @@ export function createApplication(options: ApplicationOptions): Application {
         policyEnforcementMode: "always",
         k8sServiceHost: options.k8sServiceHost,
         k8sServicePort: 6443,
-        hostFirewall: {
-          enabled: true,
-        },
         operator: {
           replicas: 1,
         },

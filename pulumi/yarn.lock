@@ -221,6 +221,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@infra/n8n@workspace:apps/n8n":
+  version: 0.0.0-use.local
+  resolution: "@infra/n8n@workspace:apps/n8n"
+  dependencies:
+    "@infra/k8s": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
 "@infra/plane@workspace:*, @infra/plane@workspace:apps/plane":
   version: 0.0.0-use.local
   resolution: "@infra/plane@workspace:apps/plane"

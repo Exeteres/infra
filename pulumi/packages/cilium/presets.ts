@@ -96,6 +96,19 @@ export function createAllowFromNamespacesPolicy(options: NamespacePolicyOptions)
   })
 }
 
+export function createAllowToNamespacesPolicy(options: NamespacePolicyOptions) {
+  return createPolicy({
+    name: options.name ?? "allow-to-namespaces",
+    namespace: options.namespace,
+
+    description: "Allows traffic to other namespaces",
+
+    egress: {
+      toEntity: "cluster",
+    },
+  })
+}
+
 export interface AllowServicePolicyOptions extends RequiredKeys<NamespacePolicyOptions, "name"> {
   /**
    * The description of the policy.

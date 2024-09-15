@@ -27,5 +27,8 @@ createDnsRecord({
 
 cilium.createAllowFromNamespacesPolicy({ namespace })
 
+// For online backup
+cilium.createAllowInsideNamespacePolicy({ namespace })
+
 export const serviceId = k8s.export(service)
 export { rootPassword, host }

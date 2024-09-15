@@ -11,5 +11,8 @@ load_secrets() {
     export TF_VAR_twc_token=$(sops decrypt --extract '["'twc_token'"]' ~/workspace/secrets/infra.yaml)
     export TF_VAR_yc_sa_key=$(sops decrypt --extract '["'yc_sa_key'"]' ~/workspace/secrets/infra.yaml)
 
+    mkdir -p ~/.config/rclone
+    echo "$(sops decrypt --extract '["'rclone_config'"]' ~/workspace/secrets/infra.yaml)" > ~/.config/rclone/rclone.conf
+
     echo "Secrets loaded"
 }
